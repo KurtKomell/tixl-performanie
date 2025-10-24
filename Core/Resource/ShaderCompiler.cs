@@ -17,7 +17,7 @@ public abstract partial class ShaderCompiler
             {
                 throw new InvalidOperationException($"Can't set {nameof(ShaderCompiler)}.{nameof(Instance)} after shutdown.");
             }
-            
+
             if (_instance != null)
             {
                 throw new InvalidOperationException($"Can't set {nameof(ShaderCompiler)}.{nameof(Instance)} twice.");
@@ -36,7 +36,7 @@ public abstract partial class ShaderCompiler
     public static void Shutdown()
     {
         _instance = null;
-        _shutdown = true;
+        //_shutdown = true;
     }
 
     private static bool _shutdown;

@@ -1,4 +1,4 @@
-﻿namespace T3.Core.Logging;
+namespace T3.Core.Logging;
 
 /// <summary>
 /// Write Debug-Log messages to log files
@@ -32,7 +32,7 @@ public sealed class FileWriter : ILogWriter
         if (_streamWriter == null)
             return;
         
-        _streamWriter.Flush();
+        //_streamWriter.Flush();
         _streamWriter.Close();
         _streamWriter.Dispose();
     }

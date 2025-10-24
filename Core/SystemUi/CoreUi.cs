@@ -14,12 +14,14 @@ public static class CoreUi
     public static ICoreSystemUiService Instance
     {
         get => _instance;
-        set
-        {
-            if (_instance != null)
-                throw new Exception($"{typeof(CoreUi)}'s {nameof(Instance)} already set to {_instance.GetType()}");
-            
-            _instance = value;
-        }
+       
+            set
+    {
+                if (_instance != null && value != null)
+                    throw new Exception($"{typeof(CoreUi)}'s {nameof(Instance)} already set to {_instance.GetType()}");
+
+                _instance = value;
+            }
+        
     }
 }

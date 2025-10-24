@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using T3.SystemUi;
+using T3.Core;
 
 // ReSharper disable ConvertToAutoPropertyWithPrivateSetter
 
@@ -36,13 +37,15 @@ public class MsForms : ICoreSystemUiService
     {
         if (System.Windows.Forms.Application.MessageLoop)
         {
-            // Use this since we are a WinForms app
+            //Use this since we are a WinForms app
             System.Windows.Forms.Application.Exit();
         }
         else
         {
             // Use this since we are a console app
-            System.Environment.Exit(1);
+            //System.Environment.Exit(1);
+            System.Windows.Forms.Application.Exit();
+
         }
     }
 

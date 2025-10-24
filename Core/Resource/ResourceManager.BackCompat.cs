@@ -159,4 +159,24 @@ public static partial class ResourceManager
         relativePath = null;
         return false;
     }
+    private static bool _disposed = false;
+
+    public static void Dispose()
+    {
+        if (_disposed)
+            return;
+
+        // Dispose the ArrayPool
+        if (_rangeArrayPool != null)
+        {
+            // Optional: Clear any remaining objects in the pool
+            _rangeArrayPool = null;
+        }
+
+        // Log the disposal for debugging purposes
+        Log.Info("ResourceManager has been disposed.");
+
+        _disposed = true;
+    }
+
 }

@@ -4,16 +4,12 @@ namespace T3.Core.SystemUi;
 
 public static class BlockingWindow
 {
-    private static IMessageBoxProvider _instance = null!;
+    private static IMessageBoxProvider? _instance;
     public static IMessageBoxProvider Instance
-    {
-        get => _instance;
-        set
+    
         {
-            if (_instance != null)
-                throw new Exception($"{typeof(BlockingWindow)}'s {nameof(Instance)} already set to {_instance.GetType()}");
-            
-            _instance = value;
+            get => _instance ?? throw new Exception($"{typeof(BlockingWindow)}'s {nameof(Instance)} is not set.");
+            set => _instance = value; // Erlaube das Zurücksetzen
         }
-    }
+    
 }

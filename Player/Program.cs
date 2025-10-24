@@ -67,6 +67,8 @@ public partial class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        CoreUi.Instance = null;
+        ShaderCompiler.ResetShaderCacheSubdirectory();
         CoreUi.Instance = new MsForms.MsForms();
         BlockingWindow.Instance = new SilkWindowProvider();
             
@@ -159,6 +161,8 @@ public partial class Program
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
 
+            
+
             var cursor = CoreUi.Instance.Cursor;
 
             if (_swapChain.IsFullScreen)
@@ -176,12 +180,19 @@ public partial class Program
             _backBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
             _renderView = new RenderTargetView(_device, _backBuffer);
 
-            var shaderCompiler = new DX11ShaderCompiler
-                                     {
-                                         Device = _device
-                                     };
-            ShaderCompiler.Instance = shaderCompiler;
-                
+            //var shaderCompiler = new DX11ShaderCompiler
+            //                         {
+            //                             Device = _device
+            //                         };
+            //ShaderCompiler.Instance = shaderCompiler;
+            if (ShaderCompiler.Instance == null)
+            {
+                ShaderCompiler.Instance = new DX11ShaderCompiler
+                {
+                    Device = _device
+                };
+            }
+
             SharedResources.Initialize();
                 
             _fullScreenPixelShaderResource = SharedResources.FullScreenPixelShaderResource;
@@ -308,6 +319,31 @@ public partial class Program
             _playback.TimeInBars = 0;
             _playback.PlaybackSpeed = 1.0;
 
+            _renderForm.FormClosing += (sender, e) =>
+            {
+                if (sender == _renderForm)
+                {
+                    CloseApplication(false, "Das Hauptfenster wurde durch das Schließen-Symbol geschlossen.");
+                }
+                else
+                {
+                    // Verhindere, dass andere Fenster geschlossen werden
+                    e.Cancel = true;
+                }
+
+            };
+
+            _renderForm.KeyDown += (sender, e) =>
+            {
+                // Anwendung schließen, wenn die Escape-Taste gedrückt wird
+                if (e.KeyCode == System.Windows.Forms.Keys.Escape && sender == _renderForm)
+                {
+                   
+                        CloseApplication(false, "Das Hauptfenster wurde durch das Schließen-Symbol geschlossen.");
+                    
+                }
+            };
+
             try
             {
                 // Main loop
@@ -335,10 +371,13 @@ public partial class Program
             
         return;
 
+        
+
         void CloseApplication(bool error, string message)
         {
+            Log.Debug("Closing application");
             CoreUi.Instance.Cursor.SetVisible(true);
-            ShaderCompiler.Shutdown();
+            //ShaderCompiler.Shutdown();
             bool openLogs = false;
                 
             if (!string.IsNullOrWhiteSpace(message))
@@ -365,12 +404,26 @@ public partial class Program
             // Release all resources
             try
             {
+                _fullScreenPixelShaderResource.Dispose();
+                _fullScreenVertexShaderResource.Dispose();
+                _rasterizerState.Dispose();
+                _outputTexture.Dispose();
+                _outputTextureSrv.Dispose();
+                _evalContext.Reset();
+                _project = null;
+                _textureOutput = null;
+                SharedResources.Dispose();
+                ShaderCompiler.Shutdown();
+                //ResourceManager.Dispose();
+                _swapChain.Dispose();
                 _renderView?.Dispose();
                 _backBuffer?.Dispose();
                 _deviceContext?.ClearState();
                 _deviceContext?.Flush();
-                _device?.Dispose();
                 _deviceContext?.Dispose();
+                _device?.Dispose();
+
+                Log.Debug("Disposed of D3D resources");
             }
             catch (Exception e)
             {
@@ -381,8 +434,9 @@ public partial class Program
             {
                 CoreUi.Instance.OpenWithDefaultApplication(logPath);
             }
-                
-            CoreUi.Instance.ExitApplication();
+            
+            //CoreUi.Instance.Shutdown();
+            //CoreUi.Instance.ExitApplication();
         }
     }
 

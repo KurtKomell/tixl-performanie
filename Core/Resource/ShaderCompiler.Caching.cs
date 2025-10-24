@@ -173,6 +173,10 @@ public abstract partial class ShaderCompiler
             Directory.CreateDirectory(_shaderCacheDirectory);
         }
     }
+    public static void ResetShaderCacheSubdirectory()
+    {
+        _shaderCacheDirectory = null;
+    }
 
     private static bool _diskCachingEnabled = true;
     private const string FileExtension = ".shadercache";

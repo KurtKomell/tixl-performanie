@@ -91,6 +91,20 @@ public static class SharedResources
         }
 
     }
+    public static void Dispose()
+    {
+        ViewWindowRasterizerState?.Dispose();
+        ViewWindowDefaultTextureSrv?.Dispose();
+        ColorPickerImageSrv?.Dispose();
+        t3logoAlphaTextureImageSrv?.Dispose();
+
+        _fullScreenVertexShaderResource?.Dispose();
+        _fullScreenPixelShaderResource?.Dispose();
+        _viewWindowDefaultTexture?.Dispose();
+        _colorPickerTexture?.Dispose();
+        _t3logoAlphaTexture?.Dispose();
+    }
+
     public static RasterizerState ViewWindowRasterizerState;
     public static ShaderResourceView ViewWindowDefaultTextureSrv;
     public static ShaderResourceView ColorPickerImageSrv;
