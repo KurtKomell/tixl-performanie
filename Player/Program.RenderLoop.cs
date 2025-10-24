@@ -10,7 +10,7 @@ using T3.Core.Operator.Slots;
 
 namespace T3.Player;
 
-internal static partial class Program
+public partial class Program
 {
     // todo - share this function with the editor ? is that possible? it could have delegate arguments
     private static void RenderCallback()

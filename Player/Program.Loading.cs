@@ -16,7 +16,7 @@ using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
 
-internal static partial class Program
+public partial class Program
 {
     private static void LoadOperators()
     {

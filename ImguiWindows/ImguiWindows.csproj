@@ -6,10 +6,11 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <Deterministic>true</Deterministic>
+      <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.89.9.3" />
+    <PackageReference Include="ImGui.NET" Version="1.89.9.4" />
     <PackageReference Include="Silk.NET.Input.Common" Version="2.22.0" />
     <PackageReference Include="Silk.NET.Windowing.Common" Version="2.22.0" />
   </ItemGroup>

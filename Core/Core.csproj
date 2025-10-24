@@ -8,7 +8,7 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <Configurations>Debug;Release</Configurations>
-        <Platforms>AnyCPU</Platforms>
+        <Platforms>AnyCPU;x64</Platforms>
         <VersionPrefix>$(TixlVersion)</VersionPrefix>
         <Version>$(TixlVersion)</Version>
         <Nullable>disable</Nullable>

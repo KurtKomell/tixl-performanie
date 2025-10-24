@@ -9,7 +9,7 @@ using MouseButtons = System.Windows.Forms.MouseButtons;
 
 namespace T3.Player;
 
-internal static partial class Program
+public partial class Program
 {
     private static void InitializeInput(Control windowControl)
     {

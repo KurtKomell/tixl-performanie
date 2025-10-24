@@ -1,16 +1,17 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>Exe</OutputType>
+        <OutputType>Library</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <ApplicationIcon>..\Resources\images\editor\t3.ico</ApplicationIcon>
         <RootNamespace>T3.Player</RootNamespace>
         <Configurations>Debug;Release</Configurations>
-        <Platforms>AnyCPU</Platforms>
+        <Platforms>AnyCPU;x64</Platforms>
         <TargetFramework>net9.0-windows</TargetFramework>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
         <Deterministic>true</Deterministic>
+        <SelfContained>true</SelfContained>
         <NoWarn>NU1900</NoWarn>
     </PropertyGroup>
 

@@ -137,30 +137,30 @@ public static class WasapiAudioInput
 
     private static bool _complainedOnce;
 
-        
-    private static void InitializeInputDeviceList()
+
+    public static void InitializeInputDeviceList()
     {
         _inputDevices = [];
 
         // Keep in local variable to avoid double evaluation
         var deviceCount = BassWasapi.DeviceCount;
 
-        for (var deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
-        {
+             for (var deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++)
+             {
             var deviceInfo = BassWasapi.GetDeviceInfo(deviceIndex);
-            var isValidInputDevice = deviceInfo.IsEnabled && (deviceInfo.IsLoopback || deviceInfo.IsInput);
+             var isValidInputDevice = deviceInfo.IsEnabled && (deviceInfo.IsLoopback || deviceInfo.IsInput);
 
-            if (!isValidInputDevice)
-                continue;
+             if (!isValidInputDevice)
+                 continue;
 
-            Log.Debug($"Found Wasapi input ID:{_inputDevices.Count} {deviceInfo.Name} LoopBack:{deviceInfo.IsLoopback} IsInput:{deviceInfo.IsInput} (at {deviceIndex})");
-            _inputDevices.Add(new WasapiInputDevice()
-                                  {
-                                      WasapiDeviceIndex = deviceIndex,
-                                      DeviceInfo = deviceInfo,
-                                  });
+             Log.Debug($"Found Wasapi input ID:{_inputDevices.Count} {deviceInfo.Name} LoopBack:{deviceInfo.IsLoopback} IsInput:{deviceInfo.IsInput} (at {deviceIndex})");
+             _inputDevices.Add(new WasapiInputDevice()
+                                   {
+                                       WasapiDeviceIndex = deviceIndex,
+                                       DeviceInfo = deviceInfo,
+                                   });
+         }
         }
-    }
 
     /// <summary>
     /// This is call async (potentially several times per frame) whenever new
@@ -210,11 +210,11 @@ public static class WasapiAudioInput
 
     public sealed class WasapiInputDevice
     {
-        internal int WasapiDeviceIndex;
+        public int WasapiDeviceIndex;
         public WasapiDeviceInfo DeviceInfo;
     }
 
-    private static List<WasapiInputDevice> _inputDevices;
+    public static List<WasapiInputDevice> _inputDevices;
     internal static double TimeSinceLastUpdate;
     internal static double LastUpdateTime;
     //private static readonly float[] _fftIntermediate = new float[AudioAnalysis.FftBufferSize];

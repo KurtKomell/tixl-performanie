@@ -41,10 +41,9 @@ using PixelShader = T3.Core.DataTypes.PixelShader;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
 namespace T3.Player;
-
-internal static partial class Program
+public partial class Program
 {
-    private class Options
+    public class Options
     {
         [Option(Default = false, Required = false, HelpText = "Disable vsync")]
         public bool NoVsync { get; set; }
@@ -66,7 +65,7 @@ internal static partial class Program
     }
 
     [STAThread]
-    private static void Main(string[] args)
+    public static void Main(string[] args)
     {
         CoreUi.Instance = new MsForms.MsForms();
         BlockingWindow.Instance = new SilkWindowProvider();
@@ -106,7 +105,7 @@ internal static partial class Program
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
             Log.Debug($": {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
-            var iconPath = Path.Combine(SharedResources.Directory,  "images", "editor","t3.ico");
+            var iconPath = Path.Combine("images", "editor","t3.ico");
             var gotIcon = File.Exists(iconPath);
 
             Icon icon;
@@ -120,11 +119,11 @@ internal static partial class Program
                 icon = new Icon(iconPath);
             }
 
-            _renderForm = new RenderForm(exportSettings!.ApplicationTitle)
+            _renderForm = new RenderForm("PerformaniePro3")
                               {
                                   ClientSize = new Size(resolution.X, resolution.Y),
                                   AllowUserResizing = false,
-                                  Icon = icon,
+                                  //Icon = icon,
                               };
 
             var windowHandle = _renderForm.Handle;
