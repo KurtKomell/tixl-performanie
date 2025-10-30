@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SharpDX;
 using SharpDX.Direct3D11;
 using T3.Core.Resource;
@@ -10,7 +10,7 @@ namespace T3.Core.Rendering;
 /// </summary>
 public static class DefaultRenderingStates
 {
-    private static DepthStencilState _defaultDepthStencilState;
+    public static DepthStencilState _defaultDepthStencilState;
 
     public static DepthStencilState DefaultDepthStencilState
     {
@@ -33,7 +33,7 @@ public static class DefaultRenderingStates
         }
     }
 
-    private static DepthStencilState _disabledDepthStencilState;
+    public static DepthStencilState _disabledDepthStencilState;
 
     public static DepthStencilState DisabledDepthStencilState
     {
@@ -52,7 +52,7 @@ public static class DefaultRenderingStates
         }
     }
 
-    private static BlendState _defaultBlendState;
+    public static BlendState _defaultBlendState;
     public static BlendState DefaultBlendState
     {
         get
@@ -76,7 +76,7 @@ public static class DefaultRenderingStates
         }
     }
 
-    private static BlendState _disabledBlendState;
+    public static BlendState _disabledBlendState;
 
     public static BlendState DisabledBlendState
     {

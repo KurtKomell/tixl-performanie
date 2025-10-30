@@ -1,19 +1,24 @@
 // NOTE: Enabling this will require Windows Graphics Tools feature to be enabled
 // This will prevent the player from running on most Windows systems.
 //#define FORCE_D3D_DEBUG
+using CommandLine;
+using CommandLine.Text;
+using ManagedBass;
+using Newtonsoft.Json;
+using Operators.Utils;
+using Rug.Osc;
+using SharpDX.Direct3D;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using SharpDX.Windows;
+using SilkWindows;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CommandLine;
-using CommandLine.Text;
-using ManagedBass;
-using Newtonsoft.Json;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.DXGI;
+using System.Windows.Forms;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Compilation;
@@ -23,28 +28,30 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Rendering;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
-using Device = SharpDX.Direct3D11.Device;
-using Resource = SharpDX.Direct3D11.Resource;
-using SharpDX.Windows;
-using SilkWindows;
 using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Serialization;
+using Device = SharpDX.Direct3D11.Device;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using Factory = SharpDX.DXGI.Factory;
 using FillMode = SharpDX.Direct3D11.FillMode;
-using ResourceManager = T3.Core.Resource.ResourceManager;
-using VertexShader = T3.Core.DataTypes.VertexShader;
 using PixelShader = T3.Core.DataTypes.PixelShader;
+using Resource = SharpDX.Direct3D11.Resource;
+using ResourceManager = T3.Core.Resource.ResourceManager;
 using Texture2D = T3.Core.DataTypes.Texture2D;
+using VertexShader = T3.Core.DataTypes.VertexShader;
 
 namespace T3.Player;
 public partial class Program
 {
     public class Options
     {
+        [Option(Default = 0, Required = true, HelpText = "monitorHandle")]
+
+        public int MonitorHandle { get; set; }
         [Option(Default = false, Required = false, HelpText = "Disable vsync")]
         public bool NoVsync { get; set; }
 
@@ -68,12 +75,114 @@ public partial class Program
     public static void Main(string[] args)
     {
         CoreUi.Instance = null;
+        fileWriter = null;
         ShaderCompiler.ResetShaderCacheSubdirectory();
         CoreUi.Instance = new MsForms.MsForms();
         BlockingWindow.Instance = new SilkWindowProvider();
-            
+        exportSettings = null;
+        ProjectSettings.Config = null;
+        _resolvedOptions = new Options();
+        //Application.EnableualStyles();
+        //Application.SetHighDpiMode(HighDpiMode.PerMonitor);
+        //Application.SetCompatibleTextRenderingDefault(false);
+        if (_evalContext != null)
+        {
+        _evalContext.Reset();
+
+        }
+        //OSC Receiver
+        //Initialisieren des OSC - Handlers
+        _oscHandler = new OscMessageHandler();
+        OscConnectionManager.IOscConsumer _ioscConsumer = null;
+        // Registrieren des Handlers beim OscConnectionManager
+        int oscPort = 8000; // Beispiel-Port
+        OscConnectionManager.RegisterConsumer(_oscHandler, oscPort);
+
+        Console.WriteLine($"OSC-Handler auf Port {oscPort} registriert.");
+
+
+
+        //Adapterrating
+        using var factory = new Factory1();
+
+        if (factory.GetAdapterCount() == 0)
+        {
+            BlockingWindow.Instance.ShowMessageBox("We are unable to find any graphics adapters",
+                                                   "Oh noooo",
+                                                   "OK");
+            Environment.Exit(0);
+        }
+        nint monitorHandle = 0; // Standardwert
+
+        foreach (var arg in args)
+        {
+            if (arg.StartsWith("--monitorhandle="))
+            {
+                if (nint.TryParse(arg.Split('=')[1], out nint handle))
+                {
+                    monitorHandle = handle;
+                }
+            }
+        }
+
+
+        var adapterRatings = new List<DisplayAdapterRating>(8);
+
+        for (var i = 0; i < factory.GetAdapterCount(); i++)
+        {
+            using var adapter = factory.GetAdapter1(i);
+            const long gb = 1024 * 1024 * 1024;
+
+            var newRating = new DisplayAdapterRating
+            {
+                Name = adapter.Description.Description,
+                Index = i,
+                MemoryInGb = (float)((double)adapter.Description.DedicatedVideoMemory / gb),
+            };
+            adapterRatings.Add(newRating);
+
+            var descriptionLower = adapter.Description.Description.ToLowerInvariant();
+
+            // Positive keywords
+            foreach (var keyword in highPerformanceKeywords)
+            {
+                if (!descriptionLower.Contains(keyword))
+                    continue;
+
+                newRating.Rating *= 2f;
+            }
+
+            // Negative keywords
+            foreach (var keyword in integratedKeywords)
+            {
+                if (!descriptionLower.Contains(keyword))
+                    continue;
+
+                newRating.Rating *= 0.2f;
+            }
+
+            var memSizeFactor = newRating.MemoryInGb switch
+            {
+                < 1 => 0.1f,
+                < 2 => 0.5f,
+                < 4 => 1f,
+                < 8 => 2f,
+                > 8 => 3f,
+                _ => 4f
+            };
+            newRating.Rating *= memSizeFactor;
+        }
+
+        var selectedAdapterIndex = adapterRatings.OrderByDescending(r => r.Rating).First().Index;
+
+        var selectedAdapter = factory.GetAdapter1(selectedAdapterIndex);
+        ActiveGpu = selectedAdapter.Description.Description;
+
+
+
+
         var settingsPath = Path.Combine(FileLocations.StartFolder, "exportSettings.json");
-        if (!JsonUtils.TryLoadingJson(settingsPath, out ExportSettings exportSettings))
+        if (!JsonUtils.TryLoadingJson(settingsPath, out exportSettings))
         {
             var message = $"Failed to load export settings from \"{settingsPath}\". Exiting!";
             Log.Error(message);
@@ -83,16 +192,22 @@ public partial class Program
 
         ProjectSettings.Config = exportSettings!.ConfigData;
             
-        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsDirectory, "Player" , exportSettings.Author, exportSettings.ApplicationTitle);
-        var fileWriter = FileWriter.CreateDefault(logDirectory, out var logPath);
+        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsDirectory, "Performanie" , exportSettings.Author, exportSettings.ApplicationTitle);
+        if (fileWriter == null)
+        {
+            fileWriter = FileWriter.CreateDefault(logDirectory, out logPath);
+        }
+       consoleWriter = new ConsoleWriter();
         try
         {
-            Log.AddWriter(new ConsoleWriter());
+            Log.AddWriter(consoleWriter);
             Log.AddWriter(fileWriter);
 
+
             if (!TryResolveOptions(args, exportSettings!, out _resolvedOptions))
-                return;
-                
+                    return;
+           
+            Log.Debug("Resolved options: " + JsonConvert.SerializeObject(_resolvedOptions, Formatting.Indented));
             Log.Info($"Starting {exportSettings.ApplicationTitle} with id {exportSettings.OperatorId} by {exportSettings.Author}.");
             Log.Info($"Build: {exportSettings.BuildId}, Editor: {exportSettings.EditorVersion}");
                 
@@ -120,23 +235,80 @@ public partial class Program
             {
                 icon = new Icon(iconPath);
             }
+            Rectangle monitorBounds = Rectangle.Empty;
 
-            _renderForm = new RenderForm("PerformaniePro3")
-                              {
-                                  ClientSize = new Size(resolution.X, resolution.Y),
-                                  AllowUserResizing = false,
-                                  //Icon = icon,
-                              };
+            for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
+            {
+                using (var adapter = factory.GetAdapter1(adapterIndex))
+                {
+                    for (int outputIndex = 0; outputIndex < adapter.GetOutputCount(); outputIndex++)
+                    {
+                        using (var output = adapter.GetOutput(outputIndex))
+                        {
+                            if (output.Description.MonitorHandle == monitorHandle)
+                            {
+                                Console.WriteLine($"Monitor gefunden: {output.Description.DeviceName}");
+                                monitorBounds = new Rectangle(
+                                    output.Description.DesktopBounds.Left,
+                                    output.Description.DesktopBounds.Top,
+                                    output.Description.DesktopBounds.Right - output.Description.DesktopBounds.Left,
+                                    output.Description.DesktopBounds.Bottom - output.Description.DesktopBounds.Top
+                                );
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            //_renderForm = new RenderForm("Performanie Pro 3")
+            //                  {
+            //                      ClientSize = new Size(resolution.X, resolution.Y),
+            //                      StartPosition = System.Windows.Forms.FormStartPosition.Manual,
+            //                      AllowUserResizing = false,
+            //                      //Icon = icon,
+            //                  };
+
+            if (monitorBounds != Rectangle.Empty)
+            {
+                _renderForm = new RenderForm("Performanie Pro 3")
+                {
+                    //                      ClientSize = new Size(resolution.X, resolution.Y),
+                    //                      StartPosition = System.Windows.Forms.FormStartPosition.Manual,
+                    //                      AllowUserResizing = false,
+                    //                      //Icon = icon,
+                    //  
+                    StartPosition = FormStartPosition.Manual,
+                   FormBorderStyle = FormBorderStyle.Sizable,
+                   WindowState = FormWindowState.Normal,
+                    Location = new Point(monitorBounds.X, monitorBounds.Y),
+                    ClientSize = new Size(
+                    Math.Min(monitorBounds.Width, _resolvedOptions.Width),
+                    Math.Min(monitorBounds.Height, _resolvedOptions.Height)),
+                    //TopMost = true,
+
+                };
+                if (!_resolvedOptions.Windowed)
+                {
+                    _renderForm.FormBorderStyle = FormBorderStyle.None;
+                    _renderForm.WindowState = FormWindowState.Maximized;
+                    _renderForm.TopMost = true;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Kein Monitor mit dem angegebenen Handle gefunden. Standardposition wird verwendet.");
+            }
 
             var windowHandle = _renderForm.Handle;
 
             // SwapChain description
             var desc = new SwapChainDescription
                            {
-                               BufferCount = 3,
-                               ModeDescription = new ModeDescription(resolution.Width, resolution.Height,
+                               BufferCount = 2,
+                               ModeDescription = new ModeDescription(resolution.X, resolution.Y,
                                                                      new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                               IsWindowed = _resolvedOptions.Windowed,
+                               IsWindowed = true,
                                OutputHandle = windowHandle,
                                SampleDescription = new SampleDescription(1, 0),
                                SwapEffect = SwapEffect.FlipDiscard,
@@ -157,7 +329,9 @@ public partial class Program
 #else
                 var deviceCreationFlags = DeviceCreationFlags.None;
 #endif
-            Device.CreateWithSwapChain(DriverType.Hardware, deviceCreationFlags, desc, out _device, out _swapChain);
+            Device.CreateWithSwapChain(selectedAdapter, deviceCreationFlags, desc, out _device, out _swapChain);
+           
+                
             ResourceManager.Init(_device);
             _deviceContext = _device.ImmediateContext;
 
@@ -171,8 +345,8 @@ public partial class Program
             }
 
             // Ign ore all windows events
-            var factory = _swapChain.GetParent<Factory>();
-            factory.MakeWindowAssociation(_renderForm.Handle, WindowAssociationFlags.IgnoreAll);
+            var factoryend = _swapChain.GetParent<Factory>();
+            factoryend.MakeWindowAssociation(_renderForm.Handle, WindowAssociationFlags.IgnoreAll);
 
             InitializeInput(_renderForm);
 
@@ -233,8 +407,11 @@ public partial class Program
                 CloseApplication(true, $"Failed to create instance of project op {demoSymbol}");
                 return;
             }
-                
+            if (_evalContext == null)
+            {
             _evalContext = new EvaluationContext();
+
+            }
 
             var prerenderRequired = false;
 
@@ -323,6 +500,10 @@ public partial class Program
             {
                 if (sender == _renderForm)
                 {
+                    //_deviceContext?.ClearState();
+                    //_deviceContext?.Flush();
+                   
+                    //_deviceContext?.Dispose();
                     CloseApplication(false, "Das Hauptfenster wurde durch das Schließen-Symbol geschlossen.");
                 }
                 else
@@ -338,8 +519,10 @@ public partial class Program
                 // Anwendung schließen, wenn die Escape-Taste gedrückt wird
                 if (e.KeyCode == System.Windows.Forms.Keys.Escape && sender == _renderForm)
                 {
-                   
-                        CloseApplication(false, "Das Hauptfenster wurde durch das Schließen-Symbol geschlossen.");
+                    //_deviceContext?.ClearState();
+                    //_deviceContext?.Flush();
+                    _renderForm.Close();
+                    
                     
                 }
             };
@@ -375,7 +558,9 @@ public partial class Program
 
         void CloseApplication(bool error, string message)
         {
-            Log.Debug("Closing application");
+            close = true;
+
+            //Log.Debug("Closing application");
             CoreUi.Instance.Cursor.SetVisible(true);
             //ShaderCompiler.Shutdown();
             bool openLogs = false;
@@ -398,32 +583,60 @@ public partial class Program
                     openLogs = result == "Yes";
                 }
             }
-                    
-            fileWriter.Dispose(); // flush and close
+            Log.RemoveWriter(fileWriter);
+            Log.RemoveWriter(consoleWriter);
+            fileWriter.Dispose();
+
 
             // Release all resources
             try
             {
+                args.ToList().Clear();
+                exportSettings = null;
                 _fullScreenPixelShaderResource.Dispose();
+                _fullScreenPixelShaderResource = null;
                 _fullScreenVertexShaderResource.Dispose();
+                _fullScreenVertexShaderResource = null;
                 _rasterizerState.Dispose();
+                _rasterizerState = null;
                 _outputTexture.Dispose();
+                _outputTexture = null;
                 _outputTextureSrv.Dispose();
-                _evalContext.Reset();
+                _outputTextureSrv = null;
+                //_evalContext.Reset();
+                _evalContext = null;
                 _project = null;
+                _playback = null;
                 _textureOutput = null;
-                SharedResources.Dispose();
+                
+                //SharedResources.Dispose();
                 ShaderCompiler.Shutdown();
-                //ResourceManager.Dispose();
+                ResourceManager.DefaultSamplerState.Dispose();
+            DefaultRenderingStates._defaultBlendState = null;
+                DefaultRenderingStates._disabledBlendState = null;
+                DefaultRenderingStates._defaultDepthStencilState = null;
+                DefaultRenderingStates._disabledDepthStencilState = null;
                 _swapChain.Dispose();
+                _swapChain = null;
                 _renderView?.Dispose();
+                _renderView = null;
                 _backBuffer?.Dispose();
+                _backBuffer = null;
+                //_evalContext = null;
                 _deviceContext?.ClearState();
                 _deviceContext?.Flush();
                 _deviceContext?.Dispose();
-                _device?.Dispose();
+                //_device?.Dispose();
+                //_device = null;
 
+                //OscConnectionManager.UnregisterConsumer(_oscHandler);
+
+                //_oscHandler = null;
+
+                //Console.WriteLine("OSC-Handler abgemeldet.");
+                Application.ExitThread();
                 Log.Debug("Disposed of D3D resources");
+               
             }
             catch (Exception e)
             {
@@ -451,6 +664,7 @@ public partial class Program
 
     private static bool TryResolveOptions(string[] args, ExportSettings exportSettings, out Options resolvedOptions)
     {
+
         var parser = new Parser(config =>
                                 {
                                     config.HelpWriter = null;
@@ -476,6 +690,7 @@ public partial class Program
                     .WithNotParsed(_ => { Log.Debug(helpText); });
 
         resolvedOptions = parsedOptions;
+        
         if (resolvedOptions == null)
             return false;
             
@@ -516,4 +731,36 @@ public partial class Program
     private static Device _device;
     private static Int2 _resolution;
     private static Slot<Texture2D> _textureOutput;
+    private static T3.Core.Logging.ILogWriter fileWriter;
+    private static string logPath;
+    private static ExportSettings exportSettings;
+    public static bool close = false;
+    private static ConsoleWriter consoleWriter;
+
+    //Adaptergrafik
+    private static string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
+    private static string[] integratedKeywords = ["integrated", "intel(r) uhd graphics", "microsoft basic render", "microsoft basic render"]; // twice to make MS worse
+    private static nint monitorHandle;
+    
+    private sealed class DisplayAdapterRating()
+    {
+        public string Name;
+        public int Index;
+        public float MemoryInGb = 0;
+        public float Rating = 1;
+    }
+    public static string ActiveGpu { get; private set; } = "Unknown";
+    public class OscMessageHandler : OscConnectionManager.IOscConsumer
+    {
+        public void ProcessMessage(OscMessage msg)
+        {
+            // Verarbeiten der empfangenen OSC-Nachricht
+            Console.WriteLine($"Empfangene OSC-Nachricht: {msg.Address}");
+            foreach (var arg in msg)
+            {
+                Console.WriteLine($"Argument: {arg}");
+            }
+        }
+    }
+    private static OscMessageHandler _oscHandler;
 }

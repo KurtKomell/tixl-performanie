@@ -89,7 +89,7 @@ public static class OscConnectionManager
 
     private static readonly Dictionary<int, PortGroup> _groupsByPort = new();
 
-    private class PortGroup
+    public class PortGroup
     {
         public int Port { get; }
 
@@ -128,7 +128,7 @@ public static class OscConnectionManager
                                               {
                                                   Stop();
                                               }
-                                          }, TaskScheduler.FromCurrentSynchronizationContext()); // 
+                                          }, TaskScheduler.Default); // 
         }
 
         private async Task ListenForMessagesAsync()
