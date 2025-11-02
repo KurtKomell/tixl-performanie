@@ -4,7 +4,10 @@
 using CommandLine;
 using CommandLine.Text;
 using ManagedBass;
+using Microsoft.CodeAnalysis;
+using Microsoft.VisualBasic.Devices;
 using Newtonsoft.Json;
+using NuGet.Configuration;
 using Operators.Utils;
 using Rug.Osc;
 using SharpDX.Direct3D;
@@ -17,7 +20,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -29,11 +34,13 @@ using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Core.Rendering;
+using T3.Core.Rendering.Material;
 using T3.Core.Resource;
 using T3.Core.SystemUi;
 using T3.Core.UserData;
 using T3.Core.Utils;
 using T3.Serialization;
+using static T3.Core.Rendering.FogSettings;
 using Device = SharpDX.Direct3D11.Device;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using Factory = SharpDX.DXGI.Factory;
@@ -50,8 +57,8 @@ public partial class Program
     public class Options
     {
         [Option(Default = 0, Required = true, HelpText = "monitorHandle")]
-
         public int MonitorHandle { get; set; }
+
         [Option(Default = false, Required = false, HelpText = "Disable vsync")]
         public bool NoVsync { get; set; }
 
@@ -69,6 +76,9 @@ public partial class Program
 
         [Option(Default = true, Required = false, HelpText = "Show log messages.")]
         public bool Logging { get; set; }
+
+        [Option(Default = "", Required = false, HelpText = "Audiodevice")]
+        public string Audio { get; set; }
     }
 
     [STAThread]
@@ -85,11 +95,8 @@ public partial class Program
         //Application.EnableualStyles();
         //Application.SetHighDpiMode(HighDpiMode.PerMonitor);
         //Application.SetCompatibleTextRenderingDefault(false);
-        if (_evalContext != null)
-        {
-        _evalContext.Reset();
+        
 
-        }
         //OSC Receiver
         //Initialisieren des OSC - Handlers
         _oscHandler = new OscMessageHandler();
@@ -99,7 +106,8 @@ public partial class Program
         OscConnectionManager.RegisterConsumer(_oscHandler, oscPort);
 
         Console.WriteLine($"OSC-Handler auf Port {oscPort} registriert.");
-
+        
+        
 
 
         //Adapterrating
@@ -121,6 +129,17 @@ public partial class Program
                 if (nint.TryParse(arg.Split('=')[1], out nint handle))
                 {
                     monitorHandle = handle;
+                }
+            }
+        }
+       
+        foreach (var arg in args)
+        {
+            if (arg.StartsWith("--audio="))
+            {
+                if (int.TryParse(arg.Split('=')[1], out int audioDeviceArg))
+                {
+                    audioDeviceIndex = audioDeviceArg;
                 }
             }
         }
@@ -220,7 +239,7 @@ public partial class Program
 
             var resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
-            Log.Debug($": {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
+            Log.Debug($": audio={audioDeviceIndex},  {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
             var iconPath = Path.Combine("images", "editor","t3.ico");
             var gotIcon = File.Exists(iconPath);
@@ -271,7 +290,7 @@ public partial class Program
 
             if (monitorBounds != Rectangle.Empty)
             {
-                _renderForm = new RenderForm("Performanie Pro 3")
+                _renderForm = new RenderForm("Performanie Pro 3 | Program Window")
                 {
                     //                      ClientSize = new Size(resolution.X, resolution.Y),
                     //                      StartPosition = System.Windows.Forms.FormStartPosition.Manual,
@@ -292,7 +311,7 @@ public partial class Program
                 {
                     _renderForm.FormBorderStyle = FormBorderStyle.None;
                     _renderForm.WindowState = FormWindowState.Maximized;
-                    _renderForm.TopMost = true;
+                    //_renderForm.TopMost = true;
                 }
             }
             else
@@ -305,7 +324,7 @@ public partial class Program
             // SwapChain description
             var desc = new SwapChainDescription
                            {
-                               BufferCount = 2,
+                               BufferCount = 3,
                                ModeDescription = new ModeDescription(resolution.X, resolution.Y,
                                                                      new Rational(60, 1), Format.R8G8B8A8_UNorm),
                                IsWindowed = true,
@@ -313,8 +332,8 @@ public partial class Program
                                SampleDescription = new SampleDescription(1, 0),
                                SwapEffect = SwapEffect.FlipDiscard,
                                Flags = SwapChainFlags.AllowModeSwitch,
-                               Usage = Usage.RenderTargetOutput,
-                           };
+                               Usage = Usage.RenderTargetOutput | Usage.ShaderInput,
+            };
 
             //Try to load 11.1 if possible, revert to 11.0 auto
             FeatureLevel[] levels =
@@ -333,9 +352,11 @@ public partial class Program
            
                 
             ResourceManager.Init(_device);
-            _deviceContext = _device.ImmediateContext;
-
             
+            _deviceContext = _device.ImmediateContext;
+            //_deviceContext.VertexShader.GetConstantBuffers(0, 3);
+            //_deviceContext.PixelShader.GetConstantBuffers(0, 3);
+
 
             var cursor = CoreUi.Instance.Cursor;
 
@@ -374,7 +395,7 @@ public partial class Program
 
             LoadOperators();
 
-            if(!SymbolRegistry.TryGetSymbol(exportSettings.OperatorId, out var demoSymbol))
+            if(!SymbolRegistry.TryGetSymbol(exportSettings.OperatorId, out demoSymbol))
             {
                 CloseApplication(true, $"Failed to find [{exportSettings.ApplicationTitle}] with id {exportSettings.OperatorId}");
                 return;
@@ -382,6 +403,7 @@ public partial class Program
 
             Log.Debug($"Try to load playback settings for {demoSymbol}");
             var playbackSettings = demoSymbol.PlaybackSettings;
+
             if (playbackSettings != null)
             {
                 Log.Debug("Playback settings: " + JsonConvert.SerializeObject(
@@ -393,12 +415,27 @@ public partial class Program
             {
                 Log.Warning($"No playback settings defined");
 
-            }
+            };
             
+
             _playback = new Playback
                             {
                                 Settings = playbackSettings
-                            };
+                                
+            };
+
+            for (int i = 0; i < WasapiAudioInput._inputDevices.Count(); i++)
+            {
+                if (i == audioDeviceIndex)
+                {
+
+
+                    audioDevice = WasapiAudioInput._inputDevices[i].DeviceInfo.Name;
+                    break;
+                }
+            }
+            
+            _playback.Settings.AudioInputDeviceName = audioDevice;
 
             // Create instance of project op, all children are create automatically
 
@@ -407,11 +444,10 @@ public partial class Program
                 CloseApplication(true, $"Failed to create instance of project op {demoSymbol}");
                 return;
             }
-            if (_evalContext == null)
-            {
-            _evalContext = new EvaluationContext();
+           
+            
 
-            }
+           
 
             var prerenderRequired = false;
 
@@ -481,6 +517,45 @@ public partial class Program
                 CloseApplication(true, message);
                 return;
             }
+
+            if (_outputTextureSrv == null)
+            {
+                Log.Debug("Creating new srv...");
+                _outputTextureSrv = new ShaderResourceView(_device, _backBuffer);
+            }
+
+          
+
+            _evalContext = new EvaluationContext();
+            _evalContext.RequestedResolution = _resolution;
+            _evalContext.PointLights.Clear();
+            _evalContext.PointLights.GetDefaultBuffer();
+
+            // Beispiel: PbrMaterial-Instanz erstellen
+            // Überprüfen, ob _evalContext und PbrMaterial initialisiert sind
+            //_evalContext.PbrMaterial.AlbedoMapSrv = PbrMaterial.DefaultAlbedoColorSrv;
+            //_evalContext.PbrMaterial.EmissiveMapSrv = PbrMaterial.DefaultEmissiveColorSrv;
+            //_evalContext.PbrMaterial.RoughnessMetallicOcclusionSrv = PbrMaterial.DefaultRoughnessMetallicOcclusionSrv;
+            //_evalContext.PbrMaterial.NormalSrv = PbrMaterial.DefaultNormalSrv;
+
+            //_evalContext.PbrMaterial.Parameters = new PbrMaterial.PbrParameters
+            //{
+            //    BaseColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f),
+            //    EmissiveColor = new Vector4(0.0f, 0.0f, 0.0f, 1.0f),
+            //    Roughness = 1.0f,
+            //    Specular = 0.5f,
+            //    Metal = 0.0f
+            //};
+            PbrContextSettings.SetDefaultToContext(_evalContext);
+
+            //_evalContext.PbrMaterial = PbrMaterial.Set();
+
+            // Texturen neu zuweisen
+            _evalContext.ContextTextures = new Dictionary<string, Texture2D>();
+
+            // Konstanten neu initialisieren
+            _evalContext.FogParameters = FogSettings.ResetDefaultSettingsBuffer();
+
 
             // TODO - implement proper shader pre-compilation as an option to instance instantiation
             // move this to core?
@@ -584,7 +659,6 @@ public partial class Program
                 }
             }
             Log.RemoveWriter(fileWriter);
-            Log.RemoveWriter(consoleWriter);
             fileWriter.Dispose();
 
 
@@ -593,18 +667,22 @@ public partial class Program
             {
                 args.ToList().Clear();
                 exportSettings = null;
+                _fullScreenPixelShaderResource.Value.Dispose();
                 _fullScreenPixelShaderResource.Dispose();
                 _fullScreenPixelShaderResource = null;
+                _fullScreenVertexShaderResource.Value?.Dispose();
                 _fullScreenVertexShaderResource.Dispose();
                 _fullScreenVertexShaderResource = null;
                 _rasterizerState.Dispose();
                 _rasterizerState = null;
                 _outputTexture.Dispose();
                 _outputTexture = null;
+                _outputTextureSrv.Resource.Dispose();
                 _outputTextureSrv.Dispose();
                 _outputTextureSrv = null;
-                //_evalContext.Reset();
-                _evalContext = null;
+                
+
+
                 _project = null;
                 _playback = null;
                 _textureOutput = null;
@@ -612,17 +690,79 @@ public partial class Program
                 //SharedResources.Dispose();
                 ShaderCompiler.Shutdown();
                 ResourceManager.DefaultSamplerState.Dispose();
-            DefaultRenderingStates._defaultBlendState = null;
+                
+                SharedResources.Dispose();
+                _evalContext.PointLights.Clear();
+                _evalContext.PbrMaterial.Dispose();
+                _evalContext.PbrMaterial = null;
+                _evalContext.FloatVariables.Clear();
+                _evalContext.ContextTextures.Clear();
+                _evalContext.FogParameters.Dispose();
+                _evalContext.FogParameters = null;
+                _evalContext.BoolVariables.Clear();
+                _evalContext.IntVariables.Clear();
+                _evalContext.ObjectVariables.Clear();
+
+                //foreach (var symbol in demoSymbol.SymbolPackage.Symbols.Values)
+                //{
+                //    Guid guid = new Guid("f89c1f31-5c8c-433a-a733-6b83368099f7");
+                //    Guid guid2 = new Guid("9a694126-ad60-4f52-b393-bdc3608c97c6");
+                //    foreach (var child in symbol.Children)
+                //    {
+
+                //        if (child. == symbol.Id || child.Key == guid2)
+                //        {
+
+                //            (child.Symbol var deconstruct, out var deconstructkey);
+
+
+                //            Console.WriteLine($"Child Deconstructed  {deconstruct}");
+
+                //            //if (instance is )
+                //            //{
+                //            //    instance.meshBufferReference.; // Zugriff auf MeshBuffers
+                //            //    Console.WriteLine($"MeshBufferReference: {meshBufferReference}");
+                //            //}
+                //            //else
+                //            //{
+                //            //    Console.WriteLine("Die Instanz ist nicht vom Typ LoadGltfScene.");
+                //            //}
+
+                //            //symbol.meshBufferReference()?.Dispose();
+                //        }
+                //        //Console.WriteLine($"Child Symbol: {child.Value} with ID: {child.Key}");
+                //    }
+
+                //    //in Dispose of each symbol
+                //    symbol.Dispose();
+                //    Console.WriteLine(symbol.Name);
+                //}
+                ;
+                demoSymbol.SymbolPackage.Dispose();
+                demoSymbol.Dispose();
+                
+
+
+
+
+
+                _evalContext = null;
+
+
+                DefaultRenderingStates._defaultBlendState = null;
                 DefaultRenderingStates._disabledBlendState = null;
                 DefaultRenderingStates._defaultDepthStencilState = null;
                 DefaultRenderingStates._disabledDepthStencilState = null;
+                
                 _swapChain.Dispose();
                 _swapChain = null;
                 _renderView?.Dispose();
                 _renderView = null;
                 _backBuffer?.Dispose();
                 _backBuffer = null;
-                //_evalContext = null;
+                _evalContext = null;
+                // ConstantBuffer für VertexShader zurücksetzen
+                
                 _deviceContext?.ClearState();
                 _deviceContext?.Flush();
                 _deviceContext?.Dispose();
@@ -634,9 +774,10 @@ public partial class Program
                 //_oscHandler = null;
 
                 //Console.WriteLine("OSC-Handler abgemeldet.");
-                Application.ExitThread();
+
                 Log.Debug("Disposed of D3D resources");
-               
+            Log.RemoveWriter(consoleWriter);
+                Application.ExitThread();
             }
             catch (Exception e)
             {
@@ -703,6 +844,8 @@ public partial class Program
         return true;
     }
 
+  
+
     private readonly struct PackageLoadInfo(
         PlayerSymbolPackage package,
         List<SymbolJson.SymbolReadResult> newlyLoadedSymbols)
@@ -736,12 +879,16 @@ public partial class Program
     private static ExportSettings exportSettings;
     public static bool close = false;
     private static ConsoleWriter consoleWriter;
+    private static Symbol demoSymbol;
+    private static SharpDX.Direct3D11.Buffer constBuffer;
 
     //Adaptergrafik
     private static string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
     private static string[] integratedKeywords = ["integrated", "intel(r) uhd graphics", "microsoft basic render", "microsoft basic render"]; // twice to make MS worse
     private static nint monitorHandle;
-    
+    private static int audioDeviceIndex;
+    private static string audioDevice = "Default";
+
     private sealed class DisplayAdapterRating()
     {
         public string Name;
@@ -764,3 +911,4 @@ public partial class Program
     }
     private static OscMessageHandler _oscHandler;
 }
+    

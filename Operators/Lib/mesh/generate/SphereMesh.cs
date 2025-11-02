@@ -13,6 +13,7 @@ internal sealed class SphereMesh : Instance<SphereMesh>
 
     public SphereMesh()
     {
+        _data.Dispose();
         Data.UpdateAction += Update;
     }
 
@@ -20,6 +21,7 @@ internal sealed class SphereMesh : Instance<SphereMesh>
     {
         try
         {
+            
             var radius = Radius.GetValue(context);
             var segments = Segments.GetValue(context);
             var uSegments = segments.Width.Clamp(2, 10000) + 1;
@@ -200,7 +202,7 @@ internal sealed class SphereMesh : Instance<SphereMesh>
     private Buffer _indexBuffer;
     private Int3[] _indexBufferData = new Int3[0];
     private readonly BufferWithViews _indexBufferWithViews = new();
-    private readonly MeshBuffers _data = new();
+    public readonly MeshBuffers _data = new();
 
     [Input(Guid = "24a1e643-3e52-4a8b-97b6-7c6f1706d14c")]
     public readonly InputSlot<float> Radius = new();

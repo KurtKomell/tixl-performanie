@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using SharpDX.Direct3D11;
 using T3.Core.DataTypes;
 using T3.Core.Logging;
@@ -44,7 +44,7 @@ public static class PbrContextSettings
         return true;
     }
 
-    internal static void SetDefaultToContext(EvaluationContext context)
+    public static void SetDefaultToContext(EvaluationContext context)
     { 
         context.Materials.Clear();
         context.PbrMaterial = _defaultMaterial;
@@ -53,9 +53,9 @@ public static class PbrContextSettings
 
     private static readonly PbrMaterial _defaultMaterial;
 
-    public static readonly Texture2D WhitePixelTexture; // TODO: move to something like shared resource
-    public static readonly Texture2D BlackPixelTexture; // TODO: move to something like shared resource
-    
+    public static readonly Texture2D WhitePixelTexture; // Beispiel: Weiße Textur mit Alpha 1; // TODO: move to something like shared resource
+    public static readonly Texture2D BlackPixelTexture; // Beispiel: Schwarze Textur mit Alpha 1; // TODO: move to something like shared resource
+
     public static ShaderResourceView PbrLookUpTextureSrv;
     
     public const string PrefilteredSpecularId = "PrefilteredSpecular";

@@ -101,7 +101,7 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
         psStage.SetSamplers(0, _prevSamplerStates.Length, _prevSamplerStates);
     }
 
-    private Buffer[] _constantBuffers = [];
+    public Buffer[] _constantBuffers = [];
     private ShaderResourceView[] _shaderResourceViews = [];
     private ShaderResourceView[] _additionalSrvs = [];
     private SamplerState[] _samplerStates = [];

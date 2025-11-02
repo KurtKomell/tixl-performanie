@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using SharpDX;
 using SharpDX.Direct3D11;
 using T3.Core.Logging;
@@ -117,7 +117,7 @@ public class PointLightStack
         }
     }
 
-    private Buffer GetDefaultBuffer()
+    public Buffer GetDefaultBuffer()
     {
         if (_defaultConstBuffer == null)
         {
@@ -164,7 +164,7 @@ public class PointLightStack
         
     private PointLight[] _pointLights = new PointLight[MaxPointLights];
     private int _currentSize = 0;
-    private bool _isConstBufferDirty = true;
+    public bool _isConstBufferDirty = true;
     private Buffer _constBuffer = null;
         
     private static PointLight[] _defaultPointLights = new PointLight[MaxPointLights];

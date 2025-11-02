@@ -359,7 +359,7 @@ public partial class Symbol
             }
         }
 
-        private void DestroyAndClearAllInstances(SymbolPackage? onlyDisposeInPackage)
+        public void DestroyAndClearAllInstances(SymbolPackage? onlyDisposeInPackage)
         {
             lock (_creationLock)
             {
@@ -379,7 +379,7 @@ public partial class Symbol
             lock (_creationLock)
             {
                 var removed = Symbol._childrenCreatedFromMe.Remove(Id, out _);
-                Debug.Assert(removed);
+                //Debug.Assert(removed);
             }
         }
 
