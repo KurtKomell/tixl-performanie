@@ -82,8 +82,9 @@ public partial class Program
     }
 
     [STAThread]
-    public static void Main(string[] args)
+    public void Main(string[] args)
     {
+        
         CoreUi.Instance = null;
         fileWriter = null;
         ShaderCompiler.ResetShaderCacheSubdirectory();
@@ -591,15 +592,27 @@ public partial class Program
 
             _renderForm.KeyDown += (sender, e) =>
             {
-                // Anwendung schließen, wenn die Escape-Taste gedrückt wird
-                if (e.KeyCode == System.Windows.Forms.Keys.Escape && sender == _renderForm)
+                // Überprüfen, ob die Taste bereits verarbeitet wurde
+                if (!_processedKeys.Contains(e.KeyCode))
                 {
-                    //_deviceContext?.ClearState();
-                    //_deviceContext?.Flush();
-                    _renderForm.Close();
-                    
-                    
+                    // Taste als verarbeitet markieren
+                    _processedKeys.Add(e.KeyCode);
+
+                    // Setze den Wert von keyInPlayer
+                    keyInPlayer = e.KeyCode.ToString();
+
+                    // Anwendung schließen, wenn die Escape-Taste gedrückt wird
+                    if (e.KeyCode == System.Windows.Forms.Keys.Escape && sender == _renderForm)
+                    {
+                        _renderForm.Close();
+                    }
                 }
+            };
+
+            _renderForm.KeyUp += (sender, e) =>
+            {
+                // Entferne die Taste aus der Liste der verarbeiteten Tasten, wenn sie losgelassen wird
+                _processedKeys.Remove(e.KeyCode);
             };
 
             try
@@ -881,6 +894,9 @@ public partial class Program
     private static ConsoleWriter consoleWriter;
     private static Symbol demoSymbol;
     private static SharpDX.Direct3D11.Buffer constBuffer;
+    public string keyInPlayer;
+    private static HashSet<System.Windows.Forms.Keys> _processedKeys = new HashSet<System.Windows.Forms.Keys>();
+
 
     //Adaptergrafik
     private static string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
