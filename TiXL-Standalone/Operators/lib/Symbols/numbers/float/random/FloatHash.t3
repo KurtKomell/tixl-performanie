@@ -1,0 +1,15 @@
+{
+  "Id": "f2b80aaa-b353-45cc-9504-48c86e69ce99"/*FloatHash*/,
+  "Inputs": [
+    {
+      "Id": "9427b1cb-da57-431f-b182-de16b7e11002"/*Seed*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "dbeffbd5-92b0-4a63-9d28-5592c6b42b69"/*UniqueForChild*/,
+      "DefaultValue": true
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

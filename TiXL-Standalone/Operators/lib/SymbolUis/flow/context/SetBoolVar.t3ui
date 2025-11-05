@@ -1,0 +1,38 @@
+{
+  "Id": "9a843835-d39c-428f-b996-6334323e8106"/*SetBoolVar*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "7698eccb-0319-4c03-8f4e-486cc959d50c"/*SubGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      }
+    },
+    {
+      "InputId": "85cdc809-e835-4851-8956-bb0217b71f1a"/*BoolValue*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "bfdfcd6e-3b31-4b26-aff4-3023a6b72810"/*VariableName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      },
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "df5e416d-8be3-4dbe-abf3-68a5139fdb7a"/*Result*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

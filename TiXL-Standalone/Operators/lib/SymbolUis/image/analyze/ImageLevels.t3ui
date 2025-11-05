@@ -1,0 +1,98 @@
+{
+  "Id": "592a2b6f-d4e3-43e0-9e73-034cca3b3900"/*ImageLevels*/,
+  "Description": "Visualizes the image brightness distribution of an image.\nSee also [CompareImages] [WaveForm]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "1224b62e-5fca-41e9-a388-4c13c1458d56"/*Center*/,
+      "Position": {
+        "X": -94.813095,
+        "Y": 227.14226
+      },
+      "GroupTitle": "Visualizer",
+      "Min": -1.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "48e80f45-9685-4ded-aa1c-d05e16658c5a"/*Width*/,
+      "Position": {
+        "X": 45.18695,
+        "Y": 297.14227
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "8910ac23-551b-446a-b833-98f4efce1022"/*Range*/,
+      "Position": {
+        "X": -94.81305,
+        "Y": 367.14224
+      },
+      "UseVec2Control": "Range"
+    },
+    {
+      "InputId": "a8a4d660-7356-40de-8dc6-549a72b69973"/*ShowOriginal*/,
+      "Position": {
+        "X": 45.18695,
+        "Y": 437.14227
+      },
+      "GroupTitle": "Image"
+    },
+    {
+      "InputId": "f1084d72-f8b8-4723-82be-e1e98880faf3"/*Rotation*/,
+      "Position": {
+        "X": 45.18695,
+        "Y": 332.14224
+      },
+      "Min": -90.0,
+      "Max": 90.0,
+      "Format": "{0:0.000}°"
+    },
+    {
+      "InputId": "f434bac8-b7d8-4787-adf2-1782d6588da8"/*Texture2d*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 45.18695,
+        "Y": 192.14226
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3e895dbd-d6fb-4712-8358-c6f6b4482841"/*Vector2Components*/,
+      "Position": {
+        "X": 45.18695,
+        "Y": 367.14224
+      }
+    },
+    {
+      "ChildId": "c2951663-1f4b-495e-9f97-c68b333f13b0"/*Vector2Components*/,
+      "Position": {
+        "X": 45.18695,
+        "Y": 227.14226
+      }
+    },
+    {
+      "ChildId": "e0755f36-83a3-40ec-b3f0-45171aa56dcc"/*_ImageFxShaderSetup2*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 202.54338,
+        "Y": 197.32584
+      },
+      "Position": {
+        "X": 185.18695,
+        "Y": 192.14226
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ae9ebfa0-3528-489b-9c07-090f26dd6968"/*Output*/,
+      "Position": {
+        "X": 786.0802,
+        "Y": 238.57426
+      }
+    }
+  ]
+}

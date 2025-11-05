@@ -1,0 +1,11 @@
+{
+  "Id": "2d1c9633-b66e-4958-913c-116ae36963a5"/*MidiRecording*/,
+  "Inputs": [
+    {
+      "Id": "9b844a51-d108-426e-a264-d570d30031c6"/*ResetTrigger*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,23 @@
+﻿{
+        "AssemblyFileName": "t3.unsplash",
+        "HomeGuid": "00000000-0000-0000-0000-000000000000",
+        "RootNamespace": "t3.unsplash",
+        "Version": "1.0.11",
+        "EditorVersion": "4.1.0.3",
+        "IsEditorOnly": "false",
+        "OperatorPackages":
+        [
+          {
+          "Identity": "lib",
+          "Version": "1.0.0",
+          "ResourcesOnly": "False"
+          }
+        ,
+          {
+          "Identity": "Types",
+          "Version": "1.0.0",
+          "ResourcesOnly": "False"
+          }
+        
+        ]
+        }

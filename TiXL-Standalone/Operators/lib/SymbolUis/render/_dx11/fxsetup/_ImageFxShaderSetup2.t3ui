@@ -1,0 +1,237 @@
+{
+  "Id": "2b20afce-2b54-4bcc-ba0e-e456a0d92833"/*_ImageFxShaderSetup2*/,
+  "Description": "This is a new version that uses Fragment shaders instead of ComputeShader as in [_ImageFxShaderSetup].",
+  "SymbolTags": "16",
+  "InputUis": [
+    {
+      "InputId": "16dce9bc-02d9-48f8-b07e-94a9af48d27b"/*Source*/,
+      "Position": {
+        "X": 1008.1196,
+        "Y": 932.336
+      },
+      "Usage": "FilePath",
+      "FileFilter": "HLSL-Files|*.hlsl"
+    },
+    {
+      "InputId": "36abde68-0d79-4fb6-b8ce-ac8a27b66850"/*Texture*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -11.96653,
+        "Y": 992.3391
+      }
+    },
+    {
+      "InputId": "3aab7e93-2629-4c6a-b647-cfbd9d5089b2"/*Filter*/,
+      "Position": {
+        "X": 389.75293,
+        "Y": 1171.2958
+      }
+    },
+    {
+      "InputId": "3ca67d25-72ec-487b-91b3-ece912b76462"/*GenerateMipmaps*/,
+      "Position": {
+        "X": 1616.0424,
+        "Y": 1274.6549
+      }
+    },
+    {
+      "InputId": "432c1a23-bf28-4595-923f-6c5a442fa90a"/*OutputFormat*/,
+      "Position": {
+        "X": 1616.0424,
+        "Y": 1239.655
+      }
+    },
+    {
+      "InputId": "499e7ff0-3b6a-414b-be19-03c615931ab8"/*BufferColor*/,
+      "Position": {
+        "X": -408.4882,
+        "Y": 1265.6207
+      }
+    },
+    {
+      "InputId": "8e9b8826-5870-4db6-93c2-9fb469cfeec9"/*Params*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 693.24695,
+        "Y": 995.7079
+      }
+    },
+    {
+      "InputId": "9911dc7e-cd3b-4c58-a5d0-2e9abc8e528a"/*BlendMode*/,
+      "Position": {
+        "X": 868.11957,
+        "Y": 1247.336
+      }
+    },
+    {
+      "InputId": "c10f16e8-9e59-4b83-91b1-c2c7ad37d52a"/*Resolution*/,
+      "Position": {
+        "X": 130.70462,
+        "Y": 741.67786
+      }
+    },
+    {
+      "InputId": "c80d3700-ceb6-43d0-9ffd-f4854e67a41d"/*Wrap*/,
+      "Position": {
+        "X": 389.75293,
+        "Y": 1206.2958
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0275fe05-3427-4d94-8a28-c8f87222ed24"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 833.24695,
+        "Y": 960.7079
+      }
+    },
+    {
+      "ChildId": "0c0ff770-02e3-4c73-9694-d5a59a9ecc3d"/*Draw*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 1282.3359
+      }
+    },
+    {
+      "ChildId": "11fe4629-85f0-46db-873e-ad384c6425d0"/*Rasterizer*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 1212.3359
+      }
+    },
+    {
+      "ChildId": "294d7ccf-7bdc-453b-bf2c-290d78ccf3d9"/*ResolutionConstBuffer*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 1037.3359
+      }
+    },
+    {
+      "ChildId": "2b2e1a84-f5e8-429c-aa66-40bc4efa39d2"/*BoolToFloat*/,
+      "Position": {
+        "X": 693.24695,
+        "Y": 1030.708
+      }
+    },
+    {
+      "ChildId": "34f9e221-7b9f-4160-865a-f8858a3f53d4"/*InputAssemblerStage*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 1177.3359
+      }
+    },
+    {
+      "ChildId": "3f3e4ac3-b221-48e3-ae4d-8777c9d59f2c"/*SamplerState*/,
+      "Position": {
+        "X": 529.7529,
+        "Y": 1171.2958
+      }
+    },
+    {
+      "ChildId": "62e25b24-a4e6-4155-91b1-26f428d84aea"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": -11.96653,
+        "Y": 1097.3391
+      }
+    },
+    {
+      "ChildId": "6d53fbbc-610c-45f2-85a8-2786319beb29"/*Execute*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 153.01604,
+        "Y": 422.9334
+      },
+      "Position": {
+        "X": 1288.1196,
+        "Y": 1142.3359
+      }
+    },
+    {
+      "ChildId": "755c4126-2a8a-478a-a63e-b6e115070732"/*UseFallbackTexture*/,
+      "Position": {
+        "X": -11.96653,
+        "Y": 1027.3391
+      }
+    },
+    {
+      "ChildId": "8d3786ba-c89f-4b25-9a2c-21a96ccfaf54"/*PickBlendMode*/,
+      "Position": {
+        "X": 1008.11957,
+        "Y": 1247.336
+      }
+    },
+    {
+      "ChildId": "930b6b71-4707-4f89-9aa2-6cd752ed6b18"/*PixelShader*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 932.336
+      }
+    },
+    {
+      "ChildId": "a5ef2134-3909-4f2a-9c8e-26acd94b455a"/*GetTextureSize*/,
+      "Position": {
+        "X": 270.70462,
+        "Y": 706.67786
+      }
+    },
+    {
+      "ChildId": "a6cd250c-074b-4445-a481-488226793fc8"/*RasterizerState*/,
+      "Position": {
+        "X": 1008.1196,
+        "Y": 1212.3359
+      }
+    },
+    {
+      "ChildId": "a71bcf29-aa1c-4d36-8228-b1695e708e30"/*TimeConstBuffer*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 1002.336
+      }
+    },
+    {
+      "ChildId": "b2582d73-a521-41d5-89a2-3a4022f7e077"/*SetPixelAndVertexShaderStage*/,
+      "Position": {
+        "X": 1288.1196,
+        "Y": 897.336
+      }
+    },
+    {
+      "ChildId": "d80a6ae2-46cd-4f17-9788-2fd0552a0552"/*VertexShader*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 897.336
+      }
+    },
+    {
+      "ChildId": "f42f3634-fa1f-49f8-a27c-ab955a485f31"/*OutputMergerStage*/,
+      "Position": {
+        "X": 1148.1196,
+        "Y": 1247.336
+      }
+    },
+    {
+      "ChildId": "f74f5fa8-6f4e-4907-8952-9d8e59d44a5a"/*RenderTarget*/,
+      "Position": {
+        "X": -151.96652,
+        "Y": 1062.3391
+      }
+    },
+    {
+      "ChildId": "f974a8af-1f53-4c09-ac95-34c8e8b6948a"/*RenderTarget*/,
+      "Position": {
+        "X": 1756.0424,
+        "Y": 1134.6549
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "36e01dc9-0680-4af5-9329-0ac6a5f78f8c"/*TextureOutput*/,
+      "Position": {
+        "X": 1756.0424,
+        "Y": 1309.655
+      }
+    }
+  ]
+}

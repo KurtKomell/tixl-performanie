@@ -1,0 +1,13 @@
+{
+  "Id": "db22a341-09f6-4953-b252-61b343159650"/*FloatList*/,
+  "Inputs": [
+    {
+      "Id": "7d1ba868-209f-4419-962b-f13c36a7d19d"/*List*/,
+      "DefaultValue": {
+        "Values": []
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

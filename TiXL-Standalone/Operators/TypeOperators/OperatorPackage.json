@@ -1,0 +1,11 @@
+﻿{
+        "AssemblyFileName": "Types",
+        "HomeGuid": "00000000-0000-0000-0000-000000000000",
+        "RootNamespace": "Types",
+        "Version": "1.0.14",
+        "EditorVersion": "4.1.0.3",
+        "IsEditorOnly": "false",
+        "OperatorPackages":
+        [
+        ]
+        }

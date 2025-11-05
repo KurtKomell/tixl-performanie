@@ -1,0 +1,23 @@
+{
+  "Id": "308bb0d1-337b-4c59-9233-6c7bdacf9633"/*CombineColorLists*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "05f25c43-c2f3-4cc1-8ef5-bbd93deb9bc2"/*InputLists*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "068501d2-df29-4672-9492-bd4911e707f6"/*Selected*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    }
+  ]
+}

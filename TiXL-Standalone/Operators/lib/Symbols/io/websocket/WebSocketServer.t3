@@ -1,0 +1,47 @@
+{
+  "Id": "9b4e3c2d-a1f0-4567-89bc-def012345678"/*WebSocketServer*/,
+  "Inputs": [
+    {
+      "Id": "0a1b2c3d-4e5f-4678-9012-3456789abcde"/*Message*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "1d2e3f4a-5b6c-4789-a0b1-c2d3e4f5a6b7"/*Port*/,
+      "DefaultValue": 8081
+    },
+    {
+      "Id": "2e725916-4143-4759-8651-e12185c658d3"/*PrintToLog*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "3d4f5e6a-7b8c-9d0e-f1a2-b3c4d5e6f7a8"/*Listen*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "4b5a6f7e-8d9c-4501-2345-6789abcdef01"/*ClientMessageParsingMode*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "4d3c2b1a-0f9e-4876-5432-10fedcba9876"/*SendTrigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "5a6f7e8d-9c0b-4412-3456-789abcdef012"/*ClientMessageDelimiter*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "73b1f8c9-9a2e-47c0-b1c8-29c34a2e7d01"/*LocalIpAddress*/,
+      "DefaultValue": "0.0.0.0"
+    },
+    {
+      "Id": "8e7d6c5b-4a3f-4123-b9c8-d7e6f5a4b3c2"/*Path*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "a0e35517-337a-4770-985a-34cac95b5b5f"/*SendOnChange*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

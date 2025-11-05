@@ -1,0 +1,15 @@
+{
+  "Id": "48136477-cb34-416c-a968-7c9d82da9d9b"/*SdfToVector*/,
+  "Inputs": [
+    {
+      "Id": "2ea69efd-a01b-4a7f-8f87-31c8dfefcad5"/*LookUpDistance*/,
+      "DefaultValue": 0.001
+    },
+    {
+      "Id": "d6664c35-040a-4021-ac37-aa7eaaae2b65"/*InputField*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

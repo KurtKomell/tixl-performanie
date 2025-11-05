@@ -1,0 +1,338 @@
+{
+  "Id": "836f211f-b387-417c-8316-658e0dc6e117"/*DrawLines*/,
+  "Description": "Draws a point buffer as lines. The lines will be aligned to the camera, but their width will shrink with distance to the camera. You can override this with the ScaleWithDistance parameter. We use the point’s W attribute as a scale factor for the line width. If the W attribute of a point is NaN (Not a Number), that point is not being drawn and acts as a separator between the adjacent line segments. This allows a point buffer to contain multiple disconnected line segments.\nDrawLines ignores the orientation defined by the points. Consider using [DrawRibbons] if you need consistent orientation.\n\nSome caveats:\n---------------\nLong line segments that intersect the camera plane (i.e., one point is in front of the camera and the other behind the camera) will not be rendered correctly. Please consider using [DrawRaypoints] for this.\n\nPerformance considerations:\n---------------\nDrawing lines is fast. Depending on your graphics card, you can draw millions of lines per frame. Performance will be impacted by the length of your lines rather than the point count. This is directly related to your render target’s resolution and multi-sampling level (MSAA).",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "00cb7dc1-edc7-4102-a6a0-6cc44a4f0e56"/*WidthFactor*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 220.82883
+      }
+    },
+    {
+      "InputId": "28f85ae9-ebae-4300-8aa0-738c6327cc44"/*TransitionProgress*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 54.1371
+      }
+    },
+    {
+      "InputId": "520c428e-77b0-44d7-95af-d1cbf9b7e4a7"/*UvScaleFX*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 185.82886
+      }
+    },
+    {
+      "InputId": "75419a73-8a3e-4538-9a1d-e3b0ce7f8561"/*Color*/,
+      "Position": {
+        "X": 350.75894,
+        "Y": -155.8629
+      },
+      "Description": "Defines the color of the Lines.\nIf a Texture is used this color will be multiplied.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "9ba2aa59-e55b-4ebe-aa98-0f79ed77c7aa"/*EnableZTest*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 639.4281
+      },
+      "GroupTitle": "Draw Options",
+      "Description": "Defines whether Lines cover themselves or are covered by or cover other 3D elements."
+    },
+    {
+      "InputId": "ba83a66f-5a4c-4355-abb2-d4b7cd55d542"/*WrapMode*/,
+      "Position": {
+        "X": 630.7589,
+        "Y": 496.41733
+      },
+      "Description": "Defines how the texture behaves when repeated.\n\nWrap: The texture repeats itself continuously\nMirror: The texture is mirrored and repeats infinitely.\nClamp: The texture is cut off at the edge\nBorder: Unclear\nMirrOnce: The texture is mirrored once, then cut off"
+    },
+    {
+      "InputId": "c10f9c6c-9923-42c6-848d-6b98097acc67"/*Texture_*/,
+      "Position": {
+        "X": 490.75897,
+        "Y": 373.78
+      },
+      "Description": "Texture Input."
+    },
+    {
+      "InputId": "c78378f5-8306-4586-af6b-99cea40fa9a9"/*FadeOutTooLong*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 124.1371
+      },
+      "Min": -0.01,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true
+    },
+    {
+      "InputId": "c9cf2182-1297-463c-b5c1-d4ee7ad0895c"/*EnableZWrite*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 674.4281
+      },
+      "Description": "Defines whether Lines cover themselves or are covered by or cover other 3D elements."
+    },
+    {
+      "InputId": "d0919481-203a-4379-8094-187d6209e00d"/*ShrinkWithDistance*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 19.1371
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "d90ff4e6-7d70-441f-a064-b40401025c36"/*BlendMod*/,
+      "Position": {
+        "X": 844.74316,
+        "Y": 604.4281
+      },
+      "Description": "Selects the Blendmode",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "df158fcf-3042-48cf-8383-7bf4c1bcb8a6"/*LineWidth*/,
+      "Position": {
+        "X": 630.759,
+        "Y": -15.8629
+      },
+      "Description": "Defines the width",
+      "Scale": 0.001
+    },
+    {
+      "InputId": "e15b6dc7-aaf9-4244-a4b8-4ac13ee7d23f"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 704.74335,
+        "Y": 731.009
+      },
+      "Description": "Input for GPoints"
+    },
+    {
+      "InputId": "e797d93b-3847-4324-898e-09018267ea82"/*UvScale*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 89.1371
+      },
+      "Description": "Uniformly scales the mapping of the used texture",
+      "AddPadding": "True"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "16140eb3-6b75-4ae3-ad84-1953c4e6a569"/*PickBlendMode*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 604.4281
+      }
+    },
+    {
+      "ChildId": "24375801-6561-45be-afcf-1853cdf2e8f8"/*GetForegroundColor*/,
+      "Position": {
+        "X": 350.75894,
+        "Y": -120.8629
+      }
+    },
+    {
+      "ChildId": "2f55c108-100d-4902-8849-6925fd3308df"/*LoadImage*/,
+      "Position": {
+        "X": 490.75897,
+        "Y": 408.77975
+      }
+    },
+    {
+      "ChildId": "2ff31c25-164c-4bc2-9d91-5ec48bb6b7dc"/*UseFallbackTexture*/,
+      "Position": {
+        "X": 630.759,
+        "Y": 373.78
+      }
+    },
+    {
+      "ChildId": "3853f7de-74e4-4767-bf13-169e2438684b"/*Rasterizer*/,
+      "Position": {
+        "X": 1124.7432,
+        "Y": 539.65283
+      }
+    },
+    {
+      "ChildId": "4d2a2525-1a36-41ad-b2fb-47dc2249b362"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 102.369125,
+        "Y": 252.4566
+      },
+      "Position": {
+        "X": 770.759,
+        "Y": -190.8629
+      }
+    },
+    {
+      "ChildId": "56848cf3-45e4-4341-a439-22a0c291e5f6"/*Draw*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 941.00885
+      }
+    },
+    {
+      "ChildId": "573d1871-ba80-4cc2-bd1b-e231eefe044e"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 373.78
+      }
+    },
+    {
+      "ChildId": "66e3693a-ce40-4a4d-bc9d-0abc61bda428"/*ContextCBuffers*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 313.83142
+      }
+    },
+    {
+      "ChildId": "72c3b3f5-f88a-4e7b-95a2-d312a3188580"/*TransformsConstBuffer*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 270.83142
+      }
+    },
+    {
+      "ChildId": "77abb5d6-df36-4ec6-92d4-8b0310938805"/*AddInts*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 801.00885
+      }
+    },
+    {
+      "ChildId": "7bf99b92-6677-4677-8f5f-40b8a5f86af0"/*IntsToBuffer*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 185.82886
+      }
+    },
+    {
+      "ChildId": "7c0592e7-a971-45da-b3b6-74e29ae8ab7c"/*Execute*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 120.182755,
+        "Y": 287.37302
+      },
+      "Position": {
+        "X": 1349.1333,
+        "Y": 772.7663
+      }
+    },
+    {
+      "ChildId": "854e0337-98e5-4e88-bcd6-4636cd822ae4"/*SamplerState*/,
+      "Position": {
+        "X": 770.759,
+        "Y": 461.41733
+      }
+    },
+    {
+      "ChildId": "8a7e1962-92b9-4b0b-915d-3661cd5c8fae"/*GetBufferComponents*/,
+      "Position": {
+        "X": 844.74335,
+        "Y": 731.009
+      }
+    },
+    {
+      "ChildId": "c24b0975-5b8d-4daa-95af-2104f9257b90"/*SetPixelAndVertexShaderStage*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 140.0,
+        "Y": 315.0
+      },
+      "Position": {
+        "X": 1124.7432,
+        "Y": 202.72704
+      }
+    },
+    {
+      "ChildId": "cb907894-2073-4565-8b82-93cfba8637fc"/*Vector4Components*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 111.079544,
+        "Y": 59.905018
+      },
+      "Position": {
+        "X": 630.759,
+        "Y": -155.8629
+      }
+    },
+    {
+      "ChildId": "d3d543a7-a310-4fb3-aca6-c187b2997fbb"/*PixelShader*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 237.72704
+      }
+    },
+    {
+      "ChildId": "dae29d43-8faa-477c-a9bf-e0c02cd72ff0"/*OutputMergerStage*/,
+      "Position": {
+        "X": 1124.7432,
+        "Y": 604.4281
+      }
+    },
+    {
+      "ChildId": "dfb377f5-abb7-4d22-938c-3db4666c0808"/*RasterizerState*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 539.65283
+      }
+    },
+    {
+      "ChildId": "e68a517c-c993-4f5e-9767-f671adb4f75c"/*ClampInt*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 836.00885
+      }
+    },
+    {
+      "ChildId": "e851fd11-5010-4239-ae12-ba314e12fb78"/*BlendColors*/,
+      "Position": {
+        "X": 490.75897,
+        "Y": -155.8629
+      }
+    },
+    {
+      "ChildId": "f0a17a7f-0778-4997-aea9-3faf5e89f8ad"/**6 -> VertexCount*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 871.00885
+      }
+    },
+    {
+      "ChildId": "f0d3f550-e67d-47f6-87a2-a6d15469b7cd"/*DepthStencilState*/,
+      "Position": {
+        "X": 984.74316,
+        "Y": 639.4281
+      }
+    },
+    {
+      "ChildId": "f9656554-f99f-4486-86b6-cfd7b41c2b50"/*InputAssemblerStage*/,
+      "Position": {
+        "X": 1124.7432,
+        "Y": 130.39796
+      }
+    },
+    {
+      "ChildId": "fc3fdcde-7f7d-4d4f-b948-db15e04c6db1"/*VertexShader*/,
+      "Position": {
+        "X": 984.7431,
+        "Y": 202.72704
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "73ebf863-ba71-421c-bee7-312f13c5eff0"/*Output*/,
+      "Position": {
+        "X": 1489.1333,
+        "Y": 772.7663
+      }
+    }
+  ]
+}

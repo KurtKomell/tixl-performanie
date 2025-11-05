@@ -1,0 +1,27 @@
+{
+  "Id": "1d2e3f4a-5b6c-4789-0123-456789abcdef"/*WebServer*/,
+  "Inputs": [
+    {
+      "Id": "4c5d6e7f-8a9b-4012-3456-7890abcdef12"/*Listen*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "5d6e7f8a-9b0c-4123-4567-890abcdef123"/*LocalIpAddress*/,
+      "DefaultValue": "127.0.0.1"
+    },
+    {
+      "Id": "6e7f8a9b-0c1d-4234-5678-90abcdef1234"/*Port*/,
+      "DefaultValue": 8082
+    },
+    {
+      "Id": "7f8a9b0c-1d2e-4345-6789-0abcdef12345"/*HtmlContent*/,
+      "DefaultValue": "<!DOCTYPE html>\n<html>\n<head>\n    <title>Default T3 WebServer Page</title>\n</head>\n<body>\n    <h1>Welcome to the T3 WebServer</h1>\n    <p>Provide your HTML content via the 'HtmlContent' input slot.</p>\n    <p>Example interaction with a T3 WebSocket:</p>\n    <div>\n        <label for='slider1'>Slider 1:</label>\n        <input type='range' id='slider1' min='0' max='100' value='50'>\n        <span id='value1'>50</span>\n    </div>\n    <div>\n        <label for='slider2'>Slider 2:</label>\n        <input type='range' id='slider2' min='0' max='100' value='50'>\n        <span id='value2'>50</span>\n    </div>\n    <div>\n        <button id='button1'>Send Message</button>\n    </div>\n    <div id='status'>Connecting...</div>\n    <script>\n        // --- Basic WebSocket Interaction Example ---\n        // Make sure to change the port to match your T3 WebSocketServer port\n        const WS_PORT = 8081;\n        let ws;\n        const statusEl = document.getElementById('status');\n        const slider1 = document.getElementById('slider1');\n        const value1 = document.getElementById('value1');\n        const slider2 = document.getElementById('slider2');\n        const value2 = document.getElementById('value2');\n        const button1 = document.getElementById('button1');\n\n        function connect() {\n            ws = new WebSocket(`ws://localhost:${WS_PORT}`);\n            ws.onopen = () => {\n                statusEl.textContent = 'Connected';\n                statusEl.style.color = 'green';\n            };\n            ws.onmessage = (event) => {\n                console.log('Received:', event.data);\n                statusEl.textContent = `Received: ${event.data}`;\n                statusEl.style.color = 'blue';\n                // Example: Update slider if T3 sends 'SET_SLIDER1:75'\n                if (event.data.startsWith('SET_SLIDER1:')) {\n                     const val = event.data.split(':')[1];\n                     slider1.value = val;\n                     value1.textContent = val;\n                }\n                if (event.data.startsWith('SET_SLIDER2:')) {\n                     const val = event.data.split(':')[1];\n                     slider2.value = val;\n                     value2.textContent = val;\n                }\n            };\n            ws.onclose = () => {\n                statusEl.textContent = 'Disconnected. Reconnecting...';\n                statusEl.style.color = 'orange';\n                setTimeout(connect, 3000);\n            };\n            ws.onerror = (err) => {\n                statusEl.textContent = 'Error';\n                statusEl.style.color = 'red';\n                console.error('WebSocket error:', err);\n            };\n        }\n\n        slider1.addEventListener('input', function() {\n            value1.textContent = slider1.value;\n            if (ws && ws.readyState === WebSocket.OPEN) {\n                ws.send(`SLIDER1:${slider1.value}`);\n            }\n        });\n\n        slider2.addEventListener('input', function() {\n            value2.textContent = slider2.value;\n            if (ws && ws.readyState === WebSocket.OPEN) {\n                ws.send(`SLIDER2:${slider2.value}`);\n            }\n        });\n\n        button1.addEventListener('click', function() {\n             if (ws && ws.readyState === WebSocket.OPEN) {\n                 ws.send('BUTTON1_CLICKED');\n             }\n        });\n\n        window.addEventListener('load', connect);\n    </script>\n</body>\n</html>"
+    },
+    {
+      "Id": "8a9b0c1d-2e3f-4456-7890-abcdef123456"/*PrintToLog*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,235 @@
+{
+  "Id": "599ada75-b2ac-4f6c-ac98-f7b4bb6cf47d"/*FieldVolumeForce*/,
+  "Description": "Allows the use of a signed distance field as a force to manipulate a particle system.\n\nWorks as an input for [ParticleSystem].\nNeeds an SDF like [CylinderSDF], [SphereSDF] in order to work.\n",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "02eb5c6b-3995-409b-bd18-9e5c3d58364a"/*Attraction*/,
+      "Position": {
+        "X": 574.5167,
+        "Y": 566.03577
+      },
+      "GroupTitle": "Behaviour",
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "0f929afe-8ba0-479f-adae-d96f89f86266"/*Repulsion*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 636.03577
+      },
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "212064e0-7adb-467d-91d7-9b8890d854bc"/*RandomizeReflection*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 741.0366
+      },
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "57ddd456-78f1-486c-a28f-9cfc02f8a989"/*RandomizeBounce*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 706.03613
+      },
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "637f406f-7cd2-496b-89b1-13945c14f637"/*NormalSamplingDistance*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 811.0366
+      },
+      "Min": -0.1,
+      "Max": 0.1
+    },
+    {
+      "InputId": "64fb0a6f-8a7b-4121-ae71-3b028953df28"/*ApplyColorOnCollision*/,
+      "Position": {
+        "X": 574.5168,
+        "Y": 969.58826
+      }
+    },
+    {
+      "InputId": "86f4bbf4-26a4-4dd7-9a23-3ef1a6c5a13b"/*Amount*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 531.03577
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "8eac0a70-00ad-45cf-a72a-d58593475151"/*Bounciness*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 671.036
+      },
+      "GroupTitle": "Collision",
+      "Min": 0.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "97334c3a-7d1b-4990-a541-70f6ef040197"/*ReflectOnCollision*/,
+      "Position": {
+        "X": 574.5168,
+        "Y": 934.58826
+      }
+    },
+    {
+      "InputId": "bf4f4938-e8ca-4b64-aa8b-6247527ad2fd"/*InvertVolume*/,
+      "Position": {
+        "X": 574.5168,
+        "Y": 776.0366
+      },
+      "GroupTitle": "Options"
+    },
+    {
+      "InputId": "dba5f4e3-cbdc-4e12-b174-dd9b7d91bea8"/*AttractionDecay*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 601.03577
+      },
+      "Min": -1.0,
+      "Max": 1.0
+    },
+    {
+      "InputId": "e24a0dca-504f-4fa9-8a1d-272611506613"/*Field*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 308.94855,
+        "Y": 61.771713
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "005ab440-8373-4d44-99ae-0ef766fb33c8"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 785.17255,
+        "Y": 309.84805
+      }
+    },
+    {
+      "ChildId": "0ce7cc7d-f30d-415d-bfe1-bb36a00d6b47"/*Multiply*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 566.03577
+      }
+    },
+    {
+      "ChildId": "200b25c7-1e87-4b1b-9dda-d0a73fe51039"/*BoolToInt*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 934.58826
+      }
+    },
+    {
+      "ChildId": "2c69ea1c-75a9-47da-98ba-615a3c05aea2"/*ComputeShader*/,
+      "Position": {
+        "X": 1259.0992,
+        "Y": 138.35352
+      }
+    },
+    {
+      "ChildId": "2f87e6f9-1b82-45f0-b1ac-cf3fc45f9e1a"/*SamplerState*/,
+      "Position": {
+        "X": 921.8706,
+        "Y": 1102.2927
+      }
+    },
+    {
+      "ChildId": "4cb46158-637b-4627-a678-c4a67276be88"/*BoolToInt*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 969.58826
+      }
+    },
+    {
+      "ChildId": "5e813c08-d9ae-4da2-b6d8-58c352b80666"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1134.8295,
+        "Y": 427.7593
+      }
+    },
+    {
+      "ChildId": "6c33d6ea-25eb-4566-a325-bf8dbe838ee1"/*IntsToBuffer*/,
+      "Position": {
+        "X": 854.5168,
+        "Y": 899.58826
+      }
+    },
+    {
+      "ChildId": "7db71542-add0-48e2-bcfe-ed29dc2932cc"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 854.5168,
+        "Y": 496.03577
+      }
+    },
+    {
+      "ChildId": "84074d15-b34c-463a-a859-7e99b9cd8c85"/*GetParticleComponents*/,
+      "Position": {
+        "X": 396.6587,
+        "Y": 408.25555
+      }
+    },
+    {
+      "ChildId": "8af6a48f-ce59-477a-9b4c-7289c5487098"/*Clamped*/,
+      "Position": {
+        "X": 916.97705,
+        "Y": 1061.7461
+      }
+    },
+    {
+      "ChildId": "cdf767f9-3bb1-49a8-b304-4612313ccbb1"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 448.94855,
+        "Y": 166.77171
+      }
+    },
+    {
+      "ChildId": "d4cced58-2538-42bc-ae3a-1bd791297471"/*HasTimeChanged*/,
+      "Position": {
+        "X": 994.8294,
+        "Y": 777.7593
+      }
+    },
+    {
+      "ChildId": "e3eabe76-4bbd-4121-ac8d-9c2b2e03143e"/*BoolToFloat*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 776.0366
+      }
+    },
+    {
+      "ChildId": "e76acc71-9691-4faa-8b20-30b42591fd64"/*_ExecuteParticleUpdate*/,
+      "Position": {
+        "X": 1134.8295,
+        "Y": 742.7593
+      }
+    },
+    {
+      "ChildId": "f3a9d17e-2847-45e1-a751-8752cf4f98e3"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 448.94855,
+        "Y": 61.771713
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3296dd74-7e80-459d-8b4d-6127437d73d8"/*Particles*/,
+      "Position": {
+        "X": 1134.8295,
+        "Y": 812.7593
+      }
+    }
+  ]
+}

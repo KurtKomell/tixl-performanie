@@ -1,0 +1,16 @@
+{
+  "Id": "3a246cf1-22da-4070-8504-08cd1c9c5c40"/*ColorsToList*/,
+  "Inputs": [
+    {
+      "Id": "011cb37b-edd1-47fe-8072-7e67c4d5b571"/*Colors*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,64 @@
+{
+  "Id": "77bfe126-5ea6-4254-ba46-2dd9f77d7a70"/*ExecuteHeightmapSdf*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "120ead3f-30d0-44a0-9ef8-a66d17fd977a"/*UvScale*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 285.0
+      }
+    },
+    {
+      "InputId": "22f0f06f-703e-4aac-9799-aec26667e1ff"/*Scale*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "486a018a-0c0c-4077-b9d1-f5f1700e6c6a"/*UvOffset*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      }
+    },
+    {
+      "InputId": "72246279-47f9-42e4-8714-fba34b687238"/*MaxHeight*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 510.0
+      }
+    },
+    {
+      "InputId": "868219cf-a768-4aec-8e6a-871c06a8541f"/*SdfImageSrv*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 210.0
+      }
+    },
+    {
+      "InputId": "96df0cc2-3bf1-45aa-beef-584c73d127cc"/*MaxSlope*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -200.0,
+        "Y": 435.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "c48b4b20-b70a-44cf-94d3-4abf5bccf830"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

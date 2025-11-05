@@ -1,0 +1,16 @@
+﻿{
+        "AssemblyFileName": "Examples",
+        "HomeGuid": "00000000-0000-0000-0000-000000000000",
+        "RootNamespace": "Examples",
+        "Version": "1.2.55",
+        "EditorVersion": "4.1.0.3",
+        "OperatorPackages":
+        [
+          {
+          "Identity": "lib",
+          "Version": "1.0.0",
+          "ResourcesOnly": "False"
+          }
+        
+        ]
+        }

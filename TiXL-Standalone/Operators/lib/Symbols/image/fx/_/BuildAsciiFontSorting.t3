@@ -1,0 +1,15 @@
+{
+  "Id": "b536f791-ae9a-45a7-a153-e2f36a65cfb3"/*BuildAsciiFontSorting*/,
+  "Inputs": [
+    {
+      "Id": "936f7d5e-8eab-4a9d-abef-b941086b027d"/*FilterCharacters*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "dab66e97-0b79-41ce-b6c7-9b01a123746e"/*Filepath*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

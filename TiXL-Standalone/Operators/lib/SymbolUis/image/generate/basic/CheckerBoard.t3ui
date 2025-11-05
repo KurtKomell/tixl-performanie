@@ -1,0 +1,119 @@
+{
+  "Id": "1a411be2-1757-4019-8ce2-e29f808ed839"/*CheckerBoard*/,
+  "Description": "Generates a modular chessboard pattern\n\n\nOther interesting patterns can be generated with [SinForm] [ZollnerPattern] [FraserGrid] [Raster] [CheckerBoard] [RyojiPattern2] [RyojiPattern1]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "1192cfbe-585f-45f0-a37b-5fe78ca32d7b"/*ColorA*/,
+      "Position": {
+        "X": -11.0660095,
+        "Y": -61.245407
+      }
+    },
+    {
+      "InputId": "48d5cd1d-3ca1-4075-a55e-21cec39b4525"/*UseAspectRatio*/,
+      "Position": {
+        "X": -11.066025,
+        "Y": 288.75458
+      }
+    },
+    {
+      "InputId": "63ebb6c9-e8a5-43e4-97a4-3a34ad585474"/*Resolution*/,
+      "Position": {
+        "X": 128.934,
+        "Y": 428.75458
+      }
+    },
+    {
+      "InputId": "70c4ecc7-72a2-42ee-8546-cbff2c08aa27"/*Stretch*/,
+      "Position": {
+        "X": -11.0660095,
+        "Y": 218.7546
+      },
+      "GroupTitle": "Size",
+      "Min": 0.0,
+      "Max": 100.0,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "b08aba90-f33f-4402-bb7b-bcfc4bb624ce"/*ColorB*/,
+      "Position": {
+        "X": -11.0660095,
+        "Y": 78.75459
+      }
+    },
+    {
+      "InputId": "cb36f66b-99d7-4468-adbf-86e168a76ade"/*Offset*/,
+      "Position": {
+        "X": -11.065994,
+        "Y": 358.75458
+      },
+      "GroupTitle": "Options",
+      "UseVec2Control": "Position"
+    },
+    {
+      "InputId": "e367bd72-c37c-4a7f-8441-698161ba75f8"/*Scale*/,
+      "Position": {
+        "X": 128.93399,
+        "Y": 323.75458
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "Format": "{0:0.000} ×"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3c4e6443-05e6-4ca6-9a76-7465e517c19b"/*Vector2Components*/,
+      "Position": {
+        "X": 128.93399,
+        "Y": 218.7546
+      }
+    },
+    {
+      "ChildId": "3e950950-94d1-432d-994e-f79ddec16168"/*_ImageFxShaderSetupStatic*/,
+      "Position": {
+        "X": 268.93396,
+        "Y": -96.24542
+      }
+    },
+    {
+      "ChildId": "a759187c-e916-4ced-8ce1-7914a6320edf"/*Vector4Components*/,
+      "Position": {
+        "X": 128.93399,
+        "Y": -61.245407
+      }
+    },
+    {
+      "ChildId": "b56327c6-5f17-4577-8087-3ed033d79482"/*BoolToFloat*/,
+      "Position": {
+        "X": 128.93398,
+        "Y": 288.75458
+      }
+    },
+    {
+      "ChildId": "b9a3d9f3-0c2d-4753-a200-6e1eacee6cc8"/*Vector4Components*/,
+      "Position": {
+        "X": 128.93399,
+        "Y": 78.75459
+      }
+    },
+    {
+      "ChildId": "cd3dfdf6-7024-4dc8-9045-a556eabcbc81"/*Vector2Components*/,
+      "Position": {
+        "X": 128.934,
+        "Y": 358.75458
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "9dd9dbeb-b506-4d10-97b7-34feaab91f07"/*TextureOutput*/,
+      "Position": {
+        "X": 737.4765,
+        "Y": -148.79898
+      }
+    }
+  ]
+}

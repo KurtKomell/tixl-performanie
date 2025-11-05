@@ -1,0 +1,180 @@
+{
+  "Id": "dd586355-64b3-4e96-af6d-b4927595dee7"/*AddNoise*/,
+  "Description": "Creates a new buffer by resampling the connected points. This can be useful for increasing resolution or smoothing out hard edges.\n\nAlso see [SimNoiseOffset] and [TurbulenceForce]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "1dfb45ae-b376-41ea-a1d2-97b170645b50"/*Variation*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1088.1663
+      },
+      "Description": "Adds more variance and detail to the noise."
+    },
+    {
+      "InputId": "2d229dc7-a7ec-4fae-b84c-5eea6b91e18a"/*NoiseOffset*/,
+      "Position": {
+        "X": -69.782776,
+        "Y": 1263.1663
+      },
+      "Description": "Shifts the noise per axis."
+    },
+    {
+      "InputId": "3f5abde2-66e1-4b04-9bff-5a19a58aab86"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -129.59567,
+        "Y": 720.00745
+      }
+    },
+    {
+      "InputId": "5894156a-cc31-4236-908c-de0e5385fd84"/*Strength*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 983.1664
+      },
+      "Description": "Defines the total intensity of the random movements.",
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 2.0
+    },
+    {
+      "InputId": "929db7b2-f19c-4a28-b4c2-187365b99760"/*Frequency*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1018.1664
+      },
+      "GroupTitle": "Settings",
+      "Description": "Defines the frequency, i.e., how fast the points move."
+    },
+    {
+      "InputId": "96b296e9-f15a-4543-a850-8078c583ee94"/*StrengthFactor*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1386.7686
+      }
+    },
+    {
+      "InputId": "97c25ec6-ef71-42f8-9352-52baf2ce41a4"/*RotationLookupDistance*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1228.1663
+      },
+      "GroupTitle": "Additional Options",
+      "Description": "Defines the rotation lookup distance",
+      "Min": 0.001,
+      "Scale": 0.01,
+      "ClampMin": true
+    },
+    {
+      "InputId": "aaba1602-e7a1-4b48-81d4-9d7b2b3aa8b1"/*Phase*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1053.1663
+      },
+      "Description": "Defines the phase of the noise and can be animated with a [Value], e.g., using [Time]."
+    },
+    {
+      "InputId": "c2df1fa3-88e1-4be2-954e-8c44edd9d421"/*AmountDistribution*/,
+      "Position": {
+        "X": -69.782776,
+        "Y": 1123.1663
+      },
+      "Description": "Multiplier for the individual axes to amplify/attenuate the noise in certain directions.",
+      "AddPadding": "True"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "22be2e8f-3ed8-47b7-88d7-677bb6cd2fca"/*FloatsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 142.91595,
+        "Y": 459.8296
+      },
+      "Position": {
+        "X": 210.21722,
+        "Y": 948.1664
+      }
+    },
+    {
+      "ChildId": "2adcb282-869e-4a3a-a7bf-df2224f34af5"/*Vector3Components*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1123.1663
+      }
+    },
+    {
+      "ChildId": "4387cbcf-50d8-462d-892e-7e03f8971bd8"/*IntsToBuffer*/,
+      "Position": {
+        "X": 210.21722,
+        "Y": 1386.7686
+      }
+    },
+    {
+      "ChildId": "4c0f05a4-805c-42ba-9bf2-02c4d87d193f"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 473.44153,
+        "Y": 578.99976
+      }
+    },
+    {
+      "ChildId": "84aa3cb4-d236-46e3-b224-5019e90317c7"/*Vector3Components*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 1263.1663
+      }
+    },
+    {
+      "ChildId": "a95da113-989c-413e-b5f5-4a5f2393735a"/*GetBufferComponents*/,
+      "Position": {
+        "X": 10.404327,
+        "Y": 720.00745
+      }
+    },
+    {
+      "ChildId": "c82e0965-feee-4224-865e-bb64953cb480"/*ComputeShader*/,
+      "Position": {
+        "X": 70.217224,
+        "Y": 582.29816
+      }
+    },
+    {
+      "ChildId": "caf7bcc5-d4ce-4b71-ba5f-9658c35db481"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 210.21722,
+        "Y": 819.16986
+      }
+    },
+    {
+      "ChildId": "e0bc3ff4-54c9-4b6d-b103-cc0aa9feb81e"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 210.21722,
+        "Y": 617.29816
+      }
+    },
+    {
+      "ChildId": "f0cb85f5-9224-4160-a6f3-dca6b7453fb2"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 473.44153,
+        "Y": 788.99976
+      }
+    },
+    {
+      "ChildId": "f4e13729-7010-4660-b8bc-f37f3ed073ee"/*GetBufferComponents*/,
+      "Position": {
+        "X": 210.21722,
+        "Y": 854.16986
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "bea6aa18-e751-4ce7-b7d7-b7a026c8e019"/*Output*/,
+      "Position": {
+        "X": 473.44156,
+        "Y": 858.99976
+      }
+    }
+  ]
+}

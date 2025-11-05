@@ -1,0 +1,38 @@
+{
+  "Id": "25307357-6f6c-45b1-a38d-de635510a845"/*SpoutInput*/,
+  "Description": "Spout live video input",
+  "InputUis": [
+    {
+      "InputId": "c5c487d2-3ec0-49e3-9ea5-0b1238e82233"/*ReceiverName*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "f7a7a410-fb91-448c-a0fe-ba4278d82107"/*Command*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "10955469-f5c0-476d-8a1b-9cb2803820a9"/*Texture*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 200.0
+      }
+    },
+    {
+      "OutputId": "b1662ae3-76c2-450d-b4a2-101ee410762b"/*UpdateCount*/,
+      "Position": {
+        "X": 300.0,
+        "Y": 300.0
+      }
+    }
+  ]
+}

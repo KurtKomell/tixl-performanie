@@ -1,0 +1,150 @@
+{
+  "Id": "b5102fba-f05b-43fc-aa1d-613fe1d68ad2"/*Grain*/,
+  "Description": "Adds animated image pixel noise similar to that of an analog TV or film grain.\n\nProTip: While this effect can be used in real-time applications at virtually no cost, it can have a significant negative impact on the effectiveness of image and video compression methods.\n\n- This means that video streams and video files can lose quality and require more bandwidth or memory.\n- Individual videos and image sequences can require considerably more storage space.\n\nUseful Ops for a PostFX Pipeline: [MotionBlur] [DepthOfField] [ChromaticAberration] [Glow] [Grain] [Blur]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "195da7e0-5279-4900-80cd-5635e96ab454"/*Amount*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 40.43416
+      },
+      "GroupTitle": "Intensity",
+      "Description": "Controls the intensity of the image noise.",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "36df2611-4f74-4cc5-a49d-c0aff65f738a"/*RandomPhase*/,
+      "Position": {
+        "X": -539.109,
+        "Y": 214.45392
+      }
+    },
+    {
+      "InputId": "4525c76c-cdcf-47f3-aa96-335cfc5b5c1b"/*Image*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 5.4341583
+      }
+    },
+    {
+      "InputId": "61bb0df6-6c8a-4f3a-b7f4-9d979377cab8"/*Resolution*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 250.43414
+      },
+      "Description": "Can be used to override the default render size.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "74ca5916-20ee-4a1f-a41e-342c12d2126a"/*GenerateMipmaps*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 285.43414
+      },
+      "Description": "Enables generation of mipmaps.\n\nProTip: This can be useful and produces better results if \"Grain\" is not used as a pure post effect, but is applied to a surface which is rendered in 3D space from different distances and angles. For example, a television / CCTV screen during a fly-through.",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "87a78859-5f0c-41af-8564-ac691b8f1950"/*Brightness*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 145.43416
+      },
+      "Description": "Controls the image brightness"
+    },
+    {
+      "InputId": "903c0270-dc46-402e-8088-8db8368a6dfb"/*Color*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 75.43416
+      },
+      "GroupTitle": "Appearance",
+      "Description": "Controls the saturation of the noise.\n\n0: monochromatic noise\n5: Colored Noise as in old TV Sets",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "d24cce46-dd3f-4047-a33f-50abbca89cc4"/*Exponent*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 110.43416
+      },
+      "Description": "Controls the Exponent"
+    },
+    {
+      "InputId": "edb719cd-be40-4758-9c13-98cf14d1a5c5"/*Scale*/,
+      "Position": {
+        "X": -123.48642,
+        "Y": 215.43416
+      },
+      "GroupTitle": "Size",
+      "Description": "Changes the size of the generated noise pattern / pixels."
+    },
+    {
+      "InputId": "f1334f45-4335-4198-9b6e-ab9e8384aa32"/*Animate*/,
+      "Position": {
+        "X": -679.10895,
+        "Y": 109.45392
+      },
+      "GroupTitle": "Motion",
+      "Description": "Controls the speed of the animation\n\nLow values can look like noise in liquids\n\nHigh values (50 and up) can look like TV static or film grain",
+      "Min": 0.0,
+      "Max": 20.0,
+      "Scale": 0.01
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "65e2c0b4-5b8d-4352-8102-14e5771b0f8c"/*Add*/,
+      "Position": {
+        "X": -399.10904,
+        "Y": 179.45392
+      }
+    },
+    {
+      "ChildId": "b7f99a6d-7c1f-4767-bc8a-77632bcf1661"/*Time*/,
+      "Position": {
+        "X": -399.10904,
+        "Y": 109.45392
+      }
+    },
+    {
+      "ChildId": "bb8f5c68-9740-4b9e-838b-a95808116a6e"/*Compare*/,
+      "Position": {
+        "X": -679.10895,
+        "Y": 144.45392
+      }
+    },
+    {
+      "ChildId": "c938672c-ac6a-466a-9075-d1c2daa7ef83"/*_ImageFxShaderSetupStatic*/,
+      "Position": {
+        "X": 16.51358,
+        "Y": 5.4341583
+      }
+    },
+    {
+      "ChildId": "e424e7ed-a636-4d26-8b06-aaf9a4a5606c"/*BoolToInt*/,
+      "Comment": "Convert int to Frozen Mode (4)",
+      "Position": {
+        "X": -539.10895,
+        "Y": 144.45392
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "df388f27-f5b6-417b-87a7-a6a59b625128"/*TextureOutput*/,
+      "Position": {
+        "X": 577.0464,
+        "Y": -29.479145
+      }
+    }
+  ]
+}

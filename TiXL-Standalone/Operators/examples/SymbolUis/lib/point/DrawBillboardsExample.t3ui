@@ -1,0 +1,51 @@
+{
+  "Id": "93292762-bc39-4b66-ace0-583f461abf76"/*DrawBillboardsExample*/,
+  "Description": "Illustrates different applications for DrawBillboards.\nIt also shows how to [CollectSpawnPoints] to drive simulated animations.",
+  "InputUis": [],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0736df8e-8c7b-4f5d-8900-36ef24176b6c"/*RadialPoints*/,
+      "Position": {
+        "X": 947.4834,
+        "Y": -170.07703
+      }
+    },
+    {
+      "ChildId": "29e2b3db-4d77-468f-865d-6089f8ff95a6"/*RenderTarget*/,
+      "Position": {
+        "X": 947.4834,
+        "Y": -30.077026
+      }
+    },
+    {
+      "ChildId": "9ecef077-3202-41fe-bf43-3d1a7826aa32"/*DrawBillboards*/,
+      "Position": {
+        "X": 947.4834,
+        "Y": -100.07703
+      }
+    },
+    {
+      "ChildId": "bc07daf8-c4a0-467b-8343-10f033d202e4"/*LoadImage*/,
+      "Position": {
+        "X": 807.4834,
+        "Y": -65.07703
+      }
+    },
+    {
+      "ChildId": "dc72ed97-1894-4ade-9875-00f99154a274"/*_Time_old*/,
+      "Position": {
+        "X": 807.4834,
+        "Y": -135.07703
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "de29b6ab-a646-4403-9fd0-d3018be62559"/*ColorBuffer*/,
+      "Position": {
+        "X": 947.48334,
+        "Y": 4.9229736
+      }
+    }
+  ]
+}

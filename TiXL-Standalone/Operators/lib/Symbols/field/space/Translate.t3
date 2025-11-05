@@ -1,0 +1,19 @@
+{
+  "Id": "7b81d100-b5a6-4a0e-8900-0d6418146b41"/*Translate*/,
+  "Inputs": [
+    {
+      "Id": "9aa6a5cd-4c0b-45c1-9a82-0f40f8aa43c2"/*InputField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "c872228d-e9ca-4dc1-b6c2-2ca130b2330b"/*Translation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

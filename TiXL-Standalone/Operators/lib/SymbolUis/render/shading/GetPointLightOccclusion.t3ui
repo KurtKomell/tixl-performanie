@@ -1,0 +1,176 @@
+{
+  "Id": "574d636f-64e6-4f07-ac17-49754d2c3599"/*GetPointLightOccclusion*/,
+  "Description": "Returns a float list with the visibility of the current point lights.\n\nThis means: This operator can recognize if a point light is being occluded by another object. It can be used to control the intensity of effects like [LenseFlare], glow, godrays etc.\n\nUse the operator called [UseRenderTarget] to get a reference to the current render target and connect its Depth output.\nThe output value can then be connected to [LenseFlareSetup] Brightness parameter.\n\n[UseRenderTarget] -> [GetPointLightOcclusion] -> [LenseFlareSetup]\n\n",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "370e5f20-a349-4a15-b7e2-342f9ece0b07"/*NearFarRange*/,
+      "Position": {
+        "X": 374.63342,
+        "Y": 88.783585
+      }
+    },
+    {
+      "InputId": "9a427b76-4976-4f7e-9033-1ba08b743c23"/*DepthMap*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 707.34576,
+        "Y": 447.39413
+      }
+    },
+    {
+      "InputId": "a2a707cf-67ed-4107-8d06-1e28cbf539f8"/*LightIndex*/,
+      "Position": {
+        "X": 1249.3779,
+        "Y": 528.86426
+      }
+    },
+    {
+      "InputId": "ef73ef3c-ad47-48ab-abaf-aec450a8459f"/*Damping*/,
+      "Position": {
+        "X": 1249.3779,
+        "Y": 633.86426
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0006cd3c-dd86-4237-ab66-a558e71f547d"/*Texture2d*/,
+      "Position": {
+        "X": 124.7693,
+        "Y": 575.6965
+      }
+    },
+    {
+      "ChildId": "19939f0e-0d08-409a-b0e0-3a07b94e89f3"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 654.6334,
+        "Y": 53.783585
+      }
+    },
+    {
+      "ChildId": "1f131548-d093-45e3-9d0d-b7bba15722e3"/*Damp*/,
+      "Position": {
+        "X": 1389.3779,
+        "Y": 598.86426
+      }
+    },
+    {
+      "ChildId": "24c52b03-9e1e-451f-94c1-9c906a3b17c2"/*_ComputeLightOcclusions*/,
+      "Position": {
+        "X": 1389.3779,
+        "Y": 458.86426
+      }
+    },
+    {
+      "ChildId": "27fdbee8-2544-4bdf-ba32-d27931c3cf10"/*CalcInt2DispatchCount*/,
+      "Position": {
+        "X": 727.7171,
+        "Y": 306.9287
+      }
+    },
+    {
+      "ChildId": "35dc3756-579f-47cd-9239-58df8732c55c"/*Multiply*/,
+      "Position": {
+        "X": 1389.3779,
+        "Y": 563.86426
+      }
+    },
+    {
+      "ChildId": "3a9b8219-9dc0-40c0-ae5a-b489a61d9f68"/*ContextCBuffers*/,
+      "Position": {
+        "X": 466.30133,
+        "Y": 360.26245
+      }
+    },
+    {
+      "ChildId": "53b60aab-39b2-4ca1-8283-87331b4d7a34"/*Clamp*/,
+      "Position": {
+        "X": 1389.3779,
+        "Y": 668.86426
+      }
+    },
+    {
+      "ChildId": "6802fbc6-d487-4005-8cd4-cedee1ae4a2d"/*Int2*/,
+      "Position": {
+        "X": 124.7693,
+        "Y": 540.6965
+      }
+    },
+    {
+      "ChildId": "6d395410-129d-4cd5-8bd2-38ba8cb6b8a1"/*TransformsConstBuffer*/,
+      "Style": "Expanded",
+      "Size": {
+        "X": 110.0,
+        "Y": 23.0
+      },
+      "Position": {
+        "X": 847.34576,
+        "Y": 412.39413
+      }
+    },
+    {
+      "ChildId": "7864f607-2721-4c32-b53b-cc792d0ced44"/*UavFromTexture2d*/,
+      "Position": {
+        "X": 847.34576,
+        "Y": 482.39413
+      }
+    },
+    {
+      "ChildId": "7c25cc5a-5037-41c8-a927-38b430356bff"/*Vector2Components*/,
+      "Position": {
+        "X": 514.6334,
+        "Y": 88.783585
+      }
+    },
+    {
+      "ChildId": "99b68b54-6fee-41cf-b203-52a2e7dd4c74"/*SrvFromTexture2d*/,
+      "Position": {
+        "X": 847.34576,
+        "Y": 447.39413
+      }
+    },
+    {
+      "ChildId": "bbfda632-9f4a-4116-ac52-7878b8213405"/*SamplerState*/,
+      "Position": {
+        "X": 847.34576,
+        "Y": 517.39417
+      }
+    },
+    {
+      "ChildId": "bf1e3f9c-0685-43a9-a335-b33f22f8ba60"/*ComputeShaderStage*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 113.85364,
+        "Y": 270.69095
+      },
+      "Position": {
+        "X": 987.34576,
+        "Y": 272.39413
+      }
+    },
+    {
+      "ChildId": "cfeec9a2-f5ae-4d0b-b702-8748cc32dd3e"/*ComputeShader*/,
+      "Position": {
+        "X": 460.3169,
+        "Y": 231.22287
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "6bad1d19-77e7-4ea7-9763-9bb66231a9ab"/*Output*/,
+      "Position": {
+        "X": 491.63916,
+        "Y": 624.50446
+      }
+    },
+    {
+      "OutputId": "21ef57a3-de27-4e31-8693-e38e693f8948"/*Occlusion*/,
+      "Position": {
+        "X": 1599.4335,
+        "Y": 713.87775
+      }
+    }
+  ]
+}

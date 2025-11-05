@@ -1,0 +1,23 @@
+﻿{
+                "AssemblyFileName": "t3.spout",
+                "HomeGuid": "00000000-0000-0000-0000-000000000000",
+                "RootNamespace": "t3.spout",
+                "Version": "1.0.5",
+                "EditorVersion": "4.0.3",
+          "IsEditorOnly": "false",
+                "OperatorPackages":
+                [
+                    {
+                    "Identity": "lib",
+                    "Version": "1.0.0",
+                    "ResourcesOnly": "False"
+                    }
+                ,
+                    {
+                    "Identity": "Types",
+                    "Version": "1.0.0",
+                    "ResourcesOnly": "False"
+                    }
+                
+                ]
+                }

@@ -1,0 +1,11 @@
+﻿{
+        "AssemblyFileName": "Lib",
+        "HomeGuid": "00000000-0000-0000-0000-000000000000",
+        "RootNamespace": "Lib",
+        "Version": "1.666.999",
+        "EditorVersion": "4.1.0.3",
+        "IsEditorOnly": "false",
+        "OperatorPackages":
+        [
+        ]
+        }

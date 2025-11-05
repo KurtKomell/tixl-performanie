@@ -1,0 +1,19 @@
+{
+  "Id": "9a843835-d39c-428f-b996-6334323e8106"/*SetBoolVar*/,
+  "Inputs": [
+    {
+      "Id": "7698eccb-0319-4c03-8f4e-486cc959d50c"/*SubGraph*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "85cdc809-e835-4851-8956-bb0217b71f1a"/*BoolValue*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "bfdfcd6e-3b31-4b26-aff4-3023a6b72810"/*VariableName*/,
+      "DefaultValue": ""
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

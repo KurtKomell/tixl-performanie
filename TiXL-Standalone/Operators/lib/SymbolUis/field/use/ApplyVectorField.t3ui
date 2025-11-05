@@ -1,0 +1,181 @@
+{
+  "Id": "67f77fd3-7fe3-49ca-bc5b-34b92aa7ab00"/*ApplyVectorField*/,
+  "Description": "Applies a signed XYZ vector field by setting the rotation and F1 to a set of points.\n\nIdeally this requires a _vector_ field, not a color or SDF, with signed vectors for the 3 axis in world space.\n\nAlso see [SdfToVector]",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "3a6cde33-48e9-4433-a654-e530f7cd8a2a"/*Normalize*/,
+      "Position": {
+        "X": 763.1979,
+        "Y": 1643.0997
+      }
+    },
+    {
+      "InputId": "3f49f5f7-4856-41aa-8196-7495fb636aea"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 763.1979,
+        "Y": 1099.8108
+      }
+    },
+    {
+      "InputId": "6d1eeced-11f1-420b-9a2c-3f784d3d4835"/*UpVector*/,
+      "Position": {
+        "X": 763.19794,
+        "Y": 1375.9243
+      }
+    },
+    {
+      "InputId": "739a735c-677b-4b56-892c-046eb7af239f"/*SetFx2To*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 1748.0997
+      }
+    },
+    {
+      "InputId": "8346d059-b9df-4a61-a9da-31bc4ff37543"/*VectorField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 763.1979,
+        "Y": 902.5769
+      }
+    },
+    {
+      "InputId": "9304f0cd-e210-4478-9235-7bb6210f3534"/*SetFx1To*/,
+      "Position": {
+        "X": 903.19794,
+        "Y": 1713.0997
+      }
+    },
+    {
+      "InputId": "9aae8917-40ad-4ce5-aac4-da2de48cdb62"/*ClampLength*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 1480.9243
+      }
+    },
+    {
+      "InputId": "a6ab6b01-9cd5-45f0-98d4-476fee3c9500"/*Strength*/,
+      "Position": {
+        "X": 903.1978,
+        "Y": 1340.9243
+      }
+    },
+    {
+      "InputId": "b4d7ac0b-92a4-44ed-8e64-717c560176bd"/*StrengthFactor*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 1678.0997
+      }
+    },
+    {
+      "InputId": "ccc4cb54-af87-4c3d-9759-c4409b092281"/*ScaleLength*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 1515.9243
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0c5f22a2-2c71-4384-9422-c5f5340d50cf"/*Execute*/,
+      "Position": {
+        "X": 1467.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "26915594-8c42-4200-be3a-0e743c371868"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 1043.1979,
+        "Y": 1305.9243
+      }
+    },
+    {
+      "ChildId": "29f63a65-84e0-4332-ae9b-7e5ad158c470"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 1043.1979,
+        "Y": 1134.8108
+      }
+    },
+    {
+      "ChildId": "2cfb3dab-bda6-47e1-bea4-3b10926ae7bd"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1043.1979,
+        "Y": 1007.5769
+      }
+    },
+    {
+      "ChildId": "38541c43-7e02-4e4f-9b92-9ba1a0d92c4b"/*BoolToInt*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 1643.0997
+      }
+    },
+    {
+      "ChildId": "48277dab-b49f-437d-8ba8-d196fa8e932e"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1317.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "51cd8541-8111-4ccf-82e7-47f4b35cb447"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 902.5769
+      }
+    },
+    {
+      "ChildId": "6a91ebdc-e8e3-417a-bdb7-5cc3ac32ed05"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1043.1979,
+        "Y": 1643.0997
+      }
+    },
+    {
+      "ChildId": "989194b7-22ac-4488-8de1-b6f5216c66af"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 972.5769
+      }
+    },
+    {
+      "ChildId": "a117ef33-d3ce-4a33-bd46-f06438dd866d"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1043.1979,
+        "Y": 1204.8108
+      }
+    },
+    {
+      "ChildId": "aa4f5484-3b3a-43e1-985f-6fc760a7455d"/*GetBufferComponents*/,
+      "Position": {
+        "X": 903.1979,
+        "Y": 1099.8108
+      }
+    },
+    {
+      "ChildId": "e8c404bc-858e-4547-a252-90088e2e2755"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1617.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "ec8def99-df61-46ca-9135-87217b45855f"/*Vector3Components*/,
+      "Position": {
+        "X": 903.19794,
+        "Y": 1375.9243
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "0cee6111-4d84-4436-894a-472aa61571cc"/*Result2*/,
+      "Position": {
+        "X": 1767.85,
+        "Y": 968.7345
+      }
+    }
+  ]
+}

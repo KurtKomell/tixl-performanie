@@ -1,0 +1,143 @@
+{
+  "Id": "1b149f1f-529c-4418-ac9d-3871f24a9e38"/*Displace*/,
+  "Description": "",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "0eff3a75-eafc-4a5e-8a2c-10577c12e776"/*DisplacementOffset*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 541.8907
+      }
+    },
+    {
+      "InputId": "0f2867ab-a65e-4bf3-b1b5-9c241690ba5f"/*Displacement*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 506.89072
+      },
+      "GroupTitle": "Amount",
+      "Scale": 0.01
+    },
+    {
+      "InputId": "1ff7d454-b8fb-470f-beee-ec7521db8a7f"/*DisplaceMapOffset*/,
+      "Position": {
+        "X": -115.55017,
+        "Y": 646.89075
+      },
+      "AddPadding": "True",
+      "Min": -2.0,
+      "Max": 2.0
+    },
+    {
+      "InputId": "3b5b278d-fd4e-4216-9916-5cd7ffd54ab2"/*DisplaceMap*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 24.449814,
+        "Y": 471.89072
+      }
+    },
+    {
+      "InputId": "404c8102-3a5e-45c6-a0f1-4d97a5f0db07"/*SampleRadius*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 716.89075
+      },
+      "GroupTitle": "Sampling"
+    },
+    {
+      "InputId": "6a5c120f-7c04-439b-ad2d-6f78ceb3b378"/*DisplaceMode*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 821.89075
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "6e772174-813d-4baa-b6b5-27e197b547ac"/*WrapMode*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 926.89075
+      },
+      "Description": "Defines if and how the image is repeated at its edge"
+    },
+    {
+      "InputId": "77673c64-918d-46a6-aa29-c362057afee6"/*Shade*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 611.8907
+      },
+      "Description": "Darkens the effect"
+    },
+    {
+      "InputId": "b2f58dc7-e5c6-4c57-a704-94aaa0b1e002"/*GenerateMips*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 786.89075
+      },
+      "GroupTitle": "Quality"
+    },
+    {
+      "InputId": "d0508dfa-89cf-4713-8f5e-893dd5bfc3f4"/*Image*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 24.449814,
+        "Y": 436.89072
+      }
+    },
+    {
+      "InputId": "dc8dfa33-1a49-4800-8c1f-89b29d7427f3"/*Twist*/,
+      "Position": {
+        "X": 24.449814,
+        "Y": 576.89075
+      },
+      "Min": -180.0,
+      "Max": 180.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "ea2b9f80-49b9-4c90-ba34-f0274169ece3"/*RGSS_4xAA*/,
+      "Position": {
+        "X": -115.55017,
+        "Y": 856.89075
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "0da95969-3de8-4603-9b0e-477c1aa6eb11"/*Vector2Components*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 646.89075
+      }
+    },
+    {
+      "ChildId": "c2468361-b9f0-438f-b434-d1699c6b97f8"/*_multiImageFxSetup*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 128.4052,
+        "Y": 541.74316
+      },
+      "Position": {
+        "X": 164.44983,
+        "Y": 401.89072
+      }
+    },
+    {
+      "ChildId": "defb45ad-5d5f-466f-8198-e7a7fb055698"/*BoolToInt*/,
+      "Position": {
+        "X": 24.44983,
+        "Y": 856.89075
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "0faa056c-b1d6-4e1f-a9be-b0791f3bae84"/*Output*/,
+      "Position": {
+        "X": 304.44983,
+        "Y": 401.89072
+      }
+    }
+  ]
+}

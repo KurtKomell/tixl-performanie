@@ -1,0 +1,19 @@
+{
+  "Id": "75286fcf-cb35-4eea-994b-51d628c8cda7"/*TranslateUV*/,
+  "Inputs": [
+    {
+      "Id": "416b6a4b-78f9-422d-85fc-ce383b97f1ba"/*Translation*/,
+      "DefaultValue": {
+        "X": 0.0,
+        "Y": 0.0,
+        "Z": 0.0
+      }
+    },
+    {
+      "Id": "858e9f77-552e-4751-b5d2-40812414ff7f"/*InputField*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

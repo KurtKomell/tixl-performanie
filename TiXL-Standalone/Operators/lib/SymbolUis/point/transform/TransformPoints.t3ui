@@ -1,0 +1,242 @@
+{
+  "Id": "7f6c64fe-ca2e-445e-a9b4-c70291ce354e"/*TransformPoints*/,
+  "Description": "Transforms incoming points.\n\nTips:\n- Try to activate .WIsWeight and combine this operator with [SelectPoints].\n- Changing the Space to Point can be used to offset the points.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "0192b746-ff90-4c26-a7d4-754b6ec8006b"/*UpdateRotation*/,
+      "Position": {
+        "X": -446.72202,
+        "Y": 1534.9219
+      },
+      "Description": "Defines if the rotation of the points is ignored",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "0ef7556a-950f-406c-8e1d-511d17b4ea10"/*Pivot*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 937.44495
+      },
+      "Description": "Moves the Pivot (center point) of the incoming subgraph:\n\nX (-left / +right) \nY (-down / +up) \nZ (-forward / +backwards)\n\nThe Pivot Point determines the location of the incoming subgraph Gizmo. Transforming its location can make it easier to perform transformations around the position you want.\n",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "1ab4671f-7977-4e7e-bb06-f828ae32e3af"/*Space*/,
+      "Position": {
+        "X": -32.16922,
+        "Y": 1087.1665
+      },
+      "GroupTitle": "Transform",
+      "Description": "Defines the space"
+    },
+    {
+      "InputId": "319d71a9-b8dd-406f-a3a2-1c7508ba2ca7"/*Shearing*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 902.4449
+      },
+      "Description": "Shears the incoming points\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "454d0150-dac4-41b2-83f8-d1ecc3ef76d4"/*Rotation*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 797.4449
+      },
+      "Description": "Rotates the incoming subgraph around the following axes:\n\nX: Horizontal axis\nY: Vertical axis\nZ: Forward axis\n",
+      "Min": -90.0,
+      "Max": 90.0,
+      "Format": "{0:0.0}°"
+    },
+    {
+      "InputId": "4af2dbdd-1005-465e-a193-756ed2b29a33"/*ScaleW*/,
+      "Position": {
+        "X": -436.32092,
+        "Y": 1634.2266
+      },
+      "GroupTitle": "Obsolete parameters...",
+      "Description": "Scales the W of the incoming points",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Format": "{0:0.000} ×"
+    },
+    {
+      "InputId": "523b7acd-d8e7-4473-9ec7-15eec1d795df"/*Stretch*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 832.4449
+      },
+      "Description": "Scales the incoming subgraph in the following directions:\n\nX: Width\nY: Height\nZ: Depth\n"
+    },
+    {
+      "InputId": "565ff364-c3d9-4c60-a9a0-79fdd36d3477"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -226.04128,
+        "Y": 650.6874
+      }
+    },
+    {
+      "InputId": "56cd97c5-f4f1-4eb4-a53c-312373ee7706"/*WIsWeight*/,
+      "Position": {
+        "X": -446.72202,
+        "Y": 1579.9219
+      },
+      "Description": "Defines if points with different Ws are treated differently"
+    },
+    {
+      "InputId": "9e803bd1-c5a3-4f6f-926d-d19f32dcbae5"/*Translation*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 762.4449
+      },
+      "Description": "Moves the incoming points\n\nX (-left / +right), \nY (-down / +up), \nZ (-forward / +backwards)\n",
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "a2b65311-d1fd-491e-8787-2f9216f3574a"/*StrengthFactor*/,
+      "Position": {
+        "X": -32.16922,
+        "Y": 1122.1665
+      }
+    },
+    {
+      "InputId": "a6e5770b-39dc-4d7b-b92e-53302dc89395"/*Scale*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 867.4449
+      },
+      "Description": "Uniformly scales the incoming subgraph",
+      "AddPadding": "True",
+      "Min": 0.0,
+      "Max": 1.0,
+      "Format": "{0:0.000} ×"
+    },
+    {
+      "InputId": "af0cff8a-126e-47bd-bb60-9198567f85e0"/*OffsetW*/,
+      "Position": {
+        "X": -436.32092,
+        "Y": 1679.2266
+      },
+      "Description": "Defines the value that is added/subtracted from W"
+    },
+    {
+      "InputId": "fb2cfc5e-51d6-4efa-b936-bdb73c33549f"/*Strength*/,
+      "Position": {
+        "X": -32.49765,
+        "Y": 1007.44495
+      },
+      "GroupTitle": "Options"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "2bf12c9a-9c70-4752-82a1-5a3b46516f61"/*IntsToBuffer*/,
+      "Position": {
+        "X": 107.83078,
+        "Y": 1087.1665
+      }
+    },
+    {
+      "ChildId": "3aa1f8d9-8e1f-43fb-80ba-f15ec5864e40"/*GetBufferComponents*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 657.60925
+      }
+    },
+    {
+      "ChildId": "4877c491-4278-4b27-80c5-3de432c67ce9"/*GetBufferComponents*/,
+      "Position": {
+        "X": -226.04128,
+        "Y": 685.6874
+      }
+    },
+    {
+      "ChildId": "4a35fd19-11d2-49d3-9d62-d4a46933db93"/*ComputeShader*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 517.60925
+      }
+    },
+    {
+      "ChildId": "597bfff4-5487-481f-a621-90890781ab32"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 622.60925
+      }
+    },
+    {
+      "ChildId": "633e829a-a30a-4a42-9723-022cc2401828"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 253.58789,
+        "Y": 552.60925
+      }
+    },
+    {
+      "ChildId": "852d7521-22e7-4482-9ae5-0556cd78a26a"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 479.60776,
+        "Y": 575.34845
+      }
+    },
+    {
+      "ChildId": "b23f0e8b-faa3-4e01-9675-e33c0fbe4af6"/*GetSRVProperties*/,
+      "Position": {
+        "X": 113.58789,
+        "Y": 587.60925
+      }
+    },
+    {
+      "ChildId": "c9390e2c-0150-4ec8-9738-f4a218418bc5"/*TransformMatrix*/,
+      "Position": {
+        "X": 107.50235,
+        "Y": 762.4449
+      }
+    },
+    {
+      "ChildId": "d45b52bf-0959-402f-820c-8fecb68d4be3"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 107.50235,
+        "Y": 972.44495
+      }
+    },
+    {
+      "ChildId": "d7f0248f-a87c-46c8-890b-3a3ec5ae2c26"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 479.6078,
+        "Y": 785.34845
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "ba17981e-ef9f-46f1-a653-6d50affa8838"/*Output*/,
+      "Position": {
+        "X": 479.6078,
+        "Y": 855.34845
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "3b6d2382-0a61-45d4-95a0-8b01fb79f621",
+      "Title": "Obsolete Parameters",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -506.72202,
+        "Y": 1474.9219
+      },
+      "Size": {
+        "X": 257.37137,
+        "Y": 290.2206
+      }
+    }
+  ]
+}

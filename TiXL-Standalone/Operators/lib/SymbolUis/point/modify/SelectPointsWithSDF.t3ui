@@ -1,0 +1,229 @@
+{
+  "Id": "695d20dc-d1fe-4648-80fb-e1159b8aead4"/*SelectPointsWithSDF*/,
+  "Description": "Allows selecting and adding values to points in 3D space via SDF Objects/Fields.\nSimilar to [SelectPoints].\nNeeds any SDF such as [BoxSDF], [ChainLinkSDF], [FractalSDF] as an input to select the points.\nAnd any form of points such as: [GridPoints], [RadialPoints], [SpherePoints], [PointsOnMesh], etc.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "03558959-4190-4b5b-a544-b17d56fb77da"/*ClampNegative*/,
+      "Position": {
+        "X": 747.8982,
+        "Y": 1970.8657
+      },
+      "GroupTitle": "Options",
+      "Description": "Prevent the result from becoming negative (which could lead to points with inverted scale)."
+    },
+    {
+      "InputId": "07177f13-ef76-4e81-91b5-49cf8eb73cbd"/*Mode*/,
+      "Position": {
+        "X": 887.8982,
+        "Y": 1935.8657
+      }
+    },
+    {
+      "InputId": "1f929520-deb1-454e-a999-12dcdef29081"/*Range*/,
+      "Position": {
+        "X": 900.7295,
+        "Y": 1595.1677
+      }
+    },
+    {
+      "InputId": "3da5b21f-f31b-4f11-9f1c-0deee0efac40"/*SdfField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 537.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "InputId": "61acc5cc-f084-4c88-8d54-207645dc841f"/*Scatter*/,
+      "Position": {
+        "X": 900.72955,
+        "Y": 1525.1677
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "74bc9dbf-015e-4182-95ef-cfca4be09f32"/*StrengthFactor*/,
+      "Position": {
+        "X": 887.8982,
+        "Y": 2040.8657
+      }
+    },
+    {
+      "InputId": "af41409a-81ce-43c0-8cf7-1787e3b47b70"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 679.0911,
+        "Y": 1136.442
+      }
+    },
+    {
+      "InputId": "b0b20881-ccb2-46e6-b936-db892ac04202"/*WriteTo*/,
+      "Position": {
+        "X": 887.89825,
+        "Y": 2075.8657
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "b7bd5d38-03ed-46da-ae4f-bfea990104ae"/*Offset*/,
+      "Position": {
+        "X": 900.72943,
+        "Y": 1560.1677
+      }
+    },
+    {
+      "InputId": "bc002ec2-cd53-4cf3-800c-868f2cacbb0c"/*DiscardNonSelected*/,
+      "Position": {
+        "X": 747.89825,
+        "Y": 2005.8657
+      },
+      "Description": "Converts points with zero or below selection to Separators (Scale = NaN) so they will not be rendered."
+    },
+    {
+      "InputId": "c9fbe013-7050-4714-a43d-68960d6afbea"/*GainAndBias*/,
+      "Position": {
+        "X": 760.72943,
+        "Y": 1455.1677
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000}",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "e3fe99fb-f1c3-4e73-ba7a-d260afcb3a22"/*Mapping*/,
+      "Position": {
+        "X": 887.89813,
+        "Y": 2110.8657
+      },
+      "GroupTitle": "Selection Range"
+    },
+    {
+      "InputId": "f38834a9-1bfe-4edc-9b70-2d0c57967556"/*Strength*/,
+      "Position": {
+        "X": 900.72943,
+        "Y": 1420.1677
+      },
+      "GroupTitle": "Settings"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "1eab1da0-07ef-4fb7-b5c4-9f8a249cb249"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 677.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "ChildId": "21bfa5f2-23d5-4d2f-ad8a-2b29b7dbffa8"/*GetBufferComponents*/,
+      "Position": {
+        "X": 829.0911,
+        "Y": 1136.442
+      }
+    },
+    {
+      "ChildId": "25b99973-f2c9-42d8-9303-25da2e765259"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1207.8899
+      }
+    },
+    {
+      "ChildId": "3659cd5c-6ea9-4530-ad99-8d2e611fe4ca"/*ReadFile*/,
+      "Position": {
+        "X": 325.99554,
+        "Y": 1036.9863
+      }
+    },
+    {
+      "ChildId": "4417c142-2884-4500-964e-a124d5cc302f"/*IntsToBuffer*/,
+      "Position": {
+        "X": 1027.8982,
+        "Y": 1935.8657
+      }
+    },
+    {
+      "ChildId": "524f075f-06dc-4771-9201-b9e122f31cb7"/*GetBufferComponents*/,
+      "Position": {
+        "X": 1085.3048,
+        "Y": 1277.8899
+      }
+    },
+    {
+      "ChildId": "5825a168-0557-409e-b486-ffdd384fe1f0"/*BoolToInt*/,
+      "Position": {
+        "X": 887.8982,
+        "Y": 1970.8657
+      }
+    },
+    {
+      "ChildId": "661910b2-98b8-48d9-8fdf-215928052088"/*BoolToInt*/,
+      "Position": {
+        "X": 887.89825,
+        "Y": 2005.8657
+      }
+    },
+    {
+      "ChildId": "6a380e80-19ba-45ac-8975-6b1ab0059ddc"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 1102.0197,
+        "Y": 1038.6473
+      }
+    },
+    {
+      "ChildId": "7f3d4dfe-029f-4ff1-84f6-49349b91ba4b"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 1617.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "9db170d5-667d-4190-b7ef-0bce37f0e478"/*Vector2Components*/,
+      "Position": {
+        "X": 900.72943,
+        "Y": 1455.1677
+      }
+    },
+    {
+      "ChildId": "dbf4da5d-d344-481c-b2d6-c7efe07ee8b0"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1317.85,
+        "Y": 968.7345
+      }
+    },
+    {
+      "ChildId": "de3fceff-9373-4a2a-a438-fa19cce87cf3"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 1040.7295,
+        "Y": 1385.1677
+      }
+    },
+    {
+      "ChildId": "f5e9fee7-5a08-483a-b534-8b864d38b0a2"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 817.42883,
+        "Y": 972.1018
+      }
+    },
+    {
+      "ChildId": "fa9ac2ee-4cf4-494c-ba43-e56aba2dcdbc"/*Execute*/,
+      "Position": {
+        "X": 1467.85,
+        "Y": 968.7345
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "7a77a26e-88b5-43ed-84b1-b35682ceda7d"/*Result2*/,
+      "Position": {
+        "X": 1767.85,
+        "Y": 968.7345
+      }
+    }
+  ]
+}

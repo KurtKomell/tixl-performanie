@@ -1,0 +1,66 @@
+{
+  "Id": "5623d6b3-b8a7-4fd1-9cb4-952dc7818a83"/*ToroidalVortexField*/,
+  "Description": "Generates a torus like vector field.",
+  "SymbolTags": "200",
+  "InputUis": [
+    {
+      "InputId": "1efeddb4-58b1-4877-bc45-efe430f147db"/*Center*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "2ed51b8f-af21-4b93-9428-45e08b9eec62"/*Axis*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "634933df-5f75-4071-a76a-6440bb3f02ef"/*SwirlGain*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 195.0
+      }
+    },
+    {
+      "InputId": "cdc51ba3-2989-449f-bf51-d8a642fd4647"/*Range*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 120.0
+      }
+    },
+    {
+      "InputId": "eb2e2e6d-af78-4b9a-a925-24cce2164053"/*RadialGain*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "f2c26298-fb95-4b74-848e-28ea9ea7b724"/*Radius*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      }
+    },
+    {
+      "InputId": "f6d274ae-8502-459e-b7a9-59755e3cb21e"/*FallOffRate*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 90.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "fc9119f1-32ae-4b3a-93d2-f9980d9b345f"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

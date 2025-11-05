@@ -1,0 +1,66 @@
+{
+  "Id": "97ea4288-2deb-44ea-8714-8374c71fda88"/*SetKeyframes*/,
+  "Description": "Allows to record keyframes to a connected animated operator",
+  "InputUis": [
+    {
+      "InputId": "198c6328-1b1c-4ba3-81dd-3b109ac86353"/*OpIndex*/,
+      "Position": {
+        "X": 197.0,
+        "Y": 463.0
+      }
+    },
+    {
+      "InputId": "36b4906d-1cab-4589-b368-d63c5a9a3ba6"/*Value*/,
+      "Relevancy": "Relevant",
+      "Position": {
+        "X": -200.0,
+        "Y": 150.0
+      },
+      "Description": "The value that should be written to the keyframe"
+    },
+    {
+      "InputId": "6c918e42-d313-4921-8b8f-6485f3f5cb6c"/*CurveIndex*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "92ecce97-9412-44f6-808e-9036f3f99ce4"/*AnimatedOp*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 197.0,
+        "Y": 328.0
+      },
+      "Description": "NOTE: These must be animated!",
+      "Min": -100.0,
+      "Max": 100.0,
+      "Scale": 0.01
+    },
+    {
+      "InputId": "e1c338e4-db8d-4d12-b073-34db00170565"/*TriggerClear*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "fc7c69f7-8f6b-4be9-96b7-bf3145f4def4"/*TriggerSet*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      },
+      "Description": "When to set keyframes.  Try using it with [AudioReaction].WasHit"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "02bdfa79-7076-4095-85d9-740401db0f9d"/*CurrentValue*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 238.0
+      }
+    }
+  ]
+}

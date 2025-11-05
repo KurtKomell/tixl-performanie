@@ -1,0 +1,23 @@
+﻿{
+        "AssemblyFileName": "t3.ndi",
+        "HomeGuid": "00000000-0000-0000-0000-000000000000",
+        "RootNamespace": "t3.ndi",
+        "Version": "1.0.21",
+        "EditorVersion": "4.1.0.3",
+        "IsEditorOnly": "false",
+        "OperatorPackages":
+        [
+          {
+          "Identity": "lib",
+          "Version": "1.0.0",
+          "ResourcesOnly": "False"
+          }
+        ,
+          {
+          "Identity": "Types",
+          "Version": "1.0.0",
+          "ResourcesOnly": "False"
+          }
+        
+        ]
+        }

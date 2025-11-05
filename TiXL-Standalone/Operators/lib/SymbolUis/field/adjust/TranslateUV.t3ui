@@ -1,0 +1,30 @@
+{
+  "Id": "75286fcf-cb35-4eea-994b-51d628c8cda7"/*TranslateUV*/,
+  "Description": "Moves the UV coordinates of the incoming SDF field along the X, Y, and Z axes.\n\nTo scale the UV coordinates, use ‘Texture Scale’ in [RaymarchField].",
+  "InputUis": [
+    {
+      "InputId": "416b6a4b-78f9-422d-85fc-ce383b97f1ba"/*Translation*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 75.0
+      }
+    },
+    {
+      "InputId": "858e9f77-552e-4751-b5d2-40812414ff7f"/*InputField*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "d9c97f8e-ea1a-4394-b0d6-b868593e81c4"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}

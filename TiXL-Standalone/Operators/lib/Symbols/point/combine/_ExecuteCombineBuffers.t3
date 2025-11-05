@@ -1,0 +1,15 @@
+{
+  "Id": "56f7cf15-678d-4527-a328-8666a80882d0"/*_ExecuteCombineBuffers*/,
+  "Inputs": [
+    {
+      "Id": "c8a5769e-2536-4caa-8380-22fbeed1ef12"/*InputBuffers*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d91e52f2-52c6-4533-ac14-f5b2ce8b4c0f"/*ComputeShader*/,
+      "DefaultValue": null
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

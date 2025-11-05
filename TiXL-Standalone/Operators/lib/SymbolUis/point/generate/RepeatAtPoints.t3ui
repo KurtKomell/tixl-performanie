@@ -1,0 +1,261 @@
+{
+  "Id": "780edb20-f83f-494c-ab17-7015e2311250"/*RepeatAtPoints*/,
+  "Description": "Repeats a list of GPU points at positions provided by another list of points. The orientation of the target points can be applied, so this operator can be used to create point instantiation.\n\nIf the ApplyTargetScaleW parameter is activated, the W attribute of the target points is used as a scale factor.\n\nAlso known as: Copy, Replicate, Instance\n\nUseful combinations: [CommonPointSets] [DrawLines] [DrawPoints]",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "0acbe3d0-53fa-47eb-b12e-453f1b61af33"/*ApplyPointScale*/,
+      "Position": {
+        "X": -153.33444,
+        "Y": 869.82654
+      },
+      "GroupTitle": "Options"
+    },
+    {
+      "InputId": "47c3c549-78bb-41fd-a88c-58f643870b40"/*GPoints*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -887.99097,
+        "Y": 1247.366
+      },
+      "Description": "Defines what set of points is being distributed"
+    },
+    {
+      "InputId": "5247aeb2-7e69-4ff3-b432-77319f9b2467"/*SetF1To*/,
+      "Position": {
+        "X": -13.334442,
+        "Y": 939.82654
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "6026d26d-b958-4508-b543-92fbdf8950d6"/*AddSeparators*/,
+      "Position": {
+        "X": -881.89056,
+        "Y": 1166.4038
+      }
+    },
+    {
+      "InputId": "62130a78-6fe7-4146-89da-e536eb81501a"/*SetF2To*/,
+      "Position": {
+        "X": -13.334442,
+        "Y": 974.82654
+      }
+    },
+    {
+      "InputId": "6bd240ad-0ff8-4282-a045-8e00d82cc017"/*ScaleFactor*/,
+      "Position": {
+        "X": -13.334442,
+        "Y": 904.82654
+      }
+    },
+    {
+      "InputId": "796d3d55-32b3-436e-a4c3-f15e1585a914"/*CombineMode*/,
+      "Position": {
+        "X": -871.4209,
+        "Y": 1009.55225
+      }
+    },
+    {
+      "InputId": "9df1f57c-a079-49c1-b537-d8eb08f2d0d3"/*Scale*/,
+      "Position": {
+        "X": -15.8194275,
+        "Y": 768.15216
+      },
+      "AddPadding": "True"
+    },
+    {
+      "InputId": "a952d91a-a86b-4370-acd9-e17b19025966"/*GTargets*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -897.46545,
+        "Y": 1411.7963
+      },
+      "Description": "The incoming points define the position at which other points will be distributed"
+    },
+    {
+      "InputId": "f15a003c-7969-4505-b598-6c6c4b5a3bbe"/*ApplyOrientation*/,
+      "Position": {
+        "X": -153.33444,
+        "Y": 834.82654
+      }
+    },
+    {
+      "InputId": "f582aa39-f5e0-46ad-89ae-6f29ab60d3e6"/*MultiplyTargetW*/,
+      "Position": {
+        "X": -532.56726,
+        "Y": 1569.1018
+      }
+    },
+    {
+      "InputId": "f71ddebe-1f2c-47d0-ba39-eb5c4693e909"/*ApplyTargetScaleW*/,
+      "Position": {
+        "X": -532.56726,
+        "Y": 1524.1018
+      },
+      "GroupTitle": "Obsolete Parameters"
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "08ce280a-b359-4cb3-8aa5-fdfc48d36811"/*AddInts*/,
+      "Position": {
+        "X": -350.4997,
+        "Y": 1212.1001
+      }
+    },
+    {
+      "ChildId": "0968f8ac-8f6b-4d30-bb21-4abff058d294"/*GetBufferComponents*/,
+      "Position": {
+        "X": -22.773392,
+        "Y": 1351.2496
+      }
+    },
+    {
+      "ChildId": "0c007b54-5e0b-43fd-b2a7-c000a12c6776"/*GetBufferComponents*/,
+      "Position": {
+        "X": -757.46545,
+        "Y": 1411.7963
+      }
+    },
+    {
+      "ChildId": "14bb6a2d-2618-4536-9aef-85394062acb6"/*IntsToBuffer*/,
+      "Style": "Resizable",
+      "Size": {
+        "X": 79.85269,
+        "Y": 207.14818
+      },
+      "Position": {
+        "X": 126.66556,
+        "Y": 834.82654
+      }
+    },
+    {
+      "ChildId": "1c72290d-5c1e-4a41-bdf6-dc1e1331e596"/*MultiplyInt*/,
+      "Position": {
+        "X": -216.58295,
+        "Y": 1128.479
+      }
+    },
+    {
+      "ChildId": "21df6466-7ba9-4fad-bef5-767491d39747"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 124.18057,
+        "Y": 733.15216
+      }
+    },
+    {
+      "ChildId": "47e36d7d-f0c7-4e3f-bb5d-86c771f908ac"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 312.81052,
+        "Y": 1133.0787
+      }
+    },
+    {
+      "ChildId": "6b3b966d-957a-408e-98f3-dc7d9743d78e"/*AddInts*/,
+      "Position": {
+        "X": -216.58295,
+        "Y": 1058.479
+      }
+    },
+    {
+      "ChildId": "6f97ffeb-c3c2-4842-9a21-17ec9934b1b5"/*BoolToInt*/,
+      "Position": {
+        "X": -741.89056,
+        "Y": 1166.4038
+      }
+    },
+    {
+      "ChildId": "9506cd5e-4355-4ce3-9060-313aad7fbf05"/*CompareInt*/,
+      "Position": {
+        "X": -516.58295,
+        "Y": 1221.479
+      }
+    },
+    {
+      "ChildId": "95230b28-9d71-4d24-bd58-1c39e6c5e4d9"/*BoolToInt*/,
+      "Position": {
+        "X": -13.334442,
+        "Y": 869.82654
+      }
+    },
+    {
+      "ChildId": "99a368bc-f405-46a2-a69a-de9a3ce84619"/*GetBufferComponents*/,
+      "Position": {
+        "X": -747.99097,
+        "Y": 1247.366
+      }
+    },
+    {
+      "ChildId": "a77358d8-104a-4143-aac5-479e4f4fd995"/*BoolToInt*/,
+      "Position": {
+        "X": -13.334442,
+        "Y": 834.82654
+      }
+    },
+    {
+      "ChildId": "b8b39d2a-4089-433d-9939-7b18bb29117f"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 114.426544,
+        "Y": 1166.9766
+      }
+    },
+    {
+      "ChildId": "c6c849fa-0bfa-47b2-863b-0f570c8fcf27"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 312.81052,
+        "Y": 1378.0787
+      }
+    },
+    {
+      "ChildId": "dde123f0-78b7-40bc-8f05-92eeba19fe9f"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": -22.773392,
+        "Y": 1316.2496
+      }
+    },
+    {
+      "ChildId": "ef16fc8f-af5b-429a-a8b6-74bc61e7b6f3"/*CompareInt*/,
+      "Position": {
+        "X": -504.15503,
+        "Y": 1069.2635
+      }
+    },
+    {
+      "ChildId": "f07842e0-5a3d-4f06-8d29-e4f81b45a6b0"/*ComputeShader*/,
+      "Position": {
+        "X": -25.573456,
+        "Y": 1131.9766
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "3ac76b2a-7b1c-4762-a3f6-50529cd42fa8"/*OutBuffer*/,
+      "Position": {
+        "X": 312.81052,
+        "Y": 1448.0787
+      }
+    }
+  ],
+  "Annotations": [
+    {
+      "Id": "75080e60-c4fc-4db6-91dc-28ec69e591a8",
+      "Title": "Obsolete parameters",
+      "Color": {
+        "X": 0.6,
+        "Y": 0.6,
+        "Z": 0.6,
+        "W": 1.0
+      },
+      "Position": {
+        "X": -592.56726,
+        "Y": 1464.1018
+      },
+      "Size": {
+        "X": 230.0,
+        "Y": 190.0
+      }
+    }
+  ]
+}

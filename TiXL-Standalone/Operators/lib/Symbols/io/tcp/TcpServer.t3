@@ -1,0 +1,35 @@
+{
+  "Id": "0f1e2d3c-4b5a-4678-9012-3456789abcde"/*TcpServer*/,
+  "Inputs": [
+    {
+      "Id": "9a0b1c2d-3e4f-4567-8901-23456789abc0"/*Listen*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "a0b1c2d3-e4f5-4678-9012-3456789abcde"/*LocalIpAddress*/,
+      "DefaultValue": "127.0.0.1"
+    },
+    {
+      "Id": "b1c2d3e4-f5a6-4789-0123-456789abcdef"/*Port*/,
+      "DefaultValue": 7070
+    },
+    {
+      "Id": "c2d3e4f5-a6b7-4890-1234-567890abcdef"/*Message*/,
+      "DefaultValue": ""
+    },
+    {
+      "Id": "d3e4f5a6-b7c8-4901-2345-67890abcdef1"/*SendOnChange*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "e4f5a6b7-c8d9-4012-3456-7890abcdef12"/*SendTrigger*/,
+      "DefaultValue": false
+    },
+    {
+      "Id": "f5a6b7c8-d9e0-4123-4567-890abcdef123"/*PrintToLog*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

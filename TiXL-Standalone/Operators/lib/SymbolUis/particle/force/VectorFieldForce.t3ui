@@ -1,0 +1,113 @@
+{
+  "Id": "658b6a44-ff5a-42ca-8673-33874b752004"/*VectorFieldForce*/,
+  "Description": "Applies a vector field to the particle velocity. \n\nNote:  This will constantly pump more energy into your particle velocity. You might need to adjust the ParticleSystem Damp parameter.",
+  "SymbolTags": "8",
+  "InputUis": [
+    {
+      "InputId": "27b2a405-e30c-4bc8-8058-468e6a806bd2"/*Amount*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 531.03577
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "Scale": 0.001
+    },
+    {
+      "InputId": "e095070a-835d-4d48-8ef3-543f1b77168b"/*VectorField*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": 657.7679,
+        "Y": 58.578857
+      }
+    },
+    {
+      "InputId": "fb9d4bfa-6a4e-4647-861a-b8b5a5ca690d"/*Randomize*/,
+      "Position": {
+        "X": 714.5168,
+        "Y": 566.03577
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "22b2566c-b6c6-4afa-8c6f-d4ba1141b914"/*ComputeShader*/,
+      "Position": {
+        "X": 575.8284,
+        "Y": 274.84805
+      }
+    },
+    {
+      "ChildId": "2c6ed2e0-268c-4883-8d1d-c620e35d3501"/*_ExecuteParticleUpdate*/,
+      "Position": {
+        "X": 1134.8295,
+        "Y": 672.7593
+      }
+    },
+    {
+      "ChildId": "530ed577-11b2-4298-91a8-2ec9bf404188"/*FloatsToBuffer*/,
+      "Position": {
+        "X": 854.5168,
+        "Y": 496.03577
+      }
+    },
+    {
+      "ChildId": "9aaf31a7-2129-4e45-89dc-e14fb7f1ae81"/*GetParticleComponents*/,
+      "Position": {
+        "X": 396.6587,
+        "Y": 408.25555
+      }
+    },
+    {
+      "ChildId": "a0299036-d13f-49f7-a105-8bbecee882a3"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 1134.8295,
+        "Y": 427.7593
+      }
+    },
+    {
+      "ChildId": "abf2e118-5f8d-4b8b-8258-3cf6aa9e8aec"/*HasTimeChanged*/,
+      "Position": {
+        "X": 994.8294,
+        "Y": 707.7593
+      }
+    },
+    {
+      "ChildId": "d52a8166-cff4-4745-8bc9-68a74cdbc4ee"/*IntsToBuffer*/,
+      "Position": {
+        "X": 854.5168,
+        "Y": 899.58826
+      }
+    },
+    {
+      "ChildId": "d5737167-dd19-4b50-9fca-59145e2f6c9c"/*CalcDispatchCount*/,
+      "Position": {
+        "X": 785.17255,
+        "Y": 309.84805
+      }
+    },
+    {
+      "ChildId": "fa33fb59-f040-4b8d-8187-78fa5871d15b"/*GenerateShaderGraphCode*/,
+      "Position": {
+        "X": 797.7679,
+        "Y": 58.578857
+      }
+    },
+    {
+      "ChildId": "fe9ebacb-af8c-4b0c-bad4-5457df6073a4"/*ComputeShaderFromSource*/,
+      "Position": {
+        "X": 937.7679,
+        "Y": 58.578857
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "58fdb657-3667-478a-8a6b-8aa8fdf73b08"/*Particles*/,
+      "Position": {
+        "X": 1134.8295,
+        "Y": 742.7593
+      }
+    }
+  ]
+}

@@ -1,0 +1,262 @@
+{
+  "Id": "ec0675d7-6b72-4b15-b141-80bdd2367cd8"/*RandomizePoints*/,
+  "Description": "Smoothly randomizes various point attributes. It's an extremely versatile operator that provides various options of applying the random modifications and can be smoothly animated.\n\nNote:  This is an updated version of [_RandomizePoints_Legacy1]. It supports phase seeds, colors, extends and different randomization methods and an improved BiasGain method.",
+  "SymbolTags": "1",
+  "InputUis": [
+    {
+      "InputId": "002e8e48-2eb3-4450-aa37-e539f1157600"/*ClampColorsEtc*/,
+      "Position": {
+        "X": -285.2865,
+        "Y": 1987.3096
+      }
+    },
+    {
+      "InputId": "0ee3b20d-b11b-4009-b1e4-ba35c1050252"/*Interpolation*/,
+      "Position": {
+        "X": -145.2865,
+        "Y": 1952.3096
+      }
+    },
+    {
+      "InputId": "1e2c9b94-b303-4454-ba08-5246c7336660"/*Stretch*/,
+      "Position": {
+        "X": -288.4453,
+        "Y": 1440.776
+      }
+    },
+    {
+      "InputId": "270bcf23-35ee-4c4f-aae5-192435b1aee3"/*Position*/,
+      "Position": {
+        "X": -288.4453,
+        "Y": 1055.776
+      }
+    },
+    {
+      "InputId": "2cf68ba3-0665-43c8-88ab-64a9fb668ecc"/*Rotation*/,
+      "Position": {
+        "X": -288.4453,
+        "Y": 1160.776
+      },
+      "Min": -90.0,
+      "Max": 90.0,
+      "Scale": 0.1
+    },
+    {
+      "InputId": "4dffb439-da81-477c-8100-34a9ba59b0ee"/*RandomPhase*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1545.776
+      },
+      "GroupTitle": "Seed"
+    },
+    {
+      "InputId": "5282ad12-aacf-4a62-8fde-df0148ab0f1f"/*GainAndBias*/,
+      "Position": {
+        "X": -288.4453,
+        "Y": 1580.776
+      },
+      "GroupTitle": "Distribution",
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true,
+      "Format": "{0:0.000} ×",
+      "UseVec2Control": "BiasAndGain"
+    },
+    {
+      "InputId": "6b60c025-d416-456c-82a2-18b7336d1710"/*F2*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1685.776
+      }
+    },
+    {
+      "InputId": "82384eba-1d7a-41c8-a703-9184c961d766"/*Strength*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1020.776
+      },
+      "GroupTitle": "Randomize",
+      "Min": 0.0,
+      "Max": 10.0,
+      "Format": "{0:0.000} ×"
+    },
+    {
+      "InputId": "95cc6d94-f0d5-4cb4-b1c1-a94270a4f5b8"/*StrengthFactor*/,
+      "Position": {
+        "X": -145.2865,
+        "Y": 2057.3096
+      }
+    },
+    {
+      "InputId": "9b4cc2f7-97f0-4b70-9773-d33ab4b893d1"/*OffsetMode*/,
+      "Position": {
+        "X": -145.2865,
+        "Y": 1882.3096
+      }
+    },
+    {
+      "InputId": "b90a5025-41e0-4bcd-b8d5-764756877dd0"/*Scale*/,
+      "Position": {
+        "X": -148.44534,
+        "Y": 1650.776
+      }
+    },
+    {
+      "InputId": "cb157c8e-98f1-46e9-b197-d17dea896e30"/*Points*/,
+      "Relevancy": "Required",
+      "Position": {
+        "X": -425.00757,
+        "Y": 746.70856
+      }
+    },
+    {
+      "InputId": "dd46595e-01e5-4616-9682-3a4eb7f63016"/*ColorHSB*/,
+      "Position": {
+        "X": -288.4453,
+        "Y": 1300.776
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "e5b7c7b0-a207-44c2-b5d4-ef393c5dccb2"/*F1*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1265.776
+      }
+    },
+    {
+      "InputId": "e86074d8-f77f-4716-9eb9-bb3948c21e68"/*Repeat*/,
+      "Position": {
+        "X": -145.2865,
+        "Y": 2022.3096
+      }
+    },
+    {
+      "InputId": "f06e85cc-a9b7-44c6-9f77-28c422db9f41"/*Space*/,
+      "Position": {
+        "X": -145.2865,
+        "Y": 1917.3096
+      }
+    }
+  ],
+  "SymbolChildUis": [
+    {
+      "ChildId": "3893bec3-9d60-4d5f-866d-88f82f3b533a"/*ComputeShader*/,
+      "Position": {
+        "X": -148.44534,
+        "Y": 631.298
+      }
+    },
+    {
+      "ChildId": "39853341-b0da-4356-84fd-5359b8fc685a"/*GetBufferComponents*/,
+      "Position": {
+        "X": -8.445335,
+        "Y": 868.3137
+      }
+    },
+    {
+      "ChildId": "40c3d6ad-5b01-479d-9d7e-801c887bcca8"/*ComputeShaderStage*/,
+      "Position": {
+        "X": 199.4545,
+        "Y": 634.2387
+      }
+    },
+    {
+      "ChildId": "4d30579c-4ba6-4fcb-86f8-250736c821fd"/*StructuredBufferWithViews*/,
+      "Position": {
+        "X": -8.445335,
+        "Y": 833.3137
+      }
+    },
+    {
+      "ChildId": "74a14f7f-fe23-4a1a-8e93-09c7a31f4138"/*BoolToInt*/,
+      "Position": {
+        "X": -145.2865,
+        "Y": 1987.3096
+      }
+    },
+    {
+      "ChildId": "78cb0c2e-41d9-4587-8a5c-b15b60112547"/*GetBufferComponents*/,
+      "Position": {
+        "X": -285.00757,
+        "Y": 746.70856
+      }
+    },
+    {
+      "ChildId": "84a97ec8-5f05-4b37-a0b8-045ff05590de"/*Vector3Components*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1055.776
+      }
+    },
+    {
+      "ChildId": "8f6a43bc-9b55-487e-a279-83d4f10ea25e"/*Vector2Components*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1580.776
+      }
+    },
+    {
+      "ChildId": "a26813c5-d026-49b7-9015-66613b9a3c09"/*IntsToBuffer*/,
+      "Position": {
+        "X": -5.2865067,
+        "Y": 1882.3096
+      }
+    },
+    {
+      "ChildId": "a7c0b8fd-c4bc-4733-acc9-9b4d187e8a87"/*Vector4Components*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1300.776
+      }
+    },
+    {
+      "ChildId": "adc58824-0f14-4ffa-80e8-57ad9ab9adb8"/*Vector3Components*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1160.776
+      }
+    },
+    {
+      "ChildId": "afaf2228-cf7f-4ab4-97b1-0d7c4a13b231"/*FloatsToBuffer*/,
+      "Position": {
+        "X": -8.445335,
+        "Y": 985.776
+      }
+    },
+    {
+      "ChildId": "f4815e54-b64c-403e-9d62-1f11bc453fe4"/*Vector3Components*/,
+      "Position": {
+        "X": -148.44533,
+        "Y": 1440.776
+      }
+    },
+    {
+      "ChildId": "f504d6a0-6569-4166-adea-4a8de5d6ef33"/*ExecuteBufferUpdate*/,
+      "Position": {
+        "X": 199.4545,
+        "Y": 844.2387
+      }
+    },
+    {
+      "ChildId": "fee0f89f-a3bd-4dca-bcb6-247d6f3528f5"/*CalcDispatchCount*/,
+      "Position": {
+        "X": -8.445335,
+        "Y": 666.298
+      }
+    }
+  ],
+  "OutputUis": [
+    {
+      "OutputId": "172dcbd2-a475-4514-8620-38f07a0ea4aa"/*Output*/,
+      "Position": {
+        "X": 424.65195,
+        "Y": 872.7168
+      }
+    }
+  ]
+}

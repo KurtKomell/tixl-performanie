@@ -1,0 +1,51 @@
+{
+  "Id": "d8010a72-68ac-4fde-9b9d-0984628b8a56"/*AnimFloatList*/,
+  "Inputs": [
+    {
+      "Id": "0042a89e-2cdc-49e5-8366-5f6631fe04ed"/*AllowSpeedFactor*/,
+      "DefaultValue": 0
+    },
+    {
+      "Id": "02ddcf2e-6e4a-48eb-95b2-66e91e2a1a24"/*Phase*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "0846a4b7-2b47-4a05-a6ee-e8628adbceff"/*OffsetNumber*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "10eb53c5-44c7-4e33-ab5a-2025f5ad7d4a"/*Amplitude*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "1d87c85c-c089-4884-b8be-b4229a707a73"/*Offset*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "60ad85b2-eb0e-4b08-9fcc-1f315d1b3f7f"/*Shape*/,
+      "DefaultValue": 1
+    },
+    {
+      "Id": "8159019a-3ef7-44ce-8ebb-a461ff893f0c"/*Ratio*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "9119408b-c753-45ab-b67a-4381d4b0ffa3"/*OffsetCycle*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "a63db03e-fe05-436e-99b8-1b67a5568a32"/*OverrideTime*/,
+      "DefaultValue": 0.0
+    },
+    {
+      "Id": "aff68f72-4c4d-4c38-b223-4c558e87d66d"/*Rate*/,
+      "DefaultValue": 1.0
+    },
+    {
+      "Id": "e05405cf-276f-4433-a5c4-0f2495b054f1"/*Bias*/,
+      "DefaultValue": 0.5
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

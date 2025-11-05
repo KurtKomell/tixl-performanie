@@ -1,0 +1,24 @@
+{
+  "Id": "88926602-4694-4632-9fd7-04c8d6ddd728"/*SetSDFMaterial*/,
+  "Inputs": [
+    {
+      "Id": "7c656067-ef12-4990-b094-7f8160a242d1"/*SdfField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "93d0ee54-b2f6-41ea-bbaa-ef06bca1f1a0"/*ColorField*/,
+      "DefaultValue": null
+    },
+    {
+      "Id": "d2a64234-c7ef-424b-822c-addce0b84e69"/*Color*/,
+      "DefaultValue": {
+        "X": 1.0,
+        "Y": 1.0,
+        "Z": 1.0,
+        "W": 1.0
+      }
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

@@ -1,0 +1,33 @@
+{
+  "Id": "48136477-cb34-416c-a968-7c9d82da9d9b"/*SdfToVector*/,
+  "Description": "Converts an SDF to a direction vector field by sampling the gradient.",
+  "SymbolTags": "72",
+  "InputUis": [
+    {
+      "InputId": "2ea69efd-a01b-4a7f-8f87-31c8dfefcad5"/*LookUpDistance*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Min": -180.0,
+      "Max": 180.0
+    },
+    {
+      "InputId": "d6664c35-040a-4021-ac37-aa7eaaae2b65"/*InputField*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "8055c3e2-0830-4795-ad60-16d8716209fc"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
