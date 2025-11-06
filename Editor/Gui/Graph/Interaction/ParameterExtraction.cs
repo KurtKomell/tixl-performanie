@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
@@ -102,22 +102,27 @@ internal static class ParameterExtraction
     // todo: define this elsewhere so they can be properly hot reloaded
     private static Dictionary<Type, Guid>? _symbolsExtractableFromInputs;
     private static Dictionary<Type, Guid> SymbolsExtractableFromInputs => _symbolsExtractableFromInputs ??=
-                                                                               SymbolPackage.AllPackages
-                                                                                            .SelectMany(package =>
-                                                                                                        {
-                                                                                                            return package.Symbols.Values
-                                                                                                               .Select(x =>
-                                                                                                                {
-                                                                                                                    var typeInfo = package
-                                                                                                                       .AssemblyInformation
-                                                                                                                       .OperatorTypeInfo[x.Id];
-                                                                                                                    return (x, typeInfo);
-                                                                                                                });
-                                                                                                        })
-                                                                                            .Where(x => x.typeInfo.ExtractableTypeInfo.IsExtractable)
-                                                                                            .ToDictionary(x => x.typeInfo.ExtractableTypeInfo.ExtractableType!,
-                                                                                                              x => x.x.Id);
-
+    SymbolPackage.AllPackages
+        .SelectMany(package =>
+            package.Symbols.Values.Select(x =>
+            {
+                var typeInfo = package.AssemblyInformation.OperatorTypeInfo[x.Id];
+                return (x, typeInfo);
+            }))
+        .Where(x => x.typeInfo.ExtractableTypeInfo.IsExtractable)
+        .GroupBy(x => x.typeInfo.ExtractableTypeInfo.ExtractableType!)
+        .Where(group => group.Count() > 1) // Nur Gruppen mit Duplikaten
+        .SelectMany(group =>
+        {
+            Console.WriteLine($"Duplicate ExtractableType: {group.Key}");
+            foreach (var item in group)
+            {
+                Console.WriteLine($" - Symbol ID: {item.x.Id}");
+            }
+            return group; // Rückgabe der Gruppe für die weitere Verarbeitung
+        })
+        .ToDictionary(x => x.typeInfo.ExtractableTypeInfo.ExtractableType!, x => x.x.Id);
+  
 }
 
 

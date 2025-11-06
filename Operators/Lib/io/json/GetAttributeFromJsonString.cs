@@ -95,4 +95,6 @@ internal sealed class GetAttributeFromJsonString : Instance<GetAttributeFromJson
     }
         
     private string _lastStatusError;
+
+
 }
