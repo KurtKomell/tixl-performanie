@@ -3,8 +3,10 @@ using System.Threading;
 using DirectShowLib;
 using OpenCvSharp;
 using SharpDX;
+using Newtonsoft.Json;
 using Device = SharpDX.Direct3D11.Device;
 using FormatType = DirectShowLib.FormatType;
+using Lib.io.file;
 
 namespace Lib.io.video;
 
@@ -88,9 +90,14 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     // Transformation cache
     private Mat _transformationMatrix;
     private int _width;
+    private string grundpath;
+    private Settings settings;
 
     public VideoDeviceInput()
     {
+        grundpath = (Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Performanie"));
+        var json = File.ReadAllText(Path.Combine(grundpath, "settings.pers"));
+        settings  = JsonConvert.DeserializeObject<Settings>(json);
         Texture.UpdateAction = Update;
         UpdateCount.UpdateAction = Update;
         Resolution.UpdateAction = Update;
@@ -106,7 +113,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     {
         ScanWebCamDevices();
 
-        var deviceName = InputDeviceName.GetValue(context);
+        var deviceName = settings.Camera;
+        InputDeviceName.Value = settings.Camera;
         if (string.IsNullOrEmpty(deviceName) && _webcamWithIndices?.Count > 0)
         {
             deviceName = _webcamWithIndices[0].Name;
@@ -736,4 +744,101 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
 
     public sealed record WebcamWithIndex(string Name, int Index);
     #endregion
+
+    public class ResolutionCamera
+    {
+        public int Width { get; set; }
+
+        public int Height { get; set; }
+
+        public double FPS { get; set; }
+
+        public ResolutionCamera(int width, int height, double fps)
+        {
+            Width = width;
+            Height = height;
+            FPS = fps;
+        }
+    }
+
+    public enum TransitionMode
+    {
+        Key,
+        Automatic,
+        Cursor
+    }
+
+    public class DropdownDataForms
+    {
+        public string[] Options { get; set; }
+
+        public int Field { get; set; }
+        public int SelectedIndex { get; set; }
+
+        public bool ShowTextInput { get; set; }
+
+        public string TextInput { get; set; }
+
+        public bool SpoutEnabled { get; set; }
+        public string SpoutInput { get; set; }
+
+        [JsonConstructor]
+        public DropdownDataForms(string[] options, int field, int selectedIndex, bool showTextInput, string textInput, bool spoutEnabled, string spoutInput)
+        {
+            Options = options;
+            Field = field;
+            SelectedIndex = selectedIndex;
+            ShowTextInput = showTextInput;
+            SpoutEnabled = spoutEnabled;
+            SpoutInput = spoutInput;
+            TextInput = textInput;
+
+        }
+    }
+    public class Settings
+    {
+        public bool IsWindowed { get; set; }
+
+        public string AudioDevice { get; set; }
+        public int GrafikDevice { get; set; }
+
+        public int ResolutionWidth { get; set; }
+        public int ResolutionHeight { get; set; }
+        public TransitionMode Transitionmode { get; set; }
+
+        public bool AutoselectedScreenInput { get; set; }
+
+        public bool AutoSelectedAudioInput { get; set; }
+
+        public int AudioInputIndex { get; set; }
+
+        public string IndexNames { get; set; }
+
+        public float Time { get; set; }
+
+        public string IndexRoot { get; set; }
+
+        public string Camera { get; set; }
+
+        public ResolutionCamera CameraResolution { get; set; }
+
+        [JsonConstructor]
+        public Settings(bool isWindowed, string audioDevice, int grafikDevice, int resolutionwidth, int resolutionheight, TransitionMode transitionmode, bool autoselectedscreeninput, bool autoselectedaudioinput, int audioinputindex, string indexnames, float time, string indexroot, string camera, ResolutionCamera cameraresolution)
+        {
+            IsWindowed = isWindowed;
+            AudioDevice = audioDevice;
+            GrafikDevice = grafikDevice;
+            ResolutionWidth = resolutionwidth;
+            ResolutionHeight = resolutionheight;
+            Transitionmode = transitionmode;
+            AutoselectedScreenInput = autoselectedscreeninput;
+            AutoSelectedAudioInput = autoselectedaudioinput;
+            AudioInputIndex = audioinputindex;
+            IndexNames = indexnames;
+            Time = time;
+            IndexRoot = indexroot;
+            Camera = camera;
+            CameraResolution = cameraresolution;
+        }
+    }
 }

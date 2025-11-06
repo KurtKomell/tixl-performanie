@@ -87,6 +87,15 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
+    <ItemGroup>
+        <PlayerFiles Include=".\..\Player\**\*" />
+    </ItemGroup>
+
+    <Target Name="CopyPlayerToDebug" AfterTargets="AfterBuild">
+        <Copy SourceFiles="@(PlayerFiles)"
+              DestinationFolder="$(OutputPath)\Player\%(RecursiveDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
     <!-- =================================//===================================== -->
 
 
@@ -149,6 +158,7 @@
         <PackageNames Include="ndi" />
         <!-- Add more as needed -->
     </ItemGroup>
+   
     <PropertyGroup>
         <OperatorDirectoryName>Operators</OperatorDirectoryName>
     </PropertyGroup>
@@ -167,7 +177,7 @@
             <SourceDir>$(SolutionDir)$(ParentFolder)/$(PackageName)</SourceDir>
             <DestinationDir>$(OutputPath)/$(OperatorDirectoryName)</DestinationDir>
         </PropertyGroup>
-
+        
         <Message Importance="high" Text="Attempting to copy $(PackageName)..." />
 
         <!-- Use XmlPeek to extract the version from the csproj file of the package -->
