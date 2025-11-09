@@ -13,7 +13,7 @@ namespace T3.Core.Resource;
 
 public abstract partial class ShaderCompiler
 {
-    internal static bool TryCompileShaderFromSource<TShader>(ShaderCompilationArgs args, bool useCache,
+    public static bool TryCompileShaderFromSource<TShader>(ShaderCompilationArgs args, bool useCache,
                                                              bool forceRecompile, [NotNullWhen(true)] out TShader? shader, out string reason)
         where TShader : AbstractShader
     {

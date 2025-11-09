@@ -82,7 +82,7 @@ public partial class Program
             if (hasTextureOutput)
             {
                 textureOutput.Invalidate();
-                textureOutput.GetValue(context); // why is this done twice?
+                /*textureOutput.GetValue(context);*/ // why is this done twice?
 
                 if (textureOutput.GetValue(context) == null)
                 {

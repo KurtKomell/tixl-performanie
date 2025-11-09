@@ -56,7 +56,7 @@ public partial class Symbol
 
         public Dictionary<Guid, Input> Inputs { get; private init; } = new();
         public Dictionary<Guid, Output> Outputs { get; private init; } = new(); 
-        internal IEnumerable<Instance> Instances
+        public IEnumerable<Instance> Instances
         {
             get
             {
@@ -373,7 +373,7 @@ public partial class Symbol
             }
         }
 
-        internal void Dispose()
+        public void Dispose()
         {
             DestroyAndClearAllInstances(null);
             lock (_creationLock)

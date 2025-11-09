@@ -129,6 +129,7 @@ public abstract partial class SymbolPackage : IResourcePackage
             {
                 var id = symbol.Id;
                 SymbolDict.Remove(id, out _);
+                symbol.Dispose();
             }
         }
     }

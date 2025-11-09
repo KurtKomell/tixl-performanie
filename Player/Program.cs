@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using NuGet.Configuration;
 using Operators.Utils;
 using Rug.Osc;
+using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -27,6 +28,7 @@ using System.Windows.Forms;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Compilation;
+using T3.Core.DataTypes;
 using T3.Core.DataTypes.Vector;
 using T3.Core.IO;
 using T3.Core.Logging;
@@ -88,6 +90,7 @@ public partial class Program
         CoreUi.Instance = null;
         fileWriter = null;
         ShaderCompiler.ResetShaderCacheSubdirectory();
+
         CoreUi.Instance = new MsForms.MsForms();
         BlockingWindow.Instance = new SilkWindowProvider();
         exportSettings = null;
@@ -301,7 +304,7 @@ public partial class Program
                     StartPosition = FormStartPosition.Manual,
                    FormBorderStyle = FormBorderStyle.Sizable,
                    WindowState = FormWindowState.Normal,
-                    Location = new Point(monitorBounds.X, monitorBounds.Y),
+                    Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y),
                     ClientSize = new Size(
                     Math.Min(monitorBounds.Width, _resolvedOptions.Width),
                     Math.Min(monitorBounds.Height, _resolvedOptions.Height)),
@@ -691,9 +694,10 @@ public partial class Program
                 _outputTexture.Dispose();
                 _outputTexture = null;
                 _outputTextureSrv.Resource.Dispose();
+                //Utilities.Dispose(ref _outputTextureSrv);
                 _outputTextureSrv.Dispose();
                 _outputTextureSrv = null;
-                
+
 
 
                 _project = null;
@@ -701,7 +705,9 @@ public partial class Program
                 _textureOutput = null;
                 
                 //SharedResources.Dispose();
+
                 ShaderCompiler.Shutdown();
+                ShaderCompiler.Instance = null;
                 ResourceManager.DefaultSamplerState.Dispose();
                 
                 SharedResources.Dispose();
@@ -716,41 +722,59 @@ public partial class Program
                 _evalContext.IntVariables.Clear();
                 _evalContext.ObjectVariables.Clear();
 
+        
                 //foreach (var symbol in demoSymbol.SymbolPackage.Symbols.Values)
                 //{
-                //    Guid guid = new Guid("f89c1f31-5c8c-433a-a733-6b83368099f7");
-                //    Guid guid2 = new Guid("9a694126-ad60-4f52-b393-bdc3608c97c6");
-                //    foreach (var child in symbol.Children)
-                //    {
-
-                //        if (child. == symbol.Id || child.Key == guid2)
+                //        if (symbol.InstanceType.Name == "Bubbles")
                 //        {
-
-                //            (child.Symbol var deconstruct, out var deconstructkey);
-
-
-                //            Console.WriteLine($"Child Deconstructed  {deconstruct}");
-
-                //            //if (instance is )
-                //            //{
-                //            //    instance.meshBufferReference.; // Zugriff auf MeshBuffers
-                //            //    Console.WriteLine($"MeshBufferReference: {meshBufferReference}");
-                //            //}
-                //            //else
-                //            //{
-                //            //    Console.WriteLine("Die Instanz ist nicht vom Typ LoadGltfScene.");
-                //            //}
-
-                //            //symbol.meshBufferReference()?.Dispose();
+                //        foreach (var child in symbol.Children)
+                //        {
+                //            //Console.WriteLine(child.Value);
+                //            if (child.Value.Symbol.InstanceType.Name == "DrawMeshAtPoints")
+                //            {
+                //                foreach (var instance in child.Value.Symbol.InstancesOfSelf)
+                //                {
+                //                    foreach (var childsymbol in instance.Symbol.Children.Values)
+                //                    {
+                //                        //Console.WriteLine(childsymbol.ReadableName);
+                                      
+                //                        {
+                //                            foreach (var inst in childsymbol.Instances)
+                //                            {
+                //                                Console.WriteLine(inst.Symbol.InstanceType.Name);
+                                               
+                //                                    inst.Symbol.Dispose();
+                //                                    //Console.WriteLine("Disposed MeshBuffers instance");
+                                                
+                //                            }
+                //                           //if (childsymbol.IsDisabled)
+                //                           // {
+                //                           //     Console.WriteLine("Disposed disabled childsymbol");
+                //                           // }
+                //                            //if (childinst.Value.Symbol.InstanceType.Name == "MeshBuffers")
+                //                            //{
+                //                            //    foreach (var meshInstance in childinst.Value.Symbol.InstancesOfSelf)
+                //                            //    {
+                //                            //        //if (meshInstance is MeshBuffers meshBuffers)
+                //                            //        //{
+                //                            //        //    meshBuffers.Dispose();
+                //                            //        //    Console.WriteLine("Disposed MeshBuffers instance");
+                //                            //        //}
+                //                            //    }
+                //                            //}
+                //                        }
+                //                    }
+                //                }
+                //            }
                 //        }
-                //        //Console.WriteLine($"Child Symbol: {child.Value} with ID: {child.Key}");
-                //    }
 
-                //    //in Dispose of each symbol
-                //    symbol.Dispose();
-                //    Console.WriteLine(symbol.Name);
+                //        }// Erstelle eine Instanz von SceneSetup oder führe die gewünschte Aktion aus
+                //            //var sceneSetup = (MeshBuffers)symbol.InstancesOfSelf;
+                //            //sceneSetup.Dispose();
+                //            //Console.WriteLine($"Disposed SceneSetup for child with ID: {child.Key}");
+                        
+                    
                 //}
-                ;
                 demoSymbol.SymbolPackage.Dispose();
                 demoSymbol.Dispose();
                 
@@ -775,10 +799,30 @@ public partial class Program
                 _backBuffer = null;
                 _evalContext = null;
                 // ConstantBuffer für VertexShader zurücksetzen
+                for (int i = 0; i < 14; i++)
+                {
+                    _deviceContext.VertexShader.SetConstantBuffer(i, null);
+                    _deviceContext.PixelShader.SetConstantBuffer(i, null);
+                }
+
                 
+                IterateConstantBufferSlots(_deviceContext);
+                //_deviceContext.ComputeShader.Dispose();
+                //_deviceContext.ComputeShader.Set(null);
+                //_deviceContext.DomainShader.Dispose();
+                //_deviceContext.DomainShader.Set(null);
+                //_deviceContext.HullShader.Dispose();
+                //_deviceContext.HullShader.Set(null);
+                //_deviceContext.GeometryShader.Dispose();
+                //_deviceContext.GeometryShader.Set(null);
+                //_deviceContext.PixelShader.Dispose();
+                //_deviceContext.PixelShader.Set(null);
+                //_deviceContext.VertexShader.Dispose();
+                //_deviceContext.VertexShader.Set(null);
                 _deviceContext?.ClearState();
                 _deviceContext?.Flush();
                 _deviceContext?.Dispose();
+                _deviceContext = null;
                 //_device?.Dispose();
                 //_device = null;
 
@@ -857,7 +901,37 @@ public partial class Program
         return true;
     }
 
-  
+    private static void IterateConstantBufferSlots(DeviceContext deviceContext)
+    {
+         // Maximale Anzahl der Slots (abhängig von der GPU, z. B. 14 für DirectX 11)
+
+        
+            // Hole den Constant Buffer für den aktuellen Slot
+            var constantBuffers = deviceContext.VertexShader.GetConstantBuffers(0, 14);
+        foreach (SharpDX.Direct3D11.Buffer constantBuffer in constantBuffers)
+        {
+            if (constantBuffer != null)
+            {
+                
+                // Hier kannst du weitere Informationen über den Buffer abrufen
+                constantBuffer.Dispose(); // Optional: Dispose, wenn nicht mehr benötigt
+              
+            }
+           
+        }
+        var pixelConstantBuffers = deviceContext.PixelShader.GetConstantBuffers(0, 14);
+        foreach (SharpDX.Direct3D11.Buffer constantBuffer in pixelConstantBuffers)
+        {
+            if (constantBuffer != null)
+            {
+                
+                // Hier kannst du weitere Informationen über den Buffer abrufen
+                constantBuffer.Dispose(); // Optional: Dispose, wenn nicht mehr benötigt
+                
+            }
+
+        }
+    }
 
     private readonly struct PackageLoadInfo(
         PlayerSymbolPackage package,

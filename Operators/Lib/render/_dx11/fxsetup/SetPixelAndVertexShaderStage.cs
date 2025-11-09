@@ -38,7 +38,7 @@ internal sealed class SetPixelAndVertexShaderStage : Instance<SetPixelAndVertexS
         // ... then add updated resources. 
         GetAdditionalResources(context);
         
-        if (vs != null)
+        if (vs != null )
         {
             vsStage.Set(vs);
             vsStage.SetSamplers(0, _samplerStates.Length, _samplerStates);

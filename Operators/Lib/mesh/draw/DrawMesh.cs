@@ -21,6 +21,7 @@ internal sealed class DrawMesh : Instance<DrawMesh>, ICustomDropdownHolder, ICom
         {
             _pbrMaterials.Clear();
             _pbrMaterials.AddRange(context.Materials);
+            Log.Debug($"DrawMesh found {context.Materials.Count} materials in context");
         }
 
         var previousMaterial = context.PbrMaterial;
