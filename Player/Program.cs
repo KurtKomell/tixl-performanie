@@ -860,6 +860,17 @@ public partial class Program
         rtv = new RenderTargetView(device, buffer);
     }
 
+    public void Dispose()
+    {
+        if (_renderForm.InvokeRequired)
+        {
+            _renderForm.Invoke((Action)(() => _renderForm.Close()));
+        }
+        else
+        {
+            _renderForm.Close();
+        }
+    }   
     private static bool TryResolveOptions(string[] args, ExportSettings exportSettings, out Options resolvedOptions)
     {
 
