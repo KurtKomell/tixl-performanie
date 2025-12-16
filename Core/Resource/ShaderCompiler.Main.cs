@@ -14,7 +14,7 @@ namespace T3.Core.Resource;
 public abstract partial class ShaderCompiler
 {
     public static bool TryCompileShaderFromSource<TShader>(ShaderCompilationArgs args, bool useCache,
-                                                             bool forceRecompile, [NotNullWhen(true)] out TShader? shader, out string reason)
+                                                             bool forceRecompile, [NotNullWhen(false)] out TShader? shader, out string reason)
         where TShader : AbstractShader
     {
         var includes = GetIncludesFrom(args.SourceCode);
@@ -85,7 +85,7 @@ public abstract partial class ShaderCompiler
         shader = null;
         return false;
 
-        static bool TryLoadCached(ulong hash, [NotNullWhen(true)] out byte[]? compiledBlob, out string reason)
+        static bool TryLoadCached(ulong hash, [NotNullWhen(false)] out byte[]? compiledBlob, out string reason)
         {
             if (_shaderBytecodeCache.TryGetValue(hash, out compiledBlob))
             {

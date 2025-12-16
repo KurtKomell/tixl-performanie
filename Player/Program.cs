@@ -15,6 +15,7 @@ using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Windows;
+using Silk.NET.Core.Contexts;
 using SilkWindows;
 using System;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -52,6 +54,7 @@ using Resource = SharpDX.Direct3D11.Resource;
 using ResourceManager = T3.Core.Resource.ResourceManager;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 using VertexShader = T3.Core.DataTypes.VertexShader;
+
 
 namespace T3.Player;
 public partial class Program
@@ -110,9 +113,10 @@ public partial class Program
         OscConnectionManager.RegisterConsumer(_oscHandler, oscPort);
 
         Console.WriteLine($"OSC-Handler auf Port {oscPort} registriert.");
-        
+
         
 
+        
 
         //Adapterrating
         using var factory = new Factory1();
@@ -527,9 +531,14 @@ public partial class Program
                 Log.Debug("Creating new srv...");
                 _outputTextureSrv = new ShaderResourceView(_device, _backBuffer);
             }
+           
+            //Guid spoutGuid = Guid.Parse("13be1e3f-861d-4350-a94e-e083637b3e55");
+            //var spoutOutputInstance = _project.Children.FirstOrDefault(child => child.Value.Symbol.Id == spoutGuid);
+            
 
-          
 
+
+                
             _evalContext = new EvaluationContext();
             _evalContext.RequestedResolution = _resolution;
             _evalContext.PointLights.Clear();
@@ -682,7 +691,38 @@ public partial class Program
             try
             {
                 args.ToList().Clear();
+             
                 exportSettings = null;
+                Guid spoutGuid = Guid.Parse("13be1e3f-861d-4350-a94e-e083637b3e55");
+                var spoutSymbolChild = _project.Children.SingleOrDefault(child => child.Value.Symbol.Id == spoutGuid);
+                if (spoutSymbolChild.Value != null)
+                {
+                    // Die Instanz selbst holen und deren Dispose-Methode aufrufen
+                    spoutSymbolChild.Value.Symbol.Dispose();
+                    Console.WriteLine("Disposed SpoutOutput instance and its resources.");
+                }
+
+                //var spoutOutputInstance = _project.Children.FirstOrDefault(child => child.Value.Symbol.Id == spoutGuid);
+                //if (spoutOutputInstance.Value != null)
+                //{
+                //    // Die `Value` sollte die Instanz der Klasse sein, die Spout enthält
+                //    var spoutObject = spoutOutputInstance.Value.Symbol;
+                //    foreach (var child in spoutObject.Children)
+                //    {
+                //        foreach (var instance in child.Value.Symbol.InstancesOfSelf)
+                //        {
+                //            instance.Symbol.Dispose();
+                //        }
+                //        child.Value.Symbol.Dispose();
+                //    }
+
+                //    // ZUERST: Geben Sie das SpoutOutput-Objekt selbst frei
+                //    spoutObject.Dispose();
+                //    spoutObject = null;
+                //    Console.WriteLine("Disposed SpoutOutput Symbol");
+
+                //    // ZWEITENS (optional, aber gut): Geben Sie die Kinder frei
+                //}
                 _fullScreenPixelShaderResource.Value.Dispose();
                 _fullScreenPixelShaderResource.Dispose();
                 _fullScreenPixelShaderResource = null;
@@ -804,7 +844,7 @@ public partial class Program
                     _deviceContext.VertexShader.SetConstantBuffer(i, null);
                     _deviceContext.PixelShader.SetConstantBuffer(i, null);
                 }
-
+                
                 
                 IterateConstantBufferSlots(_deviceContext);
                 //_deviceContext.ComputeShader.Dispose();
@@ -823,6 +863,7 @@ public partial class Program
                 _deviceContext?.Flush();
                 _deviceContext?.Dispose();
                 _deviceContext = null;
+                
                 //_device?.Dispose();
                 //_device = null;
 
@@ -944,6 +985,99 @@ public partial class Program
         }
     }
 
+    private static void SwitchToMonitor(nint monitorHandle, bool windowed)
+    {
+        bool windowed2 = windowed;
+        if (_renderForm == null)
+            return;
+
+        using var factory = new Factory1();
+        Rectangle monitorBounds = Rectangle.Empty;
+
+        for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
+        {
+            using var adapter = factory.GetAdapter1(adapterIndex);
+            for (int outputIndex = 0; outputIndex < adapter.GetOutputCount(); outputIndex++)
+            {
+                using var output = adapter.GetOutput(outputIndex);
+                if (output.Description.MonitorHandle == monitorHandle)
+                {
+                    monitorBounds = new Rectangle(
+                                                  output.Description.DesktopBounds.Left,
+                                                  output.Description.DesktopBounds.Top,
+                                                  output.Description.DesktopBounds.Right - output.Description.DesktopBounds.Left,
+                                                  output.Description.DesktopBounds.Bottom - output.Description.DesktopBounds.Top
+                                                 );
+                    goto FoundMonitor;
+                }
+            }
+        }
+
+    FoundMonitor:
+        if (monitorBounds == Rectangle.Empty)
+        {
+            Log.Warning($"Could not find monitor with handle {monitorHandle}.");
+            return;
+        }
+
+        Log.Debug($"Switching to monitor {monitorHandle} at {monitorBounds.Location}.");
+
+        // Wichtig: UI-Änderungen müssen im UI-Thread ausgeführt werden.
+        _renderForm.Invoke(new Action(() =>
+        {
+            if (windowed2)
+            {
+                _renderForm.WindowState = FormWindowState.Normal;
+                _renderForm.FormBorderStyle = FormBorderStyle.Sizable;
+                _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
+                _renderForm.ClientSize = new Size(
+                                                  Math.Min(monitorBounds.Width, _resolvedOptions.Width),
+                                                  Math.Min(monitorBounds.Height, _resolvedOptions.Height));
+            }
+            else
+            {
+                // Um den Vollbildmodus auf einem anderen Monitor zu erzwingen,
+                // müssen wir das Fenster zuerst in den normalen Zustand versetzen.
+                _renderForm.WindowState = FormWindowState.Normal;
+                _renderForm.FormBorderStyle = FormBorderStyle.None;
+                _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
+                _renderForm.Size = new Size(monitorBounds.Width, monitorBounds.Height);
+                _renderForm.WindowState = FormWindowState.Maximized;
+            }
+        }));
+    }
+    private static void SwitchAudioInputDevice(int deviceIndex)
+    {
+        if (_playback == null)
+        {
+            Log.Warning("Playback not initialized. Cannot switch audio device.");
+            return;
+        }
+
+        string newDeviceName = null;
+        if (deviceIndex >= 0 && deviceIndex < WasapiAudioInput._inputDevices.Count)
+        {
+            newDeviceName = WasapiAudioInput._inputDevices[deviceIndex].DeviceInfo.Name;
+            Log.Debug($"Attempting to switch audio input to index {deviceIndex}: '{newDeviceName}'");
+        }
+        else
+        {
+            Log.Warning($"Invalid audio device index received: {deviceIndex}. Not switching.");
+            return;
+        }
+
+        if (_playback.Settings.AudioInputDeviceName == newDeviceName)
+        {
+            Log.Debug($"Audio device '{newDeviceName}' is already active.");
+            return;
+        }
+
+        _playback.Settings.AudioInputDeviceName = newDeviceName;
+        Bass.Free();
+        Bass.Init();
+        // We need to re-initialize the audio input to apply the change.
+        //AudioEngine.ReinitializeAudioInput();
+    }
     private readonly struct PackageLoadInfo(
         PlayerSymbolPackage package,
         List<SymbolJson.SymbolReadResult> newlyLoadedSymbols)
@@ -1004,12 +1138,46 @@ public partial class Program
         {
             // Verarbeiten der empfangenen OSC-Nachricht
             Console.WriteLine($"Empfangene OSC-Nachricht: {msg.Address}");
-            foreach (var arg in msg)
+            switch (msg.Address)
             {
-                Console.WriteLine($"Argument: {arg}");
+                case "/performanie/monitorHandle":
+                    if (msg.Count > 0 && msg[0] is string monitorHandleStr && nint.TryParse(monitorHandleStr, out nint handle))
+                    {
+                        _resolvedOptions.MonitorHandle = (int)handle;
+                        SwitchToMonitor(handle, _resolvedOptions.Windowed);
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/monitorhandle: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/windowed":
+                    if (msg.Count > 0 && msg[0] is string windowedStr && bool.TryParse(windowedStr, out bool isWindowed))
+                    {
+                        _resolvedOptions.Windowed = isWindowed;
+                        SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, isWindowed);
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/windowed: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/audiodevice":
+                    if (msg.Count > 0 && msg[0] is string audioIndexStr && int.TryParse(audioIndexStr, out int audioIndex))
+                    {
+                        audioDeviceIndex = audioIndex;
+                        SwitchAudioInputDevice(audioIndex);
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/audioinput: {msg[0]}");
+                    }
+                    break;
             }
         }
     }
     private static OscMessageHandler _oscHandler;
-}
+};
     

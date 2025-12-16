@@ -10,9 +10,10 @@ using T3.Core.Operator;
 using T3.Core.Operator.Attributes;
 using T3.Core.Operator.Slots;
 using T3.Core.Resource;
+using static OpenGL.Gl;
 using DeviceContext = OpenGL.DeviceContext;
-using Resource = SharpDX.DXGI.Resource;
 using DXTexture2D = SharpDX.Direct3D11.Texture2D;
+using Resource = SharpDX.DXGI.Resource;
 
 namespace Lib.io.video;
 

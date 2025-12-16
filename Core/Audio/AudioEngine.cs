@@ -5,6 +5,8 @@ using ManagedBass;
 using T3.Core.Animation;
 using T3.Core.IO;
 using T3.Core.Operator;
+using T3.Core.Logging;
+
 
 namespace T3.Core.Audio;
 
@@ -166,8 +168,21 @@ public static class AudioEngine
         return info.Frequency;
     }
 
+    // In T3.Core/Audio/AudioEngine.cs (Diese Datei müssen Sie eventuell öffnen)
+    public static void ReinitializeAudioInput()
+    {
+        if (_wasapiAudioInput is IDisposable disposable)
+        {
+            disposable.Dispose();
+            Log.Debug("Disposed old WasapiAudioInput for re-initialization.");
+        }
+        _wasapiAudioInput = null;
+        // The audio input will be automatically re-created on the next `CompleteFrame` call.
+    }
+
     private static double _lastPlaybackSpeed = 1;
     private static bool _bassInitialized;
+    private static object? _wasapiAudioInput;
     internal static readonly Dictionary<AudioClipResourceHandle, AudioClipStream> ClipStreams = new();
     private static readonly Dictionary<AudioClipResourceHandle, double> _updatedClipTimes = new();
 

@@ -20,6 +20,7 @@ public class SpoutOutput : Instance<SpoutOutput>
         }
         TextureOutput.UpdateAction = Update;
         _instance++;
+        Console.WriteLine($"SpoutOutput instances: {_instance}");
     }
 
     private void Update(EvaluationContext context)
@@ -60,7 +61,9 @@ public class SpoutOutput : Instance<SpoutOutput>
         if (!_initialized)
         {
             // create OpenGL context and make this become the primary context
-            _deviceContext = DeviceContext.Create();
+
+            //_deviceContext?.MakeCurrent(IntPtr.Zero);
+                _deviceContext = DeviceContext.Create();
             _glContext = DeviceContext.GetCurrentContext();
             if (_glContext == IntPtr.Zero)
             {
@@ -258,9 +261,17 @@ public class SpoutOutput : Instance<SpoutOutput>
 
         if (_instance <= 0)
         {
+            
             _device?.Dispose();
+            var apis = _deviceContext.AvailableAPIs;
+            foreach (var api in apis)
+                Console.WriteLine($"Available API: {api}");
+            //_deviceContext.DeleteContext(_glContext);
             _deviceContext?.MakeCurrent(IntPtr.Zero);
             _deviceContext?.Dispose();
+            _deviceContext = null;
+            _glContext = IntPtr.Zero;
+            Console.WriteLine($"SpoutOutput instances: {_instance} is disposed");
             _initialized = false;
         }
     }

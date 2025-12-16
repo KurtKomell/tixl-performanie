@@ -854,14 +854,14 @@ namespace SpoutDX
         }
 
         // DEBUG: bool ReceiveTexture()
-        public bool ReceiveTexture()
+        public bool ReceiveTexture(/*uint spoutTextureId, uint texture2D*/)
         {
             var ___ret = __Internal.ReceiveTexture(__Instance);
             return ___ret;
         }
 
         // DEBUG: bool ReceiveTexture(ID3D11Texture2D** ppTexture)
-        public bool ReceiveTexture(global::SpoutDX.ID3D11Texture2D ppTexture)
+        public bool ReceiveTexture(uint spoutTextureId, global::SpoutDX.ID3D11Texture2D ppTexture)
         {
             var ____arg0 = ppTexture is null ? __IntPtr.Zero : ppTexture.__Instance;
             var __arg0 = new __IntPtr(&____arg0);
@@ -33466,7 +33466,7 @@ namespace SpoutDX
 
         protected bool __ownsNativeInstance;
 
-        internal static ID3D11Device __CreateInstance(__IntPtr native, bool skipVTables = false)
+        public static ID3D11Device __CreateInstance(__IntPtr native, bool skipVTables = false)
         {
             if (native == __IntPtr.Zero)
                 return null;
