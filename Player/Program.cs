@@ -614,10 +614,21 @@ public partial class Program
                     keyInPlayer = e.KeyCode.ToString();
 
                     // Anwendung schließen, wenn die Escape-Taste gedrückt wird
-                    if (e.KeyCode == System.Windows.Forms.Keys.Escape && sender == _renderForm)
+                    if (e.Control && e.KeyCode == System.Windows.Forms.Keys.F && sender == _renderForm)
                     {
-                        _renderForm.Close();
+                        if (!_resolvedOptions.Windowed)
+                        {
+                            _resolvedOptions.Windowed = true;
+                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed);
+                        }
+                        else
+                        {
+                            _resolvedOptions.Windowed = false;
+                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed);
+                        }
                     }
+                         
+                    
                 }
             };
 
@@ -886,9 +897,9 @@ public partial class Program
             {
                 CoreUi.Instance.OpenWithDefaultApplication(logPath);
             }
-            
+
             //CoreUi.Instance.Shutdown();
-            //CoreUi.Instance.ExitApplication();
+            Environment.Exit(0);
         }
     }
 
@@ -1073,10 +1084,13 @@ public partial class Program
         }
 
         _playback.Settings.AudioInputDeviceName = newDeviceName;
-        Bass.Free();
-        Bass.Init();
+        //Bass.Free();
+        //Bass.Init();
+
+        
+
         // We need to re-initialize the audio input to apply the change.
-        //AudioEngine.ReinitializeAudioInput();
+        AudioEngine.ReinitializeAudioInput();
     }
     private readonly struct PackageLoadInfo(
         PlayerSymbolPackage package,
@@ -1137,7 +1151,7 @@ public partial class Program
         public void ProcessMessage(OscMessage msg)
         {
             // Verarbeiten der empfangenen OSC-Nachricht
-            Console.WriteLine($"Empfangene OSC-Nachricht: {msg.Address}");
+            //Console.WriteLine($"Empfangene OSC-Nachricht: {msg.Address}");
             switch (msg.Address)
             {
                 case "/performanie/monitorHandle":

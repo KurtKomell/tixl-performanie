@@ -1,8 +1,14 @@
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.RegularExpressions;
 using Operators.Utils;
 using Rug.Osc;
+using T3.Core.DataTypes;
+using T3.Core.Operator;
+using T3.Core.Operator.Attributes;
+using T3.Core.Operator.Slots;
+using T3.Core.Utils;
 
 namespace Lib.io.osc;
 
@@ -18,10 +24,14 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
     [Output(Guid = "3291E15A-1900-4252-8591-D016281527F0", DirtyFlagTrigger = DirtyFlagTrigger.Animated)]
     public readonly Slot<bool> WasTrigger = new();
 
+    [Output(Guid = "e639c851-cccc-47c2-aa73-0f84c6f822c0", DirtyFlagTrigger = DirtyFlagTrigger.Always)]
+    public readonly Slot<string> Result = new();
+
     public OscInput()
     {
         Values.UpdateAction += Update;
         Contents.UpdateAction += Update;
+        Result.UpdateAction += Update;
 
         WasTrigger.UpdateAction += AnimatedUpdate;
     }
@@ -32,10 +42,10 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
 
     private void Update(EvaluationContext context)
     {
-        if (Math.Abs(_lastUpdateFrame - context.LocalFxTime) < 0.001f)
-            return;
+        //if (Math.Abs(_lastUpdateFrame - context.LocalFxTime) < 0.001f)
+        //    return;
 
-        _lastUpdateFrame = context.LocalFxTime;
+        //_lastUpdateFrame = context.LocalFxTime;
 
         var shouldClear = false;
 
@@ -145,17 +155,29 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
         _printLogMessages = PrintLogMessages.GetValue(context);
 
         Values.Value = _collectedFloatResults;
+        
+        lock (_lastMessageContent)
+        {
+            if (shouldClear)
+            {
+                _lastMessageContent = string.Empty;
+            }
+            Result.Value = _lastMessageContent;
+        }
 
         lock (_valuesByKeys)
         {
             if (shouldClear)
+            {
                 _valuesByKeys.Clear();
+            }
 
             Contents.Value = _valuesByKeys;
         }
 
-        Values.DirtyFlag.Clear();
-        Contents.DirtyFlag.Clear();
+        //Values.DirtyFlag.Clear();
+        //Contents.DirtyFlag.Clear();
+        //Result.DirtyFlag.Clear();
     }
 
     /// <summary>
@@ -234,17 +256,43 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
     {
         Contents.DirtyFlag.Invalidate();
         Values.DirtyFlag.Invalidate();
+        Result.DirtyFlag.Invalidate();
         _wasTrigger = true;
     }
 
     private bool ParseMessages(OscMessage m)
     {
+        switch (m.Address)
+        {
+            case "/string/spout" when _address == "/string/spout":
+                if (m.Count > 0 && m[0] is string spoutreceiver)
+                {
+                    _lastMessageContent = spoutreceiver;
+                }
+                break;
+
+            case "/string/textinput" when _address == "/string/textinput":
+                if (m.Count > 0 && m[0] is string textinput)
+                {
+                    _lastMessageContent = textinput;
+                }
+                break;
+
+            case "/string/logo" when _address == "/string/logo":
+                if (m.Count > 0 && m[0] is string logo)
+                {
+                    _lastMessageContent = logo;
+                }
+                break;
+        }
+
         lock (_valuesByKeys)
         {
             if (m.Count == 0)
                 return false;
 
             _collectedFloatResults.Clear();
+            
             if (_useKeyValuePairs)
             {
                 if (m.Count % 2 != 0)
@@ -342,27 +390,27 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
                     if (_filterKeys.Count > 0 && !_filterKeys.Contains(key))
                         continue;
 
+                    var path = m.Address + "/" + groupingSuffix + key;
                     if (OscConnectionManager.TryGetFloatFromMessagePart(m[index + 1], out var floatValue))
                     {
-                        _valuesByKeys[m.Address + "/" + groupingSuffix + key] = floatValue;
+                        _valuesByKeys[path] = floatValue;
+                        _collectedFloatResults.Add(floatValue);
                     }
-
-                    _collectedFloatResults.Add(floatValue);
                 }
             }
             else
             {
                 for (var index = 0; index < m.Count; index++)
                 {
+                    var path = m.Count == 1
+                                   ? OscConnectionManager.BuildMessageComponentPath(m)
+                                   : OscConnectionManager.BuildMessageComponentPath(m, index);
+                                   
                     if (OscConnectionManager.TryGetFloatFromMessagePart(m[index], out var floatValue))
                     {
-                        var path = m.Count == 1
-                                       ? OscConnectionManager.BuildMessageComponentPath(m)
-                                       : OscConnectionManager.BuildMessageComponentPath(m, index);
                         _valuesByKeys[path] = floatValue;
+                        _collectedFloatResults.Add(floatValue);
                     }
-
-                    _collectedFloatResults.Add(floatValue);
                 }
             }
 
@@ -520,6 +568,7 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
     private Regex _filterRegex;
 
     private readonly List<float> _collectedFloatResults = new(10);
+    private string _lastMessageContent = string.Empty;
     private readonly Dict<float> _valuesByKeys = new(0f);
 
     private const int UndefinedPortId = -1;
@@ -548,6 +597,8 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
 
     [Input(Guid = "DBF1C777-D399-49BC-ACB0-335CD1F7FA81")]
     public readonly InputSlot<string> SearchPattern = new();
+
+
 
     [Input(Guid = "6C15E743-9A70-47E7-A0A4-75636817E441")]
     public readonly InputSlot<bool> PrintLogMessages = new();

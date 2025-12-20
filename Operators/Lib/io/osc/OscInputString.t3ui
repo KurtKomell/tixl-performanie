@@ -1,0 +1,121 @@
+{
+  "Id": "9fc9c1b6-915e-4cde-a14d-fb54cbaf286f"/*OscInputString*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "21f3e80c-d5f9-47ab-ae9d-a3c6741e08b6"/*PrintLogMessages*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 225.0
+      }
+    },
+    {
+      "InputId": "2dda0225-7eff-429a-85ea-d323f8fde275"/*SearchPattern*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 360.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "82bbbda7-3779-40eb-a377-664e46105e89"/*Port*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    },
+    {
+      "InputId": "9adffd1d-3f69-49fc-85cd-6d445c523f22"/*SearchFilterKey*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 315.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "a7b81661-e982-4325-b636-9eecdda54525"/*IsListening*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 405.0
+      }
+    },
+    {
+      "InputId": "baf3828f-0cee-42b9-af53-0c221c2589e4"/*Address*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 45.0
+      },
+      "Usage": "CustomDropdown"
+    },
+    {
+      "InputId": "c7482f0e-da6e-4911-aba0-6de1459a186c"/*UseKeyValuePairs*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 270.0
+      }
+    },
+    {
+      "InputId": "ccfb57d2-d2cb-48d2-bb21-08195a0b1ab0"/*GroupKeysAsPaths*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 450.0
+      },
+      "Usage": "Default"
+    },
+    {
+      "InputId": "dc33dc74-f758-4f3a-b283-ef2fd16611ec"/*FilterKeys*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 495.0
+      },
+      "Usage": "Default"
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "762c128c-85d8-498c-9c4e-d2e354c9138f"/*Values*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 138.0
+      }
+    },
+    {
+      "OutputId": "a63fcd15-5c0c-4426-a139-5ad80697abc8"/*Contents*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 338.0
+      }
+    },
+    {
+      "OutputId": "452da9b5-d7f8-497e-b120-ff3923b0f498"/*WasTrigger*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 438.0
+      }
+    },
+    {
+      "OutputId": "ced24128-abbc-4eeb-8d6f-38349547953d"/*Result*/,
+      "Position": {
+        "X": 133.0,
+        "Y": 538.0
+      }
+    }
+  ],
+  "Links": [
+    {
+      "Id": "84f695fc-5269-4224-8b6b-cdd67be98190",
+      "Title": "Documentation on OSC",
+      "Description": "",
+      "LinkUrl": "https://github.com/tixl3d/tixl/wiki/help.OSC",
+      "LinkType": "Documentation"
+    },
+    {
+      "Id": "a3d23b48-e04d-4d53-80cc-d671a3a5428a",
+      "Title": "Video Tutorial",
+      "Description": "This example illustrates how to build a quick drawing application with OSC input.",
+      "LinkUrl": "https://youtu.be/4xxhQ1JX-ls?si=MGq4M5VoxY7D6_l8",
+      "LinkType": "TutorialVideo"
+    }
+  ]
+}

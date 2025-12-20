@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="$(SolutionDir)/Tixl.props" />
     <PropertyGroup>
         <TargetFramework>$(TixlNetFrameworkVersion)</TargetFramework>
@@ -92,9 +92,7 @@
     </ItemGroup>
 
     <Target Name="CopyPlayerToDebug" AfterTargets="AfterBuild">
-        <Copy SourceFiles="@(PlayerFiles)"
-              DestinationFolder="$(OutputPath)\Player\%(RecursiveDir)"
-              SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(PlayerFiles)" DestinationFolder="$(OutputPath)\Player\%(RecursiveDir)" SkipUnchangedFiles="true" />
     </Target>
     <!-- =================================//===================================== -->
 
@@ -142,6 +140,9 @@
     <Target Name="CopyPlayer" AfterTargets="AfterBuild">
         <Copy SourceFiles="@(Player)" SkipUnchangedFiles="true" UseHardlinksIfPossible="true" DestinationFiles="@(Player->'$(OutputPath)/Player/%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
+    <ItemGroup>
+      <Compile Remove="Gui\InputUi\SingleControl\StringDictInputUi - Kopieren.cs" />
+    </ItemGroup>
     <!-- =========================//=============================== -->
 
     <!-- ======================== Operator Packages ========================== -->

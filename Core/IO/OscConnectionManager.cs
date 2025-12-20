@@ -1,9 +1,10 @@
 using Rug.Osc;
+using Rug.Osc;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
-using Rug.Osc;
 using T3.Core.Logging;
 
 namespace Operators.Utils;
@@ -242,4 +243,19 @@ public static class OscConnectionManager
     {
         return msg.Address;
     }
+    public static bool TryGetStringFromMessagePart(object arg, out string value)
+    {
+        value = arg switch
+        {
+            string s => s,
+            float f => f.ToString(CultureInfo.InvariantCulture),
+            int i => i.ToString(),
+            bool b => b.ToString(),
+            double d => d.ToString(CultureInfo.InvariantCulture),
+            null => null,
+            _ => arg.ToString()
+        };
+        return value != null;
+    }
+
 }

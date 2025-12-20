@@ -1,8 +1,9 @@
-using System;
+using Operators.Utils;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using System;
 using T3.Core.Animation;
 using T3.Core.Audio;
 using T3.Core.Logging;
@@ -17,7 +18,8 @@ public partial class Program
     {
         WasapiAudioInput.StartFrame(_playback.Settings);
         _playback.Update();
-
+        // Update OSC messages
+       
         //Log.Debug($" render at playback time {_playback.TimeInSecs:0.00}s");
         if (_soundtrackHandle != null)
         {

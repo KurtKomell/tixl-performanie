@@ -263,9 +263,7 @@ public class SpoutOutput : Instance<SpoutOutput>
         {
             
             _device?.Dispose();
-            var apis = _deviceContext.AvailableAPIs;
-            foreach (var api in apis)
-                Console.WriteLine($"Available API: {api}");
+            
             //_deviceContext.DeleteContext(_glContext);
             _deviceContext?.MakeCurrent(IntPtr.Zero);
             _deviceContext?.Dispose();
