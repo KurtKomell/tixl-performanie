@@ -1,6 +1,6 @@
 // NOTE: Enabling this will require Windows Graphics Tools feature to be enabled
 // This will prevent the player from running on most Windows systems.
-//#define FORCE_D3D_DEBUG
+#define FORCE_D3D_DEBUG
 using CommandLine;
 using CommandLine.Text;
 using ManagedBass;
@@ -10,12 +10,14 @@ using Newtonsoft.Json;
 using NuGet.Configuration;
 using Operators.Utils;
 using Rug.Osc;
+using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.Windows;
 using Silk.NET.Core.Contexts;
+using Silk.NET.GLFW;
 using SilkWindows;
 using System;
 using System.Collections.Generic;
@@ -26,6 +28,7 @@ using System.Numerics;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 using T3.Core.Animation;
 using T3.Core.Audio;
@@ -89,7 +92,9 @@ public partial class Program
     [STAThread]
     public void Main(string[] args)
     {
-        
+        //Application.EnableVisualStyles();
+        //Application.SetHighDpiMode(HighDpiMode.PerMonitor);
+        //Application.SetCompatibleTextRenderingDefault(false);
         CoreUi.Instance = null;
         fileWriter = null;
         ShaderCompiler.ResetShaderCacheSubdirectory();
@@ -104,6 +109,7 @@ public partial class Program
         //Application.SetCompatibleTextRenderingDefault(false);
         
 
+
         //OSC Receiver
         //Initialisieren des OSC - Handlers
         _oscHandler = new OscMessageHandler();
@@ -114,9 +120,9 @@ public partial class Program
 
         Console.WriteLine($"OSC-Handler auf Port {oscPort} registriert.");
 
-        
+       
 
-        
+
 
         //Adapterrating
         using var factory = new Factory1();
@@ -202,10 +208,8 @@ public partial class Program
 
         var selectedAdapterIndex = adapterRatings.OrderByDescending(r => r.Rating).First().Index;
 
-        var selectedAdapter = factory.GetAdapter1(selectedAdapterIndex);
+        selectedAdapter = factory.GetAdapter1(selectedAdapterIndex);
         ActiveGpu = selectedAdapter.Description.Description;
-
-
 
 
         var settingsPath = Path.Combine(FileLocations.StartFolder, "exportSettings.json");
@@ -262,7 +266,7 @@ public partial class Program
             {
                 icon = new Icon(iconPath);
             }
-            Rectangle monitorBounds = Rectangle.Empty;
+            SharpDX.Rectangle monitorBounds = SharpDX.Rectangle.Empty;
 
             for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
             {
@@ -275,7 +279,7 @@ public partial class Program
                             if (output.Description.MonitorHandle == monitorHandle)
                             {
                                 Console.WriteLine($"Monitor gefunden: {output.Description.DeviceName}");
-                                monitorBounds = new Rectangle(
+                                monitorBounds = new SharpDX.Rectangle(
                                     output.Description.DesktopBounds.Left,
                                     output.Description.DesktopBounds.Top,
                                     output.Description.DesktopBounds.Right - output.Description.DesktopBounds.Left,
@@ -296,7 +300,7 @@ public partial class Program
             //                      //Icon = icon,
             //                  };
 
-            if (monitorBounds != Rectangle.Empty)
+            if (monitorBounds != SharpDX.Rectangle.Empty)
             {
                 _renderForm = new RenderForm("Performanie Pro 3 | Program Window")
                 {
@@ -326,7 +330,7 @@ public partial class Program
             {
                 Console.WriteLine("Kein Monitor mit dem angegebenen Handle gefunden. Standardposition wird verwendet.");
             }
-
+            //_renderForm.Resize += RenderForm_Resize;
             var windowHandle = _renderForm.Handle;
 
             // SwapChain description
@@ -339,7 +343,7 @@ public partial class Program
                                OutputHandle = windowHandle,
                                SampleDescription = new SampleDescription(1, 0),
                                SwapEffect = SwapEffect.FlipDiscard,
-                               Flags = SwapChainFlags.AllowModeSwitch,
+                               Flags = SwapChainFlags.None,
                                Usage = Usage.RenderTargetOutput | Usage.ShaderInput,
             };
 
@@ -351,11 +355,11 @@ public partial class Program
             };
 
             // Create Device and SwapChain
-#if DEBUG || FORCE_D3D_DEBUG
-            var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
-#else
-                var deviceCreationFlags = DeviceCreationFlags.None;
-#endif
+            #if DEBUG || FORCE_D3D_DEBUG
+                        var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
+            #else
+                            var deviceCreationFlags = DeviceCreationFlags.None;
+            #endif
             Device.CreateWithSwapChain(selectedAdapter, deviceCreationFlags, desc, out _device, out _swapChain);
            
                 
@@ -541,8 +545,8 @@ public partial class Program
                 
             _evalContext = new EvaluationContext();
             _evalContext.RequestedResolution = _resolution;
-            _evalContext.PointLights.Clear();
-            _evalContext.PointLights.GetDefaultBuffer();
+            //_evalContext.PointLights.Clear();
+            //_evalContext.PointLights.GetDefaultBuffer();
 
             // Beispiel: PbrMaterial-Instanz erstellen
             // Überprüfen, ob _evalContext und PbrMaterial initialisiert sind
@@ -559,15 +563,15 @@ public partial class Program
             //    Specular = 0.5f,
             //    Metal = 0.0f
             //};
-            PbrContextSettings.SetDefaultToContext(_evalContext);
+            //PbrContextSettings.SetDefaultToContext(_evalContext);
 
-            //_evalContext.PbrMaterial = PbrMaterial.Set();
+            ////_evalContext.PbrMaterial = PbrMaterial.Set();
 
-            // Texturen neu zuweisen
-            _evalContext.ContextTextures = new Dictionary<string, Texture2D>();
+            //// Texturen neu zuweisen
+            //_evalContext.ContextTextures = new Dictionary<string, Texture2D>();
 
-            // Konstanten neu initialisieren
-            _evalContext.FogParameters = FogSettings.ResetDefaultSettingsBuffer();
+            //// Konstanten neu initialisieren
+            //_evalContext.FogParameters = FogSettings.ResetDefaultSettingsBuffer();
 
 
             // TODO - implement proper shader pre-compilation as an option to instance instantiation
@@ -619,12 +623,12 @@ public partial class Program
                         if (!_resolvedOptions.Windowed)
                         {
                             _resolvedOptions.Windowed = true;
-                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed);
+                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
                         }
                         else
                         {
                             _resolvedOptions.Windowed = false;
-                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed);
+                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
                         }
                     }
                          
@@ -637,6 +641,8 @@ public partial class Program
                 // Entferne die Taste aus der Liste der verarbeiteten Tasten, wenn sie losgelassen wird
                 _processedKeys.Remove(e.KeyCode);
             };
+
+           
 
             try
             {
@@ -903,13 +909,32 @@ public partial class Program
         }
     }
 
-    private static void RebuildBackBuffer(RenderForm form, Device device, ref RenderTargetView rtv, ref SharpDX.Direct3D11.Texture2D buffer, SwapChain swapChain)
+
+
+    private static void RenderForm_Resize(object sender, EventArgs e)
     {
-        rtv.Dispose();
-        buffer.Dispose();
-        swapChain.ResizeBuffers(3, form.ClientSize.Width, form.ClientSize.Height, Format.Unknown, SwapChainFlags.AllowModeSwitch);
-        buffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(swapChain, 0);
-        rtv = new RenderTargetView(device, buffer);
+        if (_swapChain == null || _renderForm.ClientSize.Width == 0 || _renderForm.ClientSize.Height == 0)
+            return;
+
+        // Ressourcen freigeben
+        //_outputTexture.Dispose();
+
+        _renderView?.Dispose();
+        _outputTextureSrv?.Dispose();
+        _backBuffer?.Dispose();
+        _textureOutput.Invalidate();
+        _deviceContext.OutputMerger.SetTargets((RenderTargetView)null);
+        // Puffer der SwapChain an die neue Größe anpassen
+        _swapChain.ResizeBuffers(3, _renderForm.ClientSize.Width, _renderForm.ClientSize.Height, Format.R8G8B8A8_UNorm, SwapChainFlags.AllowModeSwitch);
+
+        // Neue Ressourcen aus der SwapChain erstellen
+        _backBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
+        _renderView = new RenderTargetView(_device, _backBuffer);
+
+        // Optional: Shader-Ressourcenansicht für den Backbuffer neu erstellen, falls verwendet
+        _outputTextureSrv = new ShaderResourceView(_device, _backBuffer);
+
+        Log.Debug($"Resized backbuffer to {_renderForm.ClientSize.Width}x{_renderForm.ClientSize.Height}");
     }
 
     public void Dispose()
@@ -996,14 +1021,14 @@ public partial class Program
         }
     }
 
-    private static void SwitchToMonitor(nint monitorHandle, bool windowed)
+    private static void SwitchToMonitor(nint monitorHandle, bool windowed, int width, int height, SwapChain swapChain)
     {
         bool windowed2 = windowed;
         if (_renderForm == null)
             return;
 
         using var factory = new Factory1();
-        Rectangle monitorBounds = Rectangle.Empty;
+        
 
         for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
         {
@@ -1013,7 +1038,7 @@ public partial class Program
                 using var output = adapter.GetOutput(outputIndex);
                 if (output.Description.MonitorHandle == monitorHandle)
                 {
-                    monitorBounds = new Rectangle(
+                    monitorBounds = new SharpDX.Rectangle(
                                                   output.Description.DesktopBounds.Left,
                                                   output.Description.DesktopBounds.Top,
                                                   output.Description.DesktopBounds.Right - output.Description.DesktopBounds.Left,
@@ -1025,13 +1050,13 @@ public partial class Program
         }
 
     FoundMonitor:
-        if (monitorBounds == Rectangle.Empty)
+        if (monitorBounds == SharpDX.Rectangle.Empty)
         {
             Log.Warning($"Could not find monitor with handle {monitorHandle}.");
             return;
         }
 
-        Log.Debug($"Switching to monitor {monitorHandle} at {monitorBounds.Location}.");
+        Log.Debug($"Switching to monitor {monitorHandle} at {monitorBounds.Left}.");
 
         // Wichtig: UI-Änderungen müssen im UI-Thread ausgeführt werden.
         _renderForm.Invoke(new Action(() =>
@@ -1039,11 +1064,10 @@ public partial class Program
             if (windowed2)
             {
                 _renderForm.WindowState = FormWindowState.Normal;
-                _renderForm.FormBorderStyle = FormBorderStyle.Sizable;
+                _renderForm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
                 _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
-                _renderForm.ClientSize = new Size(
-                                                  Math.Min(monitorBounds.Width, _resolvedOptions.Width),
-                                                  Math.Min(monitorBounds.Height, _resolvedOptions.Height));
+                //_renderForm.Size = new Size(width, height);
+                _renderForm.ClientSize = new Size(width, height);
             }
             else
             {
@@ -1052,9 +1076,13 @@ public partial class Program
                 _renderForm.WindowState = FormWindowState.Normal;
                 _renderForm.FormBorderStyle = FormBorderStyle.None;
                 _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
-                _renderForm.Size = new Size(monitorBounds.Width, monitorBounds.Height);
+                //_renderForm.Size = new Size(monitorBounds.Width, monitorBounds.Height);
+                _renderForm.ClientSize = new Size(monitorBounds.Width, monitorBounds.Height);
                 _renderForm.WindowState = FormWindowState.Maximized;
             }
+
+           
+            
         }));
     }
     private static void SwitchAudioInputDevice(int deviceIndex)
@@ -1092,6 +1120,9 @@ public partial class Program
         // We need to re-initialize the audio input to apply the change.
         AudioEngine.ReinitializeAudioInput();
     }
+
+   
+
     private readonly struct PackageLoadInfo(
         PlayerSymbolPackage package,
         List<SymbolJson.SymbolReadResult> newlyLoadedSymbols)
@@ -1129,7 +1160,7 @@ public partial class Program
     private static SharpDX.Direct3D11.Buffer constBuffer;
     public string keyInPlayer;
     private static HashSet<System.Windows.Forms.Keys> _processedKeys = new HashSet<System.Windows.Forms.Keys>();
-
+    private static SharpDX.Rectangle monitorBounds = SharpDX.Rectangle.Empty;
 
     //Adaptergrafik
     private static string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
@@ -1137,6 +1168,7 @@ public partial class Program
     private static nint monitorHandle;
     private static int audioDeviceIndex;
     private static string audioDevice = "Default";
+    private static SharpDX.DXGI.Adapter1 selectedAdapter;
 
     private sealed class DisplayAdapterRating()
     {
@@ -1146,6 +1178,7 @@ public partial class Program
         public float Rating = 1;
     }
     public static string ActiveGpu { get; private set; } = "Unknown";
+    public static bool renderStarted = false;
     public class OscMessageHandler : OscConnectionManager.IOscConsumer
     {
         public void ProcessMessage(OscMessage msg)
@@ -1158,7 +1191,9 @@ public partial class Program
                     if (msg.Count > 0 && msg[0] is string monitorHandleStr && nint.TryParse(monitorHandleStr, out nint handle))
                     {
                         _resolvedOptions.MonitorHandle = (int)handle;
-                        SwitchToMonitor(handle, _resolvedOptions.Windowed);
+                        
+
+                        SwitchToMonitor(handle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
                     }
                     else
                     {
@@ -1170,7 +1205,8 @@ public partial class Program
                     if (msg.Count > 0 && msg[0] is string windowedStr && bool.TryParse(windowedStr, out bool isWindowed))
                     {
                         _resolvedOptions.Windowed = isWindowed;
-                        SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, isWindowed);
+                        
+                        SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
                     }
                     else
                     {
@@ -1187,6 +1223,22 @@ public partial class Program
                     else
                     {
                         Log.Warning($"Invalid argument for /performanie/audioinput: {msg[0]}");
+                    }
+                    break;
+                case "/performanie/resolution":
+                    if (msg.Count > 1 && msg[0] is string widthStrRes && int.TryParse(widthStrRes, out int newWidth) &&
+                        msg[1] is string heightStrRes && int.TryParse(heightStrRes, out int newHeight))
+                    {
+                        _resolvedOptions.Width = newWidth;
+                        _resolution.X = newWidth;
+                        _resolvedOptions.Height = newHeight;
+                        _resolution.Y = newHeight;
+
+                        SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed, newWidth, newHeight, _swapChain);
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid arguments for /performanie/resolution. Expected two integer strings.");
                     }
                     break;
             }

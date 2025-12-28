@@ -87,9 +87,9 @@ internal sealed class OscInputString : Instance<OscInputString>, OscConnectionMa
             if (msg.Address != _address)
                 return;
 
-            if (msg.Count > 0 && msg[0] is string content)
+            if (msg.Count > 0 && msg[0] != null)
             {
-                _lastMessageContent = content;
+                _lastMessageContent = msg[0].ToString();
                 Result.DirtyFlag.Invalidate();
                 _wasTrigger = true;
             }

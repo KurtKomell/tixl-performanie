@@ -25,7 +25,7 @@ public partial class Program
         if (_resolvedOptions.Windowed && keyArgs is { Alt: true, KeyCode: Keys.Enter })
         {
             _swapChain.IsFullScreen = !_swapChain.IsFullScreen;
-            RebuildBackBuffer(_renderForm, _device, ref _renderView, ref _backBuffer, _swapChain);
+           
             coreUi.Cursor.SetVisible(!_swapChain.IsFullScreen);
         }
 

@@ -16,6 +16,7 @@ public partial class Program
     // todo - share this function with the editor ? is that possible? it could have delegate arguments
     private static void RenderCallback()
     {
+        _resolution = new Core.DataTypes.Vector.Int2(Program._renderForm.ClientSize.Width, Program._renderForm.ClientSize.Height);
         WasapiAudioInput.StartFrame(_playback.Settings);
         _playback.Update();
         // Update OSC messages
@@ -48,6 +49,7 @@ public partial class Program
 
         _evalContext.Reset();
         _evalContext.RequestedResolution = _resolution;
+        //Console.WriteLine($"Requested resolution: {_evalContext.RequestedResolution.Width}x{_evalContext.RequestedResolution.Height}");
 
         if (_textureOutput != null)
         {
@@ -79,7 +81,7 @@ public partial class Program
                 pixelShader.SetShaderResource(0, null);
             }
         }
-
+        T3.Player.Program.renderStarted = true;
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
     }
     

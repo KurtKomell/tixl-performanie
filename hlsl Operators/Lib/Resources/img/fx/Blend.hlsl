@@ -19,6 +19,7 @@ Texture2D<float4> ImageA : register(t0);
 Texture2D<float4> ImageB : register(t1);
 sampler texSampler : register(s0);
 
+// Conversion matrices for RGB to YUV and vice versa
 static const float3x3 RgbToYuv = {
     {0.299, 0.587, 0.114},
     {-0.14713, -0.28886, 0.436},
@@ -31,15 +32,16 @@ static const float3x3 YuvToRgb = {
     {1.0, 2.03211, 0.0}
 };
 
-float3 rgb2yuv(float3 rgb)
+float3 rgb2yuv(float3 rgb) 
 {
     return mul(rgb, RgbToYuv);
 }
 
-float3 yuv2rgb(float3 yuv)
+float3 yuv2rgb(float3 yuv) 
 {
     return mul(yuv, YuvToRgb);
 }
+
 float3 RgbToHsl(float3 color)
 {
     float maxVal = max(color.r, max(color.g, color.b));
@@ -75,9 +77,9 @@ float HueToRgb(float p, float q, float t)
 {
     if (t < 0.0) t += 1.0;
     if (t > 1.0) t -= 1.0;
-    if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
-    if (t < 1.0 / 2.0) return q;
-    if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+    if (t < 1.0/6.0) return p + (q - p) * 6.0 * t;
+    if (t < 1.0/2.0) return q;
+    if (t < 2.0/3.0) return p + (q - p) * (2.0/3.0 - t) * 6.0;
     return p;
 }
 
@@ -93,9 +95,9 @@ float3 HslToRgb(float3 hsl)
     {
         float q = hsl.z < 0.5 ? hsl.z * (1.0 + hsl.y) : hsl.z + hsl.y - hsl.z * hsl.y;
         float p = 2.0 * hsl.z - q;
-        r = HueToRgb(p, q, hsl.x + 1.0 / 3.0);
+        r = HueToRgb(p, q, hsl.x + 1.0/3.0);
         g = HueToRgb(p, q, hsl.x);
-        b = HueToRgb(p, q, hsl.x - 1.0 / 3.0);
+        b = HueToRgb(p, q, hsl.x - 1.0/3.0);
     }
     return float3(r, g, b);
 }
@@ -109,7 +111,6 @@ float3 SoftLight(float3 a, float3 b)
 {
     return (b < 0.5) ? (2.0 * a * b + a * a * (1.0 - 2.0 * b)) : (sqrt(a) * (2.0 * b - 1.0) + 2.0 * a * (1.0 - b));
 }
-
 
 float IsBetween(float value, float low, float high)
 {
@@ -295,12 +296,12 @@ float4 psMain(vsOutput psInput) : SV_TARGET
         break;
         // Hue
     case 19:
-    
+    {
         float3 hslA = RgbToHsl(tA.rgb);
         float3 hslB = RgbToHsl(tB.rgb);
         rgb = HslToRgb(float3(hslB.x, hslA.y, hslA.z));
         rgb = lerp(tA.rgb, rgb, tB.a);
-    
+    }
     break;
     // Inverse
     case 20:
@@ -318,7 +319,6 @@ float4 psMain(vsOutput psInput) : SV_TARGET
         rgb = tA.rgb + (lumB - lumA);
         rgb = lerp(tA.rgb, rgb, tB.a);
     }
-    
     break;
     // Negate
     case 23:
