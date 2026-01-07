@@ -147,7 +147,7 @@ public abstract partial class ShaderCompiler
     }
     
     private static readonly object _shaderCacheLock = new();
-    private static readonly string _shaderCacheRootPath = Path.Combine(UserData.FileLocations.TempFolder, "Cache");
+    private static readonly string _shaderCacheRootPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Performanie", "Cache");
     private static string _shaderCacheDirectory = string.Empty;
 
     public static string ShaderCacheSubdirectory

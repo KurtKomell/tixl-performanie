@@ -1,9 +1,9 @@
-using System.IO;
-using System.Linq;
-using System.Threading;
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using T3.Core.Animation;
 using T3.Core.Compilation;
 using T3.Core.DataTypes.Vector;
@@ -11,6 +11,7 @@ using T3.Core.Logging;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
+using T3.Core.Resource;
 using T3.Core.UserData;
 using Texture2D = T3.Core.DataTypes.Texture2D;
 
@@ -97,4 +98,5 @@ public partial class Program
         playback.PlaybackSpeed = previousSpeed;
         playback.TimeInSecs = originalTime;
     }
+    
 }

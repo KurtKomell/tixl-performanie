@@ -1,6 +1,6 @@
 // NOTE: Enabling this will require Windows Graphics Tools feature to be enabled
 // This will prevent the player from running on most Windows systems.
-#define FORCE_D3D_DEBUG
+//#define FORCE_D3D_DEBUG
 using CommandLine;
 using CommandLine.Text;
 using ManagedBass;
@@ -223,7 +223,7 @@ public partial class Program
 
         ProjectSettings.Config = exportSettings!.ConfigData;
             
-        var logDirectory = Path.Combine(Core.UserData.FileLocations.SettingsDirectory, "Performanie" , exportSettings.Author, exportSettings.ApplicationTitle);
+        var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Performanie", exportSettings.Author, exportSettings.ApplicationTitle);
         if (fileWriter == null)
         {
             fileWriter = FileWriter.CreateDefault(logDirectory, out logPath);
@@ -253,7 +253,7 @@ public partial class Program
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
             Log.Debug($": audio={audioDeviceIndex},  {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
-            var iconPath = Path.Combine("images", "editor","t3.ico");
+            var iconPath = Path.Combine(FileLocations.StartFolder, "Images", "editor","t3.ico");
             var gotIcon = File.Exists(iconPath);
 
             Icon icon;
@@ -312,6 +312,7 @@ public partial class Program
                     StartPosition = FormStartPosition.Manual,
                    FormBorderStyle = FormBorderStyle.Sizable,
                    WindowState = FormWindowState.Normal,
+                   Icon = icon,
                     Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y),
                     ClientSize = new Size(
                     Math.Min(monitorBounds.Width, _resolvedOptions.Width),
@@ -348,18 +349,18 @@ public partial class Program
             };
 
             //Try to load 11.1 if possible, revert to 11.0 auto
-            FeatureLevel[] levels =
-{
-                FeatureLevel.Level_11_1,
-                FeatureLevel.Level_11_0,
-            };
+//            FeatureLevel[] levels =
+//{
+//                FeatureLevel.Level_11_1,
+//                FeatureLevel.Level_11_0,
+//            };  
 
             // Create Device and SwapChain
-            #if DEBUG || FORCE_D3D_DEBUG
-                        var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
-            #else
-                            var deviceCreationFlags = DeviceCreationFlags.None;
-            #endif
+            //#if DEBUG || FORCE_D3D_DEBUG
+            //            var deviceCreationFlags = DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport;
+            //#else
+            var deviceCreationFlags = DeviceCreationFlags.None;
+            //#endif
             Device.CreateWithSwapChain(selectedAdapter, deviceCreationFlags, desc, out _device, out _swapChain);
            
                 
@@ -545,33 +546,7 @@ public partial class Program
                 
             _evalContext = new EvaluationContext();
             _evalContext.RequestedResolution = _resolution;
-            //_evalContext.PointLights.Clear();
-            //_evalContext.PointLights.GetDefaultBuffer();
-
-            // Beispiel: PbrMaterial-Instanz erstellen
-            // Überprüfen, ob _evalContext und PbrMaterial initialisiert sind
-            //_evalContext.PbrMaterial.AlbedoMapSrv = PbrMaterial.DefaultAlbedoColorSrv;
-            //_evalContext.PbrMaterial.EmissiveMapSrv = PbrMaterial.DefaultEmissiveColorSrv;
-            //_evalContext.PbrMaterial.RoughnessMetallicOcclusionSrv = PbrMaterial.DefaultRoughnessMetallicOcclusionSrv;
-            //_evalContext.PbrMaterial.NormalSrv = PbrMaterial.DefaultNormalSrv;
-
-            //_evalContext.PbrMaterial.Parameters = new PbrMaterial.PbrParameters
-            //{
-            //    BaseColor = new Vector4(1.0f, 1.0f, 1.0f, 1.0f),
-            //    EmissiveColor = new Vector4(0.0f, 0.0f, 0.0f, 1.0f),
-            //    Roughness = 1.0f,
-            //    Specular = 0.5f,
-            //    Metal = 0.0f
-            //};
-            //PbrContextSettings.SetDefaultToContext(_evalContext);
-
-            ////_evalContext.PbrMaterial = PbrMaterial.Set();
-
-            //// Texturen neu zuweisen
-            //_evalContext.ContextTextures = new Dictionary<string, Texture2D>();
-
-            //// Konstanten neu initialisieren
-            //_evalContext.FogParameters = FogSettings.ResetDefaultSettingsBuffer();
+      
 
 
             // TODO - implement proper shader pre-compilation as an option to instance instantiation
@@ -710,14 +685,14 @@ public partial class Program
                 args.ToList().Clear();
              
                 exportSettings = null;
-                Guid spoutGuid = Guid.Parse("13be1e3f-861d-4350-a94e-e083637b3e55");
-                var spoutSymbolChild = _project.Children.SingleOrDefault(child => child.Value.Symbol.Id == spoutGuid);
-                if (spoutSymbolChild.Value != null)
-                {
-                    // Die Instanz selbst holen und deren Dispose-Methode aufrufen
-                    spoutSymbolChild.Value.Symbol.Dispose();
-                    Console.WriteLine("Disposed SpoutOutput instance and its resources.");
-                }
+                //Guid spoutGuid = Guid.Parse("13be1e3f-861d-4350-a94e-e083637b3e55");
+                //var spoutSymbolChild = _project.Children.SingleOrDefault(child => child.Value.Symbol.Id == spoutGuid);
+                //if (spoutSymbolChild.Value != null)
+                //{
+                //    // Die Instanz selbst holen und deren Dispose-Methode aufrufen
+                //    spoutSymbolChild.Value.Symbol.Dispose();
+                //    Console.WriteLine("Disposed SpoutOutput instance and its resources.");
+                //}
 
                 //var spoutOutputInstance = _project.Children.FirstOrDefault(child => child.Value.Symbol.Id == spoutGuid);
                 //if (spoutOutputInstance.Value != null)
@@ -1068,6 +1043,7 @@ public partial class Program
                 _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
                 //_renderForm.Size = new Size(width, height);
                 _renderForm.ClientSize = new Size(width, height);
+                _renderForm.Icon = icon;
             }
             else
             {
@@ -1079,6 +1055,7 @@ public partial class Program
                 //_renderForm.Size = new Size(monitorBounds.Width, monitorBounds.Height);
                 _renderForm.ClientSize = new Size(monitorBounds.Width, monitorBounds.Height);
                 _renderForm.WindowState = FormWindowState.Maximized;
+                _renderForm.Icon = icon;
             }
 
            
@@ -1161,6 +1138,7 @@ public partial class Program
     public string keyInPlayer;
     private static HashSet<System.Windows.Forms.Keys> _processedKeys = new HashSet<System.Windows.Forms.Keys>();
     private static SharpDX.Rectangle monitorBounds = SharpDX.Rectangle.Empty;
+    public static bool shaderCompilerbool = false;
 
     //Adaptergrafik
     private static string[] highPerformanceKeywords = ["dedicated", "high performance", "rtx", "gtx"];
@@ -1169,6 +1147,7 @@ public partial class Program
     private static int audioDeviceIndex;
     private static string audioDevice = "Default";
     private static SharpDX.DXGI.Adapter1 selectedAdapter;
+    private static Icon icon;
 
     private sealed class DisplayAdapterRating()
     {

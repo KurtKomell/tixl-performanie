@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="ImGui.NET" Version="1.89.9.4" />
     <PackageReference Include="Silk.NET.Input.Common" Version="2.22.0" />
+    <PackageReference Include="Silk.NET.OpenGL.Extensions.ImGui" Version="2.19.0" />
     <PackageReference Include="Silk.NET.Windowing.Common" Version="2.22.0" />
   </ItemGroup>
 

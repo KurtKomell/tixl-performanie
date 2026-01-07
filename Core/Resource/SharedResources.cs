@@ -20,7 +20,7 @@ public static class SharedResources
 {
     public static readonly string Directory = Path.Combine(FileLocations.StartFolder, FileLocations.ResourcesSubfolder);
     public static readonly IResourcePackage ResourcePackage = new SharedResourceObject();
-        
+
     static SharedResources()
     {
         ResourceManager.AddSharedResourceFolder(ResourcePackage, true);
@@ -40,7 +40,7 @@ public static class SharedResources
         {
             throw new Exception($"{nameof(SharedResources)} Failed to load fullscreen vertex shader");
         }
-            
+
         if (_fullScreenPixelShaderResource.Value == null)
         {
             throw new Exception($"{nameof(SharedResources)} Failed to load fullscreen pixel shader");
@@ -72,7 +72,7 @@ public static class SharedResources
         {
             _viewWindowDefaultTexture.Value.CreateShaderResourceView(ref ViewWindowDefaultTextureSrv, "view window default texture SRV");
         }
-            
+
         if (_colorPickerTexture.Value == null)
         {
             Log.Error("Failed to load color picker texture");

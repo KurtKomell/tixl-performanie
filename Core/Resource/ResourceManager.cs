@@ -185,7 +185,8 @@ public static partial class ResourceManager
 
     internal static void AddSharedResourceFolder(IResourcePackage resourcePackage, bool allowSharedNonCodeFiles)
     {
-        if(allowSharedNonCodeFiles)
+      
+        if (allowSharedNonCodeFiles)
             _sharedResourcePackages.Add(resourcePackage);
             
         _shaderPackages.Add(resourcePackage);
