@@ -113,8 +113,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     {
         ScanWebCamDevices();
 
-        var deviceName = settings.Camera;
-        InputDeviceName.Value = settings.Camera;
+        var deviceName = InputDeviceName.GetValue(context);
+        
         if (string.IsNullOrEmpty(deviceName) && _webcamWithIndices?.Count > 0)
         {
             deviceName = _webcamWithIndices[0].Name;
