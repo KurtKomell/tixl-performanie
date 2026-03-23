@@ -1,6 +1,7 @@
-﻿#nullable enable
+#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using T3.Core.Operator;
 using T3.Core.Operator.Slots;
 using T3.Editor.Gui.Interaction;
@@ -530,7 +531,7 @@ internal static class ConnectionMaker
                                                             && c.ConnectionType == firstConnectionType);
             if (validForMultiInput)
             {
-                var oldConnections = connectionList.ToArray().Reverse();
+                var oldConnections = Enumerable.Reverse(connectionList.ToArray());
                 connectionList.Clear();
                 foreach (var c in oldConnections)
                 {

@@ -1,10 +1,12 @@
-﻿using System.Text;
+using System.Linq;
+using System.Text;
 using T3.Core.Model;
 using T3.Core.Operator;
 using T3.Editor.Gui.UiHelpers;
 using T3.Editor.UiModel.Commands;
 using T3.Editor.UiModel.Commands.Annotations;
 using T3.Editor.UiModel.Commands.Graph;
+using System.Linq;          // falls noch nicht vorhanden
 
 namespace T3.Editor.UiModel.Modification;
 
@@ -202,7 +204,7 @@ internal static class Combine
 
         var newSymbolChildId = addCommand.AddedChildId;
 
-        foreach (var con in inputConnections.Reverse()) // reverse for multi input order preservation
+        foreach (var con in inputConnections.AsEnumerable().Reverse()) // reverse for multi input order preservation
         {
             var sourceId = con.SourceParentOrChildId;
             var sourceSlotId = con.SourceSlotId;
@@ -213,7 +215,7 @@ internal static class Combine
             parentCompositionSymbol.AddConnection(newConnection);
         }
 
-        foreach (var con in outputConnections.Reverse()) // reverse for multi input order preservation
+        foreach (var con in outputConnections.AsEnumerable().Reverse()) // reverse for multi input order preservation
         {
             var sourceId = newSymbolChildId;
             var sourceSlotId = connectionToNewSlotIdMap[con];

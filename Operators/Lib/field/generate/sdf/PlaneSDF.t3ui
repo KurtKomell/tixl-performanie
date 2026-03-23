@@ -16,13 +16,6 @@
         "X": -200.0,
         "Y": 150.0
       }
-    },
-    {
-      "InputId": "deb91db5-cefb-4e0d-9244-d44bc6a21985"/*Size*/,
-      "Position": {
-        "X": -200.0,
-        "Y": 75.0
-      }
     }
   ],
   "SymbolChildUis": [],
