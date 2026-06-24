@@ -16,7 +16,15 @@ public partial class Program
     // todo - share this function with the editor ? is that possible? it could have delegate arguments
     private static void RenderCallback()
     {
+        ProcessPendingSwapChainResize();
+        if (_renderView == null)
+            return;
+
         _resolution = new Core.DataTypes.Vector.Int2(Program._renderForm.ClientSize.Width, Program._renderForm.ClientSize.Height);
+
+        var viewportW = _backBuffer?.Description.Width ?? _resolution.Width;
+        var viewportH = _backBuffer?.Description.Height ?? _resolution.Height;
+
         WasapiAudioInput.StartFrame(_playback.Settings);
         _playback.Update();
         // Update OSC messages
@@ -44,7 +52,7 @@ public partial class Program
         DirtyFlag.IncrementGlobalTicks();
         DirtyFlag.InvalidationRefFrame++;
 
-        _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, _resolution.Width, _resolution.Height, 0.0f, 1.0f));
+        _deviceContext.Rasterizer.SetViewport(new Viewport(0, 0, viewportW, viewportH, 0.0f, 1.0f));
         _deviceContext.OutputMerger.SetTargets(_renderView);
 
         _evalContext.Reset();
@@ -81,6 +89,10 @@ public partial class Program
                 pixelShader.SetShaderResource(0, null);
             }
         }
+        UpdateRecord();
+        if (RecordEnabled && _outputTexture != null)
+            CaptureFrameIfDue(_outputTexture);
+
         T3.Player.Program.renderStarted = true;
         _swapChain.Present(_vsyncInterval, PresentFlags.None);
     }

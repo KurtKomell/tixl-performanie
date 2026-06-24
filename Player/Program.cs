@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Numerics;
 using System.Reflection.Metadata;
 using System.Text;
@@ -250,6 +251,7 @@ public partial class Program
                                                                   exportSettings.BuildId.ToString());
 
             var resolution = new Int2(_resolvedOptions.Width, _resolvedOptions.Height);
+
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
             Log.Debug($": audio={audioDeviceIndex},  {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
@@ -292,6 +294,13 @@ public partial class Program
                 }
             }
 
+            if (!_resolvedOptions.Windowed && monitorBounds != SharpDX.Rectangle.Empty)
+            {
+                resolution = new Int2(monitorBounds.Width, monitorBounds.Height);
+                _resolvedOptions.Width = monitorBounds.Width;
+                _resolvedOptions.Height = monitorBounds.Height;
+            }
+
             //_renderForm = new RenderForm("Performanie Pro 3")
             //                  {
             //                      ClientSize = new Size(resolution.X, resolution.Y),
@@ -304,34 +313,28 @@ public partial class Program
             {
                 _renderForm = new RenderForm("Performanie Pro 3 | Program Window")
                 {
-                    //                      ClientSize = new Size(resolution.X, resolution.Y),
-                    //                      StartPosition = System.Windows.Forms.FormStartPosition.Manual,
-                    //                      AllowUserResizing = false,
-                    //                      //Icon = icon,
-                    //  
                     StartPosition = FormStartPosition.Manual,
-                   FormBorderStyle = FormBorderStyle.Sizable,
-                   WindowState = FormWindowState.Normal,
-                   Icon = icon,
+                    FormBorderStyle = FormBorderStyle.Sizable,
+                    WindowState = FormWindowState.Normal,
+                    Icon = icon,
                     Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y),
-                    ClientSize = new Size(
-                    Math.Min(monitorBounds.Width, _resolvedOptions.Width),
-                    Math.Min(monitorBounds.Height, _resolvedOptions.Height)),
-                    //TopMost = true,
-
+                    ClientSize = new Size(_resolvedOptions.Width, _resolvedOptions.Height),
                 };
+
                 if (!_resolvedOptions.Windowed)
-                {
-                    _renderForm.FormBorderStyle = FormBorderStyle.None;
-                    _renderForm.WindowState = FormWindowState.Maximized;
-                    //_renderForm.TopMost = true;
-                }
+                    ApplyBorderlessMonitorBounds(monitorBounds);
             }
             else
             {
                 Console.WriteLine("Kein Monitor mit dem angegebenen Handle gefunden. Standardposition wird verwendet.");
             }
-            //_renderForm.Resize += RenderForm_Resize;
+            _renderForm.ResizeBegin += (_, _) => _suppressFormResize = true;
+            _renderForm.ResizeEnd += (_, _) =>
+            {
+                _suppressFormResize = false;
+                RequestSwapChainResize();
+            };
+            _renderForm.Resize += RenderForm_Resize;
             var windowHandle = _renderForm.Handle;
 
             // SwapChain description
@@ -595,16 +598,12 @@ public partial class Program
                     // Anwendung schließen, wenn die Escape-Taste gedrückt wird
                     if (e.Control && e.KeyCode == System.Windows.Forms.Keys.F && sender == _renderForm)
                     {
-                        if (!_resolvedOptions.Windowed)
-                        {
-                            _resolvedOptions.Windowed = true;
-                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
-                        }
-                        else
-                        {
-                            _resolvedOptions.Windowed = false;
-                            SwitchToMonitor((nint)_resolvedOptions.MonitorHandle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
-                        }
+                        _resolvedOptions.Windowed = !_resolvedOptions.Windowed;
+                        ApplyDisplaySettings(
+                            _resolvedOptions.Windowed,
+                            (nint)_resolvedOptions.MonitorHandle,
+                            _resolvedOptions.Width,
+                            _resolvedOptions.Height);
                     }
                          
                     
@@ -888,28 +887,164 @@ public partial class Program
 
     private static void RenderForm_Resize(object sender, EventArgs e)
     {
-        if (_swapChain == null || _renderForm.ClientSize.Width == 0 || _renderForm.ClientSize.Height == 0)
+        if (_suppressFormResize || _inResize)
             return;
 
-        // Ressourcen freigeben
-        //_outputTexture.Dispose();
+        RequestSwapChainResize();
+    }
 
-        _renderView?.Dispose();
-        _outputTextureSrv?.Dispose();
-        _backBuffer?.Dispose();
-        _textureOutput.Invalidate();
-        _deviceContext.OutputMerger.SetTargets((RenderTargetView)null);
-        // Puffer der SwapChain an die neue Größe anpassen
-        _swapChain.ResizeBuffers(3, _renderForm.ClientSize.Width, _renderForm.ClientSize.Height, Format.R8G8B8A8_UNorm, SwapChainFlags.AllowModeSwitch);
+    private static void RequestSwapChainResize(int delayFrames = 0)
+    {
+        _pendingSwapChainResize = true;
+        if (delayFrames > _swapChainResizeDelayFrames)
+            _swapChainResizeDelayFrames = delayFrames;
+    }
 
-        // Neue Ressourcen aus der SwapChain erstellen
-        _backBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
-        _renderView = new RenderTargetView(_device, _backBuffer);
+    internal static void ProcessPendingSwapChainResize()
+    {
+        if (!_pendingSwapChainResize || _inResize)
+            return;
 
-        // Optional: Shader-Ressourcenansicht für den Backbuffer neu erstellen, falls verwendet
-        _outputTextureSrv = new ShaderResourceView(_device, _backBuffer);
+        if (_swapChain == null || _renderForm == null || _device == null || _deviceContext == null)
+            return;
 
-        Log.Debug($"Resized backbuffer to {_renderForm.ClientSize.Width}x{_renderForm.ClientSize.Height}");
+        if (_renderForm.ClientSize.Width == 0 || _renderForm.ClientSize.Height == 0)
+            return;
+
+        if (_swapChainResizeDelayFrames > 0)
+        {
+            _swapChainResizeDelayFrames--;
+            return;
+        }
+
+        ResizeSwapChainToClientSize();
+    }
+
+    private static void ResizeSwapChainToClientSize()
+    {
+        var clientW = _renderForm!.ClientSize.Width;
+        var clientH = _renderForm.ClientSize.Height;
+
+        if (_backBuffer != null
+            && _backBuffer.Description.Width == clientW
+            && _backBuffer.Description.Height == clientH)
+        {
+            _pendingSwapChainResize = false;
+            return;
+        }
+
+        _inResize = true;
+        try
+        {
+            _deviceContext!.PixelShader.SetShaderResource(0, null);
+            _deviceContext.OutputMerger.SetRenderTargets((DepthStencilView)null, (RenderTargetView)null);
+            _deviceContext.Flush();
+
+            _renderView?.Dispose();
+            _renderView = null;
+            _backBuffer = null;
+
+            _swapChain!.ResizeBuffers(3, clientW, clientH, Format.Unknown, SwapChainFlags.AllowModeSwitch);
+
+            _backBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
+            _renderView = new RenderTargetView(_device, _backBuffer);
+            _resolution = new Core.DataTypes.Vector.Int2(clientW, clientH);
+            _resolvedOptions.Width = clientW;
+            _resolvedOptions.Height = clientH;
+            _pendingSwapChainResize = false;
+
+            if (_pendingCanvasOscAfterResize)
+            {
+                ResetCanvasOscDedupe();
+                BroadcastCanvasResolutionOsc(clientW, clientH, "buffer-resized");
+                _pendingCanvasOscAfterResize = false;
+            }
+
+            Log.Debug($"Resized backbuffer to {clientW}x{clientH}");
+        }
+        catch (Exception ex)
+        {
+            Log.Debug($"Failed to resize backbuffer: {ex.Message}");
+            _pendingSwapChainResize = true;
+            _swapChainResizeDelayFrames = Math.Max(_swapChainResizeDelayFrames, 5);
+            TryRecoverBackBufferAfterFailedResize();
+        }
+        finally
+        {
+            _inResize = false;
+        }
+    }
+
+    private static void TryRecoverBackBufferAfterFailedResize()
+    {
+        if (_renderView != null || _swapChain == null || _device == null)
+            return;
+
+        try
+        {
+            _backBuffer = Resource.FromSwapChain<SharpDX.Direct3D11.Texture2D>(_swapChain, 0);
+            _renderView = new RenderTargetView(_device, _backBuffer);
+        }
+        catch (Exception ex)
+        {
+            Log.Debug($"Failed to recover backbuffer after resize failure: {ex.Message}");
+        }
+    }
+
+    private const int CanvasOscPort = 8000;
+    private static int _lastBroadcastCanvasOscW = -1;
+    private static int _lastBroadcastCanvasOscH = -1;
+
+    public static void ResetCanvasOscDedupe()
+    {
+        _lastBroadcastCanvasOscW = -1;
+        _lastBroadcastCanvasOscH = -1;
+    }
+
+    private static bool TryLookupMonitorBounds(nint monitorHandle, out SharpDX.Rectangle bounds)
+    {
+        bounds = SharpDX.Rectangle.Empty;
+        using var factory = new Factory1();
+        for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
+        {
+            using var adapter = factory.GetAdapter1(adapterIndex);
+            for (int outputIndex = 0; outputIndex < adapter.GetOutputCount(); outputIndex++)
+            {
+                using var output = adapter.GetOutput(outputIndex);
+                if (output.Description.MonitorHandle != monitorHandle)
+                    continue;
+
+                var desktop = output.Description.DesktopBounds;
+                bounds = new SharpDX.Rectangle(
+                    desktop.Left,
+                    desktop.Top,
+                    desktop.Right - desktop.Left,
+                    desktop.Bottom - desktop.Top);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static void BroadcastCanvasResolutionOsc(int w, int h, string source = "player")
+    {
+        if (w == _lastBroadcastCanvasOscW && h == _lastBroadcastCanvasOscH)
+            return;
+
+        _lastBroadcastCanvasOscW = w;
+        _lastBroadcastCanvasOscH = h;
+        try
+        {
+            using var sender = new OscSender(IPAddress.Loopback, CanvasOscPort);
+            sender.Connect();
+            sender.Send(new OscMessage("/performanie/resolution.x", w.ToString()));
+            sender.Send(new OscMessage("/performanie/resolution.y", h.ToString()));
+        }
+        catch (Exception ex)
+        {
+            Log.Debug($"Failed to broadcast canvas resolution OSC: {ex.Message}");
+        }
     }
 
     public void Dispose()
@@ -996,39 +1131,42 @@ public partial class Program
         }
     }
 
+    private static void ApplyBorderlessMonitorBounds(SharpDX.Rectangle bounds)
+    {
+        _renderForm!.WindowState = FormWindowState.Normal;
+        _renderForm.FormBorderStyle = FormBorderStyle.None;
+        _renderForm.StartPosition = FormStartPosition.Manual;
+        _renderForm.MaximizeBox = false;
+        _renderForm.Location = new System.Drawing.Point(bounds.Left, bounds.Top);
+        _renderForm.ClientSize = new Size(bounds.Width, bounds.Height);
+    }
+
+    private static void ApplyWindowedClientSize(SharpDX.Rectangle monitorBounds, int width, int height)
+    {
+        _renderForm!.WindowState = FormWindowState.Normal;
+        _renderForm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+        _renderForm.StartPosition = FormStartPosition.Manual;
+        _renderForm.MaximizeBox = false;
+        _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
+        _renderForm.ClientSize = new Size(width, height);
+    }
+
     private static void SwitchToMonitor(nint monitorHandle, bool windowed, int width, int height, SwapChain swapChain)
     {
         bool windowed2 = windowed;
         if (_renderForm == null)
             return;
 
-        using var factory = new Factory1();
-        
-
-        for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
-        {
-            using var adapter = factory.GetAdapter1(adapterIndex);
-            for (int outputIndex = 0; outputIndex < adapter.GetOutputCount(); outputIndex++)
-            {
-                using var output = adapter.GetOutput(outputIndex);
-                if (output.Description.MonitorHandle == monitorHandle)
-                {
-                    monitorBounds = new SharpDX.Rectangle(
-                                                  output.Description.DesktopBounds.Left,
-                                                  output.Description.DesktopBounds.Top,
-                                                  output.Description.DesktopBounds.Right - output.Description.DesktopBounds.Left,
-                                                  output.Description.DesktopBounds.Bottom - output.Description.DesktopBounds.Top
-                                                 );
-                    goto FoundMonitor;
-                }
-            }
-        }
-
-    FoundMonitor:
-        if (monitorBounds == SharpDX.Rectangle.Empty)
+        if (!TryLookupMonitorBounds(monitorHandle, out monitorBounds))
         {
             Log.Warning($"Could not find monitor with handle {monitorHandle}.");
             return;
+        }
+
+        if (!windowed2)
+        {
+            width = monitorBounds.Width;
+            height = monitorBounds.Height;
         }
 
         Log.Debug($"Switching to monitor {monitorHandle} at {monitorBounds.Left}.");
@@ -1036,32 +1174,54 @@ public partial class Program
         // Wichtig: UI-Änderungen müssen im UI-Thread ausgeführt werden.
         _renderForm.Invoke(new Action(() =>
         {
-            if (windowed2)
+            _suppressFormResize = true;
+            try
             {
-                _renderForm.WindowState = FormWindowState.Normal;
-                _renderForm.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-                _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
-                //_renderForm.Size = new Size(width, height);
-                _renderForm.ClientSize = new Size(width, height);
-                _renderForm.Icon = icon;
+                _renderForm.SuspendLayout();
+                if (windowed2)
+                {
+                    ApplyWindowedClientSize(monitorBounds, width, height);
+                    if (icon != null)
+                        _renderForm.Icon = icon;
+                }
+                else
+                {
+                    ApplyBorderlessMonitorBounds(monitorBounds);
+                    if (icon != null)
+                        _renderForm.Icon = icon;
+                }
+                _renderForm.ResumeLayout(true);
             }
-            else
+            finally
             {
-                // Um den Vollbildmodus auf einem anderen Monitor zu erzwingen,
-                // müssen wir das Fenster zuerst in den normalen Zustand versetzen.
-                _renderForm.WindowState = FormWindowState.Normal;
-                _renderForm.FormBorderStyle = FormBorderStyle.None;
-                _renderForm.Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y);
-                //_renderForm.Size = new Size(monitorBounds.Width, monitorBounds.Height);
-                _renderForm.ClientSize = new Size(monitorBounds.Width, monitorBounds.Height);
-                _renderForm.WindowState = FormWindowState.Maximized;
-                _renderForm.Icon = icon;
+                _suppressFormResize = false;
+                _pendingCanvasOscAfterResize = true;
+                ResetCanvasOscDedupe();
+                RequestSwapChainResize(2);
             }
-
-           
-            
         }));
     }
+
+    public static void ApplyDisplaySettings(bool windowed, nint monitorHandle, int width, int height)
+    {
+        if (_renderForm == null || _swapChain == null)
+            return;
+
+        if (!windowed && TryLookupMonitorBounds(monitorHandle, out var bounds))
+        {
+            width = bounds.Width;
+            height = bounds.Height;
+        }
+
+        _resolvedOptions.Windowed = windowed;
+        _resolvedOptions.MonitorHandle = (int)monitorHandle;
+        _resolvedOptions.Width = width;
+        _resolvedOptions.Height = height;
+        _resolution = new Core.DataTypes.Vector.Int2(width, height);
+
+        SwitchToMonitor(monitorHandle, windowed, width, height, _swapChain);
+    }
+
     private static void SwitchAudioInputDevice(int deviceIndex)
     {
         if (_playback == null)
@@ -1108,7 +1268,11 @@ public partial class Program
         public readonly List<SymbolJson.SymbolReadResult> NewlyLoadedSymbols = newlyLoadedSymbols;
     }
 
-    // Private static bool _inResize;
+    private static bool _inResize;
+    private static bool _suppressFormResize;
+    private static bool _pendingSwapChainResize;
+    private static bool _pendingCanvasOscAfterResize;
+    private static int _swapChainResizeDelayFrames;
     private static int _vsyncInterval;
     private static SwapChain _swapChain;
     private static RenderTargetView _renderView;
@@ -1167,12 +1331,20 @@ public partial class Program
             switch (msg.Address)
             {
                 case "/performanie/monitorHandle":
+                    if (renderStarted)
+                        break;
                     if (msg.Count > 0 && msg[0] is string monitorHandleStr && nint.TryParse(monitorHandleStr, out nint handle))
                     {
                         _resolvedOptions.MonitorHandle = (int)handle;
-                        
+                        var w = _resolvedOptions.Width;
+                        var h = _resolvedOptions.Height;
+                        if (!_resolvedOptions.Windowed && TryLookupMonitorBounds(handle, out var bounds))
+                        {
+                            w = bounds.Width;
+                            h = bounds.Height;
+                        }
 
-                        SwitchToMonitor(handle, _resolvedOptions.Windowed, _resolvedOptions.Width, _resolvedOptions.Height, _swapChain);
+                        SwitchToMonitor(handle, _resolvedOptions.Windowed, w, h, _swapChain);
                     }
                     else
                     {
@@ -1181,6 +1353,8 @@ public partial class Program
                     break;
 
                 case "/performanie/windowed":
+                    if (renderStarted)
+                        break;
                     if (msg.Count > 0 && msg[0] is string windowedStr && bool.TryParse(windowedStr, out bool isWindowed))
                     {
                         _resolvedOptions.Windowed = isWindowed;
@@ -1205,6 +1379,8 @@ public partial class Program
                     }
                     break;
                 case "/performanie/resolution":
+                    if (renderStarted)
+                        break;
                     if (msg.Count > 1 && msg[0] is string widthStrRes && int.TryParse(widthStrRes, out int newWidth) &&
                         msg[1] is string heightStrRes && int.TryParse(heightStrRes, out int newHeight))
                     {
