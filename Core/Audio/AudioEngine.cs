@@ -168,6 +168,45 @@ public static class AudioEngine
         return info.Frequency;
     }
 
+    public static bool TryGetMainSoundtrackStream(out int streamHandle, out int channels, out int sampleRate)
+    {
+        streamHandle = 0;
+        channels = 2;
+        sampleRate = 48000;
+
+        foreach (var (_, clipStream) in ClipStreams)
+        {
+            if (!clipStream.ResourceHandle.Clip.IsSoundtrack)
+                continue;
+
+            streamHandle = clipStream.StreamHandle;
+            if (Bass.ChannelGetInfo(streamHandle, out var info))
+            {
+                channels = info.Channels;
+                sampleRate = info.Frequency;
+            }
+
+            return streamHandle != 0;
+        }
+
+        foreach (var (_, clipStream) in ClipStreams)
+        {
+            if (clipStream.StreamHandle == 0)
+                continue;
+
+            streamHandle = clipStream.StreamHandle;
+            if (Bass.ChannelGetInfo(streamHandle, out var info))
+            {
+                channels = info.Channels;
+                sampleRate = info.Frequency;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     // In T3.Core/Audio/AudioEngine.cs (Diese Datei müssen Sie eventuell öffnen)
     public static void ReinitializeAudioInput()
     {

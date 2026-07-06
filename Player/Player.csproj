@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <ApplicationIcon>..\Resources\images\editor\t3.ico</ApplicationIcon>
+        <ApplicationIcon>..\Resources\images\editor\performanie.ico</ApplicationIcon>
         <RootNamespace>T3.Player</RootNamespace>
         <Configurations>Debug;Release</Configurations>
         <Platforms>AnyCPU;x64</Platforms>

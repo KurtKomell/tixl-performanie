@@ -255,7 +255,7 @@ public partial class Program
             _vsyncInterval = Convert.ToInt16(!_resolvedOptions.NoVsync);
             Log.Debug($": audio={audioDeviceIndex},  {_vsyncInterval}, windowed: {_resolvedOptions.Windowed}, size: {resolution}, loop: {_resolvedOptions.Loop}, logging: {_resolvedOptions.Logging}");
 
-            var iconPath = Path.Combine(FileLocations.StartFolder, "Images", "editor","t3.ico");
+            var iconPath = Path.Combine(FileLocations.StartFolder, "Images", "editor", "performanie.ico");
             var gotIcon = File.Exists(iconPath);
 
             Icon icon;

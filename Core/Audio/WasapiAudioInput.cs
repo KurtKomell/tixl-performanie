@@ -172,6 +172,9 @@ public static class WasapiAudioInput
         TimeSinceLastUpdate = time - LastUpdateTime;
         LastUpdateTime = time;
 
+        if (LiveAudioCapture.WasapiCaptureEnabled)
+            LiveAudioCapture.AppendRawPcm(buffer, length);
+
         if (WaveFormProcessing.RequestedOnce)
         {
             var sizeInBytes = WaveFormProcessing.WaveSampleCount << 2 << 1;
@@ -193,7 +196,6 @@ public static class WasapiAudioInput
         var playbackSettings = Playback.Current?.Settings;
         if (playbackSettings == null) 
             return length;
-        
         
         AudioAnalysis.ProcessUpdate(playbackSettings?.AudioGainFactor?? 1,
                                     playbackSettings?.AudioDecayFactor?? 0.9f);
@@ -221,6 +223,7 @@ public static class WasapiAudioInput
     internal static long SampleRate = 48000;
 
     public static string ActiveInputDeviceName { get; private set; }
+    public static int ActiveMixSampleRate => (int)SampleRate;
     private static float _lastAudioLevel;
     
     /// <summary>
