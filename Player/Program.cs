@@ -27,6 +27,7 @@ using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -88,6 +89,9 @@ public partial class Program
 
         [Option(Default = "", Required = false, HelpText = "Audiodevice")]
         public string Audio { get; set; }
+
+        [Option(Default = false, Required = false, HelpText = "Keep player window always on top")]
+        public bool AlwaysOnTop { get; set; }
     }
 
     [STAThread]
@@ -323,6 +327,8 @@ public partial class Program
 
                 if (!_resolvedOptions.Windowed)
                     ApplyBorderlessMonitorBounds(monitorBounds);
+
+                ApplyAlwaysOnTop(_resolvedOptions.AlwaysOnTop);
             }
             else
             {
@@ -592,10 +598,12 @@ public partial class Program
                     // Taste als verarbeitet markieren
                     _processedKeys.Add(e.KeyCode);
 
-                    // Setze den Wert von keyInPlayer
-                    keyInPlayer = e.KeyCode.ToString();
+                    if (e.Control && e.KeyCode == System.Windows.Forms.Keys.A && sender == _renderForm)
+                    {
+                        ForegroundToggleRequested?.Invoke();
+                        return;
+                    }
 
-                    // Anwendung schließen, wenn die Escape-Taste gedrückt wird
                     if (e.Control && e.KeyCode == System.Windows.Forms.Keys.F && sender == _renderForm)
                     {
                         _resolvedOptions.Windowed = !_resolvedOptions.Windowed;
@@ -604,9 +612,11 @@ public partial class Program
                             (nint)_resolvedOptions.MonitorHandle,
                             _resolvedOptions.Width,
                             _resolvedOptions.Height);
+                        return;
                     }
-                         
-                    
+
+                    // Setze den Wert von keyInPlayer
+                    keyInPlayer = e.KeyCode.ToString();
                 }
             };
 
@@ -992,8 +1002,12 @@ public partial class Program
     }
 
     private const int CanvasOscPort = 8000;
+    private const int AppOscPort = 9000;
     private static int _lastBroadcastCanvasOscW = -1;
     private static int _lastBroadcastCanvasOscH = -1;
+    private static OscSender? _appOscSender;
+    private static DateTime _lastAudioLevelBroadcastUtc = DateTime.MinValue;
+    private static readonly TimeSpan AudioLevelBroadcastInterval = TimeSpan.FromMilliseconds(30);
 
     public static void ResetCanvasOscDedupe()
     {
@@ -1044,6 +1058,35 @@ public partial class Program
         catch (Exception ex)
         {
             Log.Debug($"Failed to broadcast canvas resolution OSC: {ex.Message}");
+        }
+    }
+
+    private static void EnsureAppOscSender()
+    {
+        if (_appOscSender is { State: OscSocketState.Connected })
+            return;
+
+        _appOscSender?.Dispose();
+        _appOscSender = new OscSender(IPAddress.Loopback, AppOscPort);
+        _appOscSender.Connect();
+    }
+
+    internal static void BroadcastAudioLevel()
+    {
+        var now = DateTime.UtcNow;
+        if (now - _lastAudioLevelBroadcastUtc < AudioLevelBroadcastInterval)
+            return;
+
+        _lastAudioLevelBroadcastUtc = now;
+        try
+        {
+            EnsureAppOscSender();
+            var level = WasapiAudioInput.InputPeakLevel;
+            _appOscSender!.Send(new OscMessage("/performanie/audiolevel", level));
+        }
+        catch (Exception ex)
+        {
+            Log.Debug($"Failed to broadcast audio level OSC: {ex.Message}");
         }
     }
 
@@ -1222,6 +1265,91 @@ public partial class Program
         SwitchToMonitor(monitorHandle, windowed, width, height, _swapChain);
     }
 
+    private const int SwRestore = 9;
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+    [DllImport("user32.dll")]
+    private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+
+    [DllImport("kernel32.dll")]
+    private static extern uint GetCurrentThreadId();
+
+    public static event Action? ForegroundToggleRequested;
+
+    public static void ApplyAlwaysOnTop(bool enabled)
+    {
+        if (_renderForm == null)
+            return;
+
+        void Apply()
+        {
+            _renderForm.TopMost = enabled;
+            if (enabled)
+                BringToForegroundInternal();
+        }
+
+        if (_renderForm.InvokeRequired)
+            _renderForm.Invoke((Action)Apply);
+        else
+            Apply();
+    }
+
+    public static void BringToForeground()
+    {
+        if (_renderForm == null)
+            return;
+
+        if (_renderForm.InvokeRequired)
+            _renderForm.Invoke((Action)BringToForegroundInternal);
+        else
+            BringToForegroundInternal();
+    }
+
+    private static void BringToForegroundInternal()
+    {
+        if (_renderForm == null)
+            return;
+
+        if (_renderForm.WindowState == FormWindowState.Minimized)
+            _renderForm.WindowState = FormWindowState.Normal;
+
+        var handle = _renderForm.Handle;
+        ShowWindow(handle, SwRestore);
+
+        var foreground = GetForegroundWindow();
+        var foregroundThread = GetWindowThreadProcessId(foreground, out _);
+        var currentThread = GetCurrentThreadId();
+        var targetThread = GetWindowThreadProcessId(handle, out _);
+
+        if (foregroundThread != targetThread)
+        {
+            AttachThreadInput(currentThread, foregroundThread, true);
+            AttachThreadInput(currentThread, targetThread, true);
+        }
+
+        SetForegroundWindow(handle);
+        _renderForm.Activate();
+        _renderForm.BringToFront();
+        _renderForm.Focus();
+
+        if (foregroundThread != targetThread)
+        {
+            AttachThreadInput(currentThread, targetThread, false);
+            AttachThreadInput(currentThread, foregroundThread, false);
+        }
+    }
+
     private static void SwitchAudioInputDevice(int deviceIndex)
     {
         if (_playback == null)
@@ -1376,6 +1504,66 @@ public partial class Program
                     else
                     {
                         Log.Warning($"Invalid argument for /performanie/audioinput: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/audiogain":
+                    if (msg.Count > 0 && OscConnectionManager.TryGetFloatFromMessagePart(msg[0], out float gain))
+                    {
+                        if (_playback?.Settings != null)
+                            _playback.Settings.AudioGainFactor = gain;
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/audiogain: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/audiocompressorenabled":
+                    if (msg.Count > 0 && OscConnectionManager.TryGetFloatFromMessagePart(msg[0], out float compressorEnabled))
+                    {
+                        if (_playback?.Settings != null)
+                            _playback.Settings.EnableAudioCompressor = compressorEnabled > 0.5f;
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/audiocompressorenabled: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/compressorthreshold":
+                    if (msg.Count > 0 && OscConnectionManager.TryGetFloatFromMessagePart(msg[0], out float threshold))
+                    {
+                        if (_playback?.Settings != null)
+                            _playback.Settings.CompressorThresholdDb = threshold;
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/compressorthreshold: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/compressorratio":
+                    if (msg.Count > 0 && OscConnectionManager.TryGetFloatFromMessagePart(msg[0], out float ratio))
+                    {
+                        if (_playback?.Settings != null)
+                            _playback.Settings.CompressorRatio = Math.Max(1f, ratio);
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/compressorratio: {msg[0]}");
+                    }
+                    break;
+
+                case "/performanie/compressormakeup":
+                    if (msg.Count > 0 && OscConnectionManager.TryGetFloatFromMessagePart(msg[0], out float makeup))
+                    {
+                        if (_playback?.Settings != null)
+                            _playback.Settings.CompressorMakeupDb = makeup;
+                    }
+                    else
+                    {
+                        Log.Warning($"Invalid argument for /performanie/compressormakeup: {msg[0]}");
                     }
                     break;
                 case "/performanie/resolution":

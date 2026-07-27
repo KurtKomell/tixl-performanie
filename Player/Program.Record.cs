@@ -57,6 +57,13 @@ public partial class Program
         if (RecordEnabled && RecordIncludeAudio)
             PumpRecordAudio();
 
+        if (RecordEnabled && !string.IsNullOrEmpty(_videoEncoder?.LastError))
+        {
+            RecordStatusMessage = _videoEncoder.LastError;
+            StopRecording();
+            return;
+        }
+
         UpdateRecordAudioEndCheck();
     }
 
@@ -168,13 +175,21 @@ public partial class Program
             return false;
         }
 
+        string recordFolder;
         try
         {
-            Directory.CreateDirectory(RecordOutputFolder);
+            recordFolder = Path.GetFullPath(RecordOutputFolder);
+            if (!TryValidateRecordFolder(recordFolder, out var folderError))
+            {
+                RecordStatusMessage = folderError;
+                return false;
+            }
+
+            RecordOutputFolder = recordFolder;
         }
         catch (Exception e)
         {
-            RecordStatusMessage = $"Ordner nicht erstellbar: {e.Message}";
+            RecordStatusMessage = $"Aufnahmeordner ungueltig: {e.Message}";
             return false;
         }
 
@@ -186,7 +201,7 @@ public partial class Program
             return false;
         }
 
-        var outputFile = Path.Combine(RecordOutputFolder, $"record_{DateTime.Now:yyyyMMdd_HHmmss}.mp4");
+        var outputFile = Path.Combine(recordFolder, $"record_{DateTime.Now:yyyyMMdd_HHmmss}.mp4");
         var channels = 2;
         var sampleRate = 48000;
         var streamHandle = 0;
@@ -320,6 +335,32 @@ public partial class Program
         return _recordStartRunTime < 0
             ? 0
             : Math.Max(0, Playback.RunTimeInSecs - _recordStartRunTime);
+    }
+
+    private static bool TryValidateRecordFolder(string folder, out string errorMessage)
+    {
+        errorMessage = string.Empty;
+        try
+        {
+            Directory.CreateDirectory(folder);
+
+            var testPath = Path.Combine(folder, $".performanie_write_test_{Guid.NewGuid():N}.tmp");
+            using (var stream = new FileStream(testPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                stream.WriteByte(0);
+                stream.Flush(true);
+            }
+
+            File.Delete(testPath);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage =
+                $"Kein Schreibzugriff auf den Aufnahmeordner:\n{folder}\n({ex.Message})\n" +
+                "Bitte unter Record | 'Ordner waehlen...' einen beschreibbaren Ordner festlegen.";
+            return false;
+        }
     }
 
     private static Texture2D? CopyToRecordSnapshot(Texture2D source)

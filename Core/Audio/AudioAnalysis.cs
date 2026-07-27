@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using ManagedBass;
+using T3.Core.Animation;
 using T3.Core.Utils;
 
 namespace T3.Core.Audio;
@@ -11,15 +12,28 @@ namespace T3.Core.Audio;
 /// </summary>
 public static class AudioAnalysis
 {
-    internal static void ProcessUpdate(float gainFactor = 1f, float decayFactor = 0.9f)
+    internal static void ProcessUpdate(float gainFactor = 1f,
+                                     float decayFactor = 0.9f,
+                                     bool enableCompressor = false,
+                                     float compressorThresholdDb = -24f,
+                                     float compressorRatio = 4f,
+                                     float compressorMakeupDb = 6f)
     {
+        if (Math.Abs(gainFactor - 1f) > 0.0001f)
+        {
+            for (var i = 0; i < FftBufferSize; i++)
+                FftGainBuffer[i] *= gainFactor;
+        }
+
+        ApplyCompressor(enableCompressor, compressorThresholdDb, compressorRatio, compressorMakeupDb);
+
         var lastTargetIndex = -1;
 
         lock (FrequencyBands)
         {
             for (var binIndex = 0; binIndex < FftBufferSize; binIndex++)
             {
-                var gain = FftGainBuffer[binIndex] * gainFactor;
+                var gain = FftGainBuffer[binIndex];
                 var gainDb = gain <= 0.000001f ? float.NegativeInfinity : 20 * MathF.Log10(gain);
 
                 var normalizedValue = gainDb.RemapAndClamp(-80, 0, 0, 1);
@@ -193,4 +207,52 @@ public static class AudioAnalysis
 
     internal const DataFlags BassFlagForFftBufferSize = DataFlags.FFT2048;
     internal const int FftBufferSize = 1024; // For Bass DataFlags.FFT2024
+
+    /// <summary>Current gain reduction in dB (negative or zero), for UI display.</summary>
+    public static float CurrentCompressionGainDb { get; private set; }
+
+    private static float _compressorEnvelopeDb = -80f;
+    private static double _lastCompressorUpdateTime = -1;
+
+    private static void ApplyCompressor(bool enabled, float thresholdDb, float ratio, float makeupDb)
+    {
+        if (!enabled)
+        {
+            CurrentCompressionGainDb = 0f;
+            return;
+        }
+
+        var sumSquares = 0f;
+        for (var i = 0; i < FftBufferSize; i++)
+            sumSquares += FftGainBuffer[i] * FftGainBuffer[i];
+
+        var rms = MathF.Sqrt(sumSquares / FftBufferSize);
+        var inputDb = rms <= 0.000001f ? -80f : 20f * MathF.Log10(rms);
+
+        var now = Playback.RunTimeInSecs;
+        var dt = _lastCompressorUpdateTime < 0
+                     ? 0.003f
+                     : (float)Math.Clamp(now - _lastCompressorUpdateTime, 0.0001, 0.1);
+        _lastCompressorUpdateTime = now;
+
+        const float attackMs = 10f;
+        const float releaseMs = 150f;
+        var attackCoeff = MathF.Exp(-dt / (attackMs / 1000f));
+        var releaseCoeff = MathF.Exp(-dt / (releaseMs / 1000f));
+
+        if (inputDb > _compressorEnvelopeDb)
+            _compressorEnvelopeDb = attackCoeff * _compressorEnvelopeDb + (1f - attackCoeff) * inputDb;
+        else
+            _compressorEnvelopeDb = releaseCoeff * _compressorEnvelopeDb + (1f - releaseCoeff) * inputDb;
+
+        var overDb = MathF.Max(0f, _compressorEnvelopeDb - thresholdDb);
+        var safeRatio = MathF.Max(1f, ratio);
+        var reductionDb = overDb * (1f - 1f / safeRatio);
+        var outGainDb = makeupDb - reductionDb;
+        CurrentCompressionGainDb = -reductionDb;
+
+        var factor = MathF.Pow(10f, outGainDb / 20f);
+        for (var i = 0; i < FftBufferSize; i++)
+            FftGainBuffer[i] *= factor;
+    }
 }

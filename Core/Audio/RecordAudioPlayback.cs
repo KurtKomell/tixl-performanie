@@ -15,9 +15,11 @@ public static class RecordAudioPlayback
     private static string? _filePath;
     private static int _streamHandle;
     private static double _durationSeconds;
+    private static bool _loopEnabled;
 
     public static string? FilePath => _filePath;
     public static double DurationSeconds => _durationSeconds;
+    public static bool LoopEnabled => _loopEnabled;
     public static bool HasFile => !string.IsNullOrEmpty(_filePath) && File.Exists(_filePath);
     public static bool IsActive => _streamHandle != 0 && Bass.ChannelIsActive(_streamHandle) == PlaybackState.Playing;
 
@@ -29,6 +31,13 @@ public static class RecordAudioPlayback
         Stop();
         _filePath = string.IsNullOrWhiteSpace(absolutePath) ? null : absolutePath;
         _durationSeconds = 0;
+    }
+
+    public static void SetLoopEnabled(bool enabled)
+    {
+        _loopEnabled = enabled;
+        if (_streamHandle != 0)
+            Bass.ChannelFlags(_streamHandle, enabled ? BassFlags.Loop : BassFlags.Default, BassFlags.Loop);
     }
 
     public static bool TryProbeDuration(out double durationSeconds)
@@ -70,7 +79,11 @@ public static class RecordAudioPlayback
             return false;
         }
 
-        _streamHandle = Bass.CreateStream(_filePath!, 0, 0, BassFlags.Prescan | BassFlags.Float);
+        var streamFlags = BassFlags.Prescan | BassFlags.Float;
+        if (_loopEnabled)
+            streamFlags |= BassFlags.Loop;
+
+        _streamHandle = Bass.CreateStream(_filePath!, 0, 0, streamFlags);
         if (_streamHandle == 0)
         {
             Log.Warning($"Record audio: failed to load '{_filePath}' ({Bass.LastError})");

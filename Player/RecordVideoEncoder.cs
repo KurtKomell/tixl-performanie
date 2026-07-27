@@ -67,7 +67,7 @@ public sealed class RecordVideoEncoder : IDisposable
     }
 
     public string FilePath { get; }
-    public string? LastError => _lastError;
+    public string? LastError => _lastError ?? _writer.LastError;
     public int FramesWritten => _writer.FramesWritten;
 
     public void Update() => _readAccess.Update();
@@ -327,6 +327,8 @@ internal sealed class RecordMp4VideoWriter : IDisposable
     private int _initChannels = 2;
     private int _initSampleRate = 48000;
     private volatile bool _disposed;
+    private volatile string? _lastError;
+    private volatile bool _writeFailed;
 
     public RecordMp4VideoWriter(string filePath, Int2 videoPixelSize, RecordCodec codec, bool supportAudio)
     {
@@ -353,6 +355,7 @@ internal sealed class RecordMp4VideoWriter : IDisposable
     public int AudioChannels { get; set; }
     public int AudioSampleRate { get; set; }
     public int FramesWritten => Volatile.Read(ref _videoFramesWritten);
+    public string? LastError => _lastError;
 
     public void EnqueueAudio(byte[] audioFrame, double captureTimeSeconds, double durationSeconds)
     {
@@ -374,7 +377,7 @@ internal sealed class RecordMp4VideoWriter : IDisposable
         TextureBgraReadAccess readAccess,
         TextureBgraReadAccess.OnReadComplete onReadComplete)
     {
-        if (_disposed)
+        if (_disposed || _writeFailed)
             return false;
 
         _pendingVideoTiming.Enqueue((captureTimeSeconds, frameDurationSeconds));
@@ -391,7 +394,7 @@ internal sealed class RecordMp4VideoWriter : IDisposable
 
     public void CompleteReadback(TextureBgraReadAccess.ReadRequestItem readRequestItem)
     {
-        if (_disposed)
+        if (_disposed || _writeFailed)
             return;
 
         var cpuAccessTexture = readRequestItem.CpuAccessTexture;
@@ -512,7 +515,7 @@ internal sealed class RecordMp4VideoWriter : IDisposable
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning($"Record worker: {ex.Message}");
+                    FailWrite($"Record worker: {ex.Message}");
                 }
                 finally
                 {
@@ -676,11 +679,38 @@ internal sealed class RecordMp4VideoWriter : IDisposable
 
     private void WriteSample(int streamIndex, MF.Sample sample, double captureTimeSeconds, double durationSeconds)
     {
+        if (_writeFailed)
+            return;
+
         var sampleTime = (long)(Math.Max(0, captureTimeSeconds) * 10_000_000);
         var sampleDuration = Math.Max(1L, (long)(Math.Max(1.0 / 6000.0, durationSeconds) * 10_000_000));
         sample.SampleTime = sampleTime;
         sample.SampleDuration = sampleDuration;
-        _sinkWriter!.WriteSample(streamIndex, sample);
+        try
+        {
+            _sinkWriter!.WriteSample(streamIndex, sample);
+        }
+        catch (Exception ex)
+        {
+            FailWrite($"Schreibfehler in {_filePath}: {ex.Message}");
+            throw;
+        }
+    }
+
+    private void FailWrite(string message)
+    {
+        _lastError = message;
+        _writeFailed = true;
+        Log.Warning(message);
+        try
+        {
+            if (!_muxQueue.IsAddingCompleted)
+                _muxQueue.CompleteAdding();
+        }
+        catch
+        {
+            // ignore shutdown race
+        }
     }
 
     private static int RgbaSizeInBytes(int width, int height) => (width * height * 32 + 7) / 8;

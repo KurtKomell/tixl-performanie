@@ -191,14 +191,21 @@ public static class WasapiAudioInput
         }
         
         var level = BassWasapi.GetLevel();
-        _lastAudioLevel = (float)(level * 0.00001);
+        var leftPeak = level & 0xFFFF;
+        var rightPeak = (level >> 16) & 0xFFFF;
+        var peak = Math.Max(leftPeak, rightPeak);
+        _lastAudioLevel = (float)(peak * 0.00001);
 
         var playbackSettings = Playback.Current?.Settings;
         if (playbackSettings == null) 
             return length;
         
-        AudioAnalysis.ProcessUpdate(playbackSettings?.AudioGainFactor?? 1,
-                                    playbackSettings?.AudioDecayFactor?? 0.9f);
+        AudioAnalysis.ProcessUpdate(playbackSettings?.AudioGainFactor ?? 1,
+                                    playbackSettings?.AudioDecayFactor ?? 0.9f,
+                                    playbackSettings?.EnableAudioCompressor ?? false,
+                                    playbackSettings?.CompressorThresholdDb ?? -24f,
+                                    playbackSettings?.CompressorRatio ?? 4f,
+                                    playbackSettings?.CompressorMakeupDb ?? 6f);
 
         if (playbackSettings.EnableAudioBeatLocking)
         {
@@ -225,6 +232,9 @@ public static class WasapiAudioInput
     public static string ActiveInputDeviceName { get; private set; }
     public static int ActiveMixSampleRate => (int)SampleRate;
     private static float _lastAudioLevel;
+
+    /// <summary>Latest normalized input peak (0..~0.33), without decay division.</summary>
+    public static float InputPeakLevel => _lastAudioLevel;
     
     /// <summary>
     /// This is only used of the gain meter in the playback settings dialog.

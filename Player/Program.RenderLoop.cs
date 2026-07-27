@@ -28,6 +28,7 @@ public partial class Program
         var viewportH = _backBuffer?.Description.Height ?? _resolution.Height;
 
         WasapiAudioInput.StartFrame(_playback.Settings);
+        BroadcastAudioLevel();
         _playback.Update();
 
         // Update OSC messages

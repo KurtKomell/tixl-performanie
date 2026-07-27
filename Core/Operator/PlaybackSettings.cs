@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -26,6 +26,10 @@ public sealed class PlaybackSettings
     public string AudioInputDeviceName = string.Empty;
     public float AudioGainFactor = 1;
     public float AudioDecayFactor = 0.9f;
+    public bool EnableAudioCompressor = false;
+    public float CompressorThresholdDb = -24f;
+    public float CompressorRatio = 4f;
+    public float CompressorMakeupDb = 6f;
     
     public bool EnableAudioBeatLocking = false;
     public float BeatLockAudioOffsetSec;
@@ -81,6 +85,10 @@ public sealed class PlaybackSettings
             writer.WriteValue(nameof(Syncing), Syncing);
             writer.WriteValue(nameof(AudioDecayFactor), AudioDecayFactor);
             writer.WriteValue(nameof(AudioGainFactor), AudioGainFactor);
+            writer.WriteValue(nameof(EnableAudioCompressor), EnableAudioCompressor);
+            writer.WriteValue(nameof(CompressorThresholdDb), CompressorThresholdDb);
+            writer.WriteValue(nameof(CompressorRatio), CompressorRatio);
+            writer.WriteValue(nameof(CompressorMakeupDb), CompressorMakeupDb);
             writer.WriteObject(nameof(AudioInputDeviceName), AudioInputDeviceName);
             writer.WriteObject(nameof(EnableAudioBeatLocking), EnableAudioBeatLocking);
             writer.WriteObject(nameof(BeatLockAudioOffsetSec), BeatLockAudioOffsetSec);
@@ -123,6 +131,10 @@ public sealed class PlaybackSettings
                                   Syncing = JsonUtils.ReadEnum<SyncModes>(settingsToken, nameof(Syncing)),
                                   AudioDecayFactor = JsonUtils.ReadToken(settingsToken, nameof(AudioDecayFactor), 0.5f),
                                   AudioGainFactor = JsonUtils.ReadToken(settingsToken, nameof(AudioGainFactor), 1f),
+                                  EnableAudioCompressor = JsonUtils.ReadToken(settingsToken, nameof(EnableAudioCompressor), false),
+                                  CompressorThresholdDb = JsonUtils.ReadToken(settingsToken, nameof(CompressorThresholdDb), -24f),
+                                  CompressorRatio = JsonUtils.ReadToken(settingsToken, nameof(CompressorRatio), 4f),
+                                  CompressorMakeupDb = JsonUtils.ReadToken(settingsToken, nameof(CompressorMakeupDb), 6f),
                                   AudioInputDeviceName = JsonUtils.ReadToken<string>(settingsToken, nameof(AudioInputDeviceName))?? string.Empty,
                                   EnableAudioBeatLocking = JsonUtils.ReadToken(settingsToken, nameof(EnableAudioBeatLocking), false),
                                   BeatLockAudioOffsetSec = JsonUtils.ReadToken(settingsToken, nameof(BeatLockAudioOffsetSec), 0f),

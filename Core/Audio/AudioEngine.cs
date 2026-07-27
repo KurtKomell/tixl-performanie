@@ -44,7 +44,12 @@ public static class AudioEngine
         if(playback.Settings is { 
                Enabled: true, 
                AudioSource: PlaybackSettings.AudioSources.ProjectSoundTrack })
-            AudioAnalysis.ProcessUpdate(playback.Settings.AudioGainFactor, playback.Settings.AudioDecayFactor);
+            AudioAnalysis.ProcessUpdate(playback.Settings.AudioGainFactor,
+                                        playback.Settings.AudioDecayFactor,
+                                        playback.Settings.EnableAudioCompressor,
+                                        playback.Settings.CompressorThresholdDb,
+                                        playback.Settings.CompressorRatio,
+                                        playback.Settings.CompressorMakeupDb);
 
         // Create new streams
         foreach (var (handle, time) in _updatedClipTimes)
