@@ -1,0 +1,20 @@
+{
+  "Id": "b223fbda-d11e-4389-bc89-4b9346cff20d"/*InttoBoolean*/,
+  "Inputs": [
+    {
+      "Id": "5c73cde8-5523-48bb-8517-0e03c42b8050"/*ColorInGraph*/,
+      "DefaultValue": {
+        "X": 0.15294118,
+        "Y": 0.15294118,
+        "Z": 0.15294118,
+        "W": 1.0
+      }
+    },
+    {
+      "Id": "6529d61e-95e0-4e05-8f5b-e38dc44c5aa0"/*BoolValue*/,
+      "DefaultValue": false
+    }
+  ],
+  "Children": [],
+  "Connections": []
+}

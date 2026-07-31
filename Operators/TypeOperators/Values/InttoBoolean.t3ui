@@ -1,0 +1,34 @@
+{
+  "Id": "b223fbda-d11e-4389-bc89-4b9346cff20d"/*InttoBoolean*/,
+  "Description": "",
+  "InputUis": [
+    {
+      "InputId": "5c73cde8-5523-48bb-8517-0e03c42b8050"/*ColorInGraph*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 135.0
+      },
+      "Min": 0.0,
+      "Max": 1.0,
+      "ClampMin": true,
+      "ClampMax": true
+    },
+    {
+      "InputId": "6529d61e-95e0-4e05-8f5b-e38dc44c5aa0"/*BoolValue*/,
+      "Position": {
+        "X": -200.0,
+        "Y": 0.0
+      }
+    }
+  ],
+  "SymbolChildUis": [],
+  "OutputUis": [
+    {
+      "OutputId": "efb1e5ff-eaca-45c5-a671-4ea53400729a"/*Result*/,
+      "Position": {
+        "X": 0.0,
+        "Y": 0.0
+      }
+    }
+  ]
+}
