@@ -164,6 +164,29 @@ public partial class Program
         }
 
 
+        // Prefer the DXGI adapter that owns the target monitor (USB extenders often
+        // sit on a different GPU than the highest-rated discrete card).
+        int? monitorOwnerAdapterIndex = null;
+        if (monitorHandle != 0)
+        {
+            for (var i = 0; i < factory.GetAdapterCount1(); i++)
+            {
+                using var adapter = factory.GetAdapter1(i);
+                for (var outputIndex = 0; outputIndex < adapter.GetOutputCount(); outputIndex++)
+                {
+                    using var output = adapter.GetOutput(outputIndex);
+                    if (output.Description.MonitorHandle != monitorHandle)
+                        continue;
+
+                    monitorOwnerAdapterIndex = i;
+                    break;
+                }
+
+                if (monitorOwnerAdapterIndex.HasValue)
+                    break;
+            }
+        }
+
         var adapterRatings = new List<DisplayAdapterRating>(8);
 
         for (var i = 0; i < factory.GetAdapterCount(); i++)
@@ -211,7 +234,8 @@ public partial class Program
             newRating.Rating *= memSizeFactor;
         }
 
-        var selectedAdapterIndex = adapterRatings.OrderByDescending(r => r.Rating).First().Index;
+        var selectedAdapterIndex = monitorOwnerAdapterIndex
+            ?? adapterRatings.OrderByDescending(r => r.Rating).First().Index;
 
         selectedAdapter = factory.GetAdapter1(selectedAdapterIndex);
         ActiveGpu = selectedAdapter.Description.Description;
@@ -273,6 +297,7 @@ public partial class Program
                 icon = new Icon(iconPath);
             }
             SharpDX.Rectangle monitorBounds = SharpDX.Rectangle.Empty;
+            int? foundMonitorAdapterIndex = null;
 
             for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
             {
@@ -284,18 +309,81 @@ public partial class Program
                         {
                             if (output.Description.MonitorHandle == monitorHandle)
                             {
-                                Console.WriteLine($"Monitor gefunden: {output.Description.DeviceName}");
                                 monitorBounds = new SharpDX.Rectangle(
                                     output.Description.DesktopBounds.Left,
                                     output.Description.DesktopBounds.Top,
                                     output.Description.DesktopBounds.Right - output.Description.DesktopBounds.Left,
                                     output.Description.DesktopBounds.Bottom - output.Description.DesktopBounds.Top
                                 );
+                                foundMonitorAdapterIndex = adapterIndex;
                                 break;
                             }
                         }
                     }
+
+                    if (foundMonitorAdapterIndex.HasValue)
+                        break;
                 }
+            }
+
+            // Fallback: use primary monitor so _renderForm is never null.
+            // Sole USB extender is Primary (0,0); if that heuristic fails, take the only output.
+            if (monitorBounds == SharpDX.Rectangle.Empty)
+            {
+                SharpDX.Rectangle firstOutputBounds = SharpDX.Rectangle.Empty;
+                int? firstOutputAdapter = null;
+                nint firstOutputHandle = 0;
+
+                for (int adapterIndex = 0; adapterIndex < factory.GetAdapterCount1(); adapterIndex++)
+                {
+                    using var adapter = factory.GetAdapter1(adapterIndex);
+                    for (int outputIndex = 0; outputIndex < adapter.GetOutputCount(); outputIndex++)
+                    {
+                        using var output = adapter.GetOutput(outputIndex);
+                        var desktop = output.Description.DesktopBounds;
+                        var bounds = new SharpDX.Rectangle(
+                            desktop.Left,
+                            desktop.Top,
+                            desktop.Right - desktop.Left,
+                            desktop.Bottom - desktop.Top);
+
+                        if (firstOutputBounds == SharpDX.Rectangle.Empty)
+                        {
+                            firstOutputBounds = bounds;
+                            firstOutputAdapter = adapterIndex;
+                            firstOutputHandle = output.Description.MonitorHandle;
+                        }
+
+                        if (desktop.Left != 0 || desktop.Top != 0)
+                            continue;
+
+                        monitorBounds = bounds;
+                        monitorHandle = output.Description.MonitorHandle;
+                        _resolvedOptions.MonitorHandle = (int)monitorHandle;
+                        foundMonitorAdapterIndex = adapterIndex;
+                        break;
+                    }
+
+                    if (monitorBounds != SharpDX.Rectangle.Empty)
+                        break;
+                }
+
+                if (monitorBounds == SharpDX.Rectangle.Empty && firstOutputBounds != SharpDX.Rectangle.Empty)
+                {
+                    monitorBounds = firstOutputBounds;
+                    monitorHandle = firstOutputHandle;
+                    _resolvedOptions.MonitorHandle = (int)monitorHandle;
+                    foundMonitorAdapterIndex = firstOutputAdapter;
+                }
+            }
+
+            // If the monitor lives on a different adapter than the one we picked earlier, rebind.
+            if (foundMonitorAdapterIndex.HasValue && foundMonitorAdapterIndex.Value != selectedAdapterIndex)
+            {
+                selectedAdapter?.Dispose();
+                selectedAdapterIndex = foundMonitorAdapterIndex.Value;
+                selectedAdapter = factory.GetAdapter1(selectedAdapterIndex);
+                ActiveGpu = selectedAdapter.Description.Description;
             }
 
             if (!_resolvedOptions.Windowed && monitorBounds != SharpDX.Rectangle.Empty)
@@ -305,35 +393,25 @@ public partial class Program
                 _resolvedOptions.Height = monitorBounds.Height;
             }
 
-            //_renderForm = new RenderForm("Performanie Pro 3")
-            //                  {
-            //                      ClientSize = new Size(resolution.X, resolution.Y),
-            //                      StartPosition = System.Windows.Forms.FormStartPosition.Manual,
-            //                      AllowUserResizing = false,
-            //                      //Icon = icon,
-            //                  };
-
-            if (monitorBounds != SharpDX.Rectangle.Empty)
+            if (monitorBounds == SharpDX.Rectangle.Empty)
             {
-                _renderForm = new RenderForm("Performanie Pro 3 | Program Window")
-                {
-                    StartPosition = FormStartPosition.Manual,
-                    FormBorderStyle = FormBorderStyle.Sizable,
-                    WindowState = FormWindowState.Normal,
-                    Icon = icon,
-                    Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y),
-                    ClientSize = new Size(_resolvedOptions.Width, _resolvedOptions.Height),
-                };
-
-                if (!_resolvedOptions.Windowed)
-                    ApplyBorderlessMonitorBounds(monitorBounds);
-
-                ApplyAlwaysOnTop(_resolvedOptions.AlwaysOnTop);
+                monitorBounds = new SharpDX.Rectangle(0, 0, _resolvedOptions.Width, _resolvedOptions.Height);
             }
-            else
+
+            _renderForm = new RenderForm("Performanie Pro 3 | Program Window")
             {
-                Console.WriteLine("Kein Monitor mit dem angegebenen Handle gefunden. Standardposition wird verwendet.");
-            }
+                StartPosition = FormStartPosition.Manual,
+                FormBorderStyle = FormBorderStyle.Sizable,
+                WindowState = FormWindowState.Normal,
+                Icon = icon,
+                Location = new System.Drawing.Point(monitorBounds.X, monitorBounds.Y),
+                ClientSize = new Size(_resolvedOptions.Width, _resolvedOptions.Height),
+            };
+
+            if (!_resolvedOptions.Windowed)
+                ApplyBorderlessMonitorBounds(monitorBounds);
+
+            ApplyAlwaysOnTop(_resolvedOptions.AlwaysOnTop);
             _renderForm.ResizeBegin += (_, _) => _suppressFormResize = true;
             _renderForm.ResizeEnd += (_, _) =>
             {
@@ -468,6 +546,7 @@ public partial class Program
             }
            
             
+
 
            
 

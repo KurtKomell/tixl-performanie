@@ -162,6 +162,9 @@ public sealed class Animator : SymbolExtension
             
         foreach (var instance in childInstances)
         {
+            if (instance?.SymbolChild == null)
+                continue;
+
             var childId = instance.SymbolChildId;
             // if(!childInstances.TryGetValue(childId, out var instance))
             //     continue;

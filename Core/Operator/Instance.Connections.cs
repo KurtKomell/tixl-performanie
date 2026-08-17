@@ -17,42 +17,94 @@ public abstract partial class Instance
         if (!NeedsInternalReconnections)
             return;
 
-        if (TryGetParentInstance(out var parent, false) && parent is { NeedsInternalReconnections: true })
+        // Walk up iteratively — do not recurse into parent.ReconnectChildren()
+        // (that reintroduced deep stacks on USB-display-only startups).
+        var root = this;
+        while (root.TryGetParentInstance(out var parent, false) && parent is { NeedsInternalReconnections: true })
         {
-            // if the parent instance also needs reconnections, we return early
-            // as the parent will trigger this method in its children as well
-            parent.ReconnectChildren();
+            root = parent;
+        }
+
+        if (!ReferenceEquals(root, this))
+        {
+            root.ReconnectChildren();
             return;
         }
-        
-        // prevent recursion by setting the connection status prematurely
-        _status |= InstanceStatus.ConnectedInternally;
-        _status |= InstanceStatus.IsReconnecting;
 
-        // first removes all connections from direct children
-        // we do this so we can blindly re-apply all of our connections
-        foreach (var childInst in Children.PreExistingValues)
+        // Breadth-first: create/wire descendants without nested Initialize/ReconnectChildren.
+        // Deep recursive graph load overflowed the stack on some display adapters
+        // (reported as AccessViolationException during InstanceChildren construction).
+        var queue = new Queue<Instance>();
+        queue.Enqueue(this);
+
+        while (queue.Count > 0)
         {
-            childInst.DisconnectInputs();
+            var current = queue.Dequeue();
+            if (!current.NeedsInternalReconnections)
+                continue;
+
+            // Deferred instances skip Instance.Initialize; finish the same setup here.
+            if (!current.Initialized)
+            {
+                SortInputSlotsByDefinitionOrder(current);
+                current._status |= InstanceStatus.ResourceFoldersDirty;
+            }
+
+            // prevent re-entry by setting the connection status prematurely
+            current._status |= InstanceStatus.ConnectedInternally;
+            current._status |= InstanceStatus.IsReconnecting;
+
+            foreach (var childInst in current.Children.PreExistingValues)
+            {
+                childInst.DisconnectInputs();
+            }
+
+            foreach (var child in current.SymbolChild.Symbol.Children.Values)
+            {
+                try
+                {
+                    // Create children without Initialize so nesting depth stays O(1) per level.
+                    if (current.Children.TryGetChildInstance(child.Id, out var childInst, allowCreate: true, initialize: false))
+                    {
+                        if (childInst.NeedsInternalReconnections)
+                            queue.Enqueue(childInst);
+                    }
+                    else
+                    {
+                        Log.Error($"Failed to create/locate child instance {child.Id} in {current.SymbolChild}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    // Isolate faults to a single operator instead of aborting the whole graph load.
+                    // Also surfaces which operator was involved — the outer catch in TryCreateNewInstance
+                    // only knows the top-level project type, not the specific child that failed.
+                    var msg = $"Exception creating child {child.Id} ({child.Symbol?.Name}) in {current.SymbolChild}: {e}";
+                    Log.Error(msg);
+                    Console.Error.WriteLine($"[T3] {msg}");
+                }
+            }
+
+            try
+            {
+                CreateConnectionsForInstance(current);
+            }
+            catch (Exception e)
+            {
+                var msg = $"Exception connecting children of {current.SymbolChild}: {e}";
+                Log.Error(msg);
+                Console.Error.WriteLine($"[T3] {msg}");
+            }
+
+            current._status &= ~InstanceStatus.IsReconnecting;
+
+            if (!current.Initialized)
+            {
+                current._status |= InstanceStatus.Initialized;
+                current._status |= InstanceStatus.Active;
+            }
         }
 
-        // ensure all of our children have their own internall connections connected (recursive)
-        foreach (var child in SymbolChild.Symbol.Children.Values)
-        {
-            if (Children.TryGetChildInstance(child.Id, out var childInst) )
-            {
-                if(childInst.NeedsInternalReconnections)
-                    childInst.ReconnectChildren();
-            }
-            else
-            {
-                Log.Error($"Failed to create/locate child instance {child.Id} in {SymbolChild}");
-            }
-        }
-        
-        // actually create the connections for this instance and its children
-        CreateConnectionsForInstance(this);
-        _status &= ~InstanceStatus.IsReconnecting; // clear reconnecting status
         return;
         
         static void CreateConnectionsForInstance(Instance instance)
@@ -74,7 +126,9 @@ public abstract partial class Instance
                     ulong hash = (highPart << 32) | lowPart;
                     conHashToCount.TryGetValue(hash, out int count);
 
-                    if (!instance.TryAddConnection(connection, count, true))
+                    // Children were just created above; never allowCreate here — that would
+                    // nest Initialize/ReconnectChildren and blow the stack again.
+                    if (!instance.TryAddConnection(connection, count, allowCreate: false))
                     {
                         Log.Warning($"Removing obsolete connecting in {symbol}...");
                         // todo: this removal should be moved into the Symbol class
@@ -88,8 +142,9 @@ public abstract partial class Instance
             }
 
             // connect animations if available
-            // note: by accessing the Values property, all children are guaranteed to be created, even if they are not connected to anything
-            symbol.Animator.CreateUpdateActionsForExistingCurves(instance.Children.Values);
+            // Children were already created by ReconnectChildren (BFS); do not use Values —
+            // that path defaults to initialize:true and would nest ReconnectChildren again.
+            symbol.Animator.CreateUpdateActionsForExistingCurves(instance.Children.PreExistingValues);
 
             if (child.IsBypassed)
             {
@@ -128,7 +183,7 @@ public abstract partial class Instance
         }
         else
         {
-            if (!Children.TryGetChildInstance(targetParentOrChildId, out var targetInstance, allowCreate))
+            if (!Children.TryGetChildInstance(targetParentOrChildId, out var targetInstance, allowCreate, initialize: !IsReconnecting))
             {
                 targetSlot = null;
                 return false;
@@ -194,7 +249,7 @@ public abstract partial class Instance
         }
         else
         {
-            if (!Children.TryGetChildInstance(sourceParentOrChildId, out var sourceInstance, allowCreate))
+            if (!Children.TryGetChildInstance(sourceParentOrChildId, out var sourceInstance, allowCreate, initialize: !IsReconnecting))
             {
                 sourceSlot = null;
                 return false;

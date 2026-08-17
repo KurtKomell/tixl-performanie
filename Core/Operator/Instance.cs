@@ -53,30 +53,51 @@ public abstract partial class Instance :  IGuidPathContainer, IResourceConsumer
 
     internal void SetSymbolInfo(Symbol.Child child, Symbol.Child? parent, IReadOnlyList<Guid> instancePath, int pathHash)
     {
-        if(SymbolChild != null)
-            throw new InvalidOperationException("Instance already has a symbol child");
-        
-        if (instancePath.Count > 1)
+        ArgumentNullException.ThrowIfNull(child);
+        ArgumentNullException.ThrowIfNull(instancePath);
+
+        // Always clone — callers may pass InstanceChildren's mutable scratch buffer.
+        var pathCopy = new Guid[instancePath.Count];
+        for (var i = 0; i < instancePath.Count; i++)
+            pathCopy[i] = instancePath[i];
+
+        if (SymbolChild != null)
         {
-            _parentPath = new Guid[instancePath.Count - 1];
+            // Idempotent re-entry (same child + path): safe no-op. Different identity: real error.
+            if (ReferenceEquals(SymbolChild, child) && _pathHash == pathHash)
+                return;
+
+            throw new InvalidOperationException(
+                $"Instance already has a symbol child ({SymbolChild.Name}/{SymbolChild.Id}). " +
+                $"New: {child.Name}/{child.Id}, oldHash: {_pathHash}, newHash: {pathHash}");
+        }
+        
+        if (pathCopy.Length > 1)
+        {
+            _parentPath = new Guid[pathCopy.Length - 1];
             for (var i = 0; i < _parentPath.Length; i++)
             {
-                _parentPath[i] = instancePath[i];
+                _parentPath[i] = pathCopy[i];
             }
         }
         
-        InstancePath = instancePath;
+        // Build Children first; only publish SymbolChild after success so failed ctors
+        // cannot leave a half-bound instance visible via SymbolChildId / PreExistingValues.
+        var children = new InstanceChildren(pathCopy, child);
+        InstancePath = pathCopy;
         _pathHash = pathHash;
-        SymbolChild = child;
         _parentSymbolChild = parent;
-        Children = new InstanceChildren(instancePath, child);
+        Children = children;
+        SymbolChild = child;
     }
     
     internal void Initialize(Instance? parentInstance)
     {
+        // BFS reconnect may have already finished this instance; avoid assert/re-entry failures.
+        if (Initialized || IsReconnecting)
+            return;
+
         SortInputSlotsByDefinitionOrder(this);
-        
-        Debug.Assert(_status == default);
 
         parentInstance ??= Parent;
         if (parentInstance is { Initialized: true, IsReconnecting: false })

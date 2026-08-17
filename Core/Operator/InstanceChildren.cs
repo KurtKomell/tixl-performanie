@@ -21,6 +21,9 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
     
     internal InstanceChildren(IReadOnlyList<Guid> instancePath, Symbol.Child symbolChild)
     {
+        ArgumentNullException.ThrowIfNull(instancePath);
+        ArgumentNullException.ThrowIfNull(symbolChild);
+
         _asChild = symbolChild;
         _childSearchPath = new Guid[instancePath.Count + 1];
         for (var i = 0; i < instancePath.Count; i++)
@@ -90,7 +93,8 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
 
             foreach (var child in _asChild.Symbol.Children.Values)
             {
-                if (TryGetChildInstance(child.Id, out var instance, allowCreate: false))
+                if (TryGetChildInstance(child.Id, out var instance, allowCreate: false)
+                    && instance.SymbolChild != null)
                 {
                     yield return instance;
                 }
@@ -138,7 +142,7 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
         return false;
     }
 
-    public bool TryGetChildInstance(Guid childId, [NotNullWhen(true)] out Instance? instance, bool allowCreate = true)
+    public bool TryGetChildInstance(Guid childId, [NotNullWhen(true)] out Instance? instance, bool allowCreate = true, bool initialize = true)
     {
         var symbol = _asChild.Symbol;
         if (!symbol.Children.TryGetValue(childId, out var sourceChild))
@@ -152,7 +156,9 @@ public sealed class InstanceChildren : IReadOnlyDictionary<Guid, Instance>
         lock (_childSearchPath) // prevent concurrent modifications to the search path
         {
             _childSearchPath[^1] = childId;
-            if (sourceChild.TryGetOrCreateInstance(_childSearchPath, out instance, out _, allowCreate))
+            // Copy path — TryGetOrCreateInstance must not observe later mutations to this buffer.
+            var pathCopy = (Guid[])_childSearchPath.Clone();
+            if (sourceChild.TryGetOrCreateInstance(pathCopy, out instance, out _, allowCreate, initialize))
             {
                 return true;
             }
