@@ -1,8 +1,8 @@
 using Rug.Osc;
-using Rug.Osc;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using T3.Core.Logging;
@@ -13,8 +13,11 @@ public static class OscConnectionManager
 {
     public static void RegisterConsumer(IOscConsumer consumer, int port)
     {
-        var group = CreateOrGetReceiverForPort(port);
-        group?.Consumers.Add(consumer);
+        lock (_groupsByPort)
+        {
+            var group = CreateOrGetReceiverForPort(port);
+            group?.Consumers.Add(consumer);
+        }
     }
 
     public static void UnregisterConsumer(IOscConsumer consumer)
@@ -59,15 +62,34 @@ public static class OscConnectionManager
         }
     }
 
+    /// <summary>True when a UDP OSC receiver is actively bound on this port.</summary>
+    public static bool IsPortListening(int port)
+    {
+        lock (_groupsByPort)
+        {
+            return _groupsByPort.TryGetValue(port, out var group) && group.IsListening;
+        }
+    }
+
     private static PortGroup CreateOrGetReceiverForPort(int port)
     {
         if (port < 0 || port > 65535)
             return null;
 
         if (_groupsByPort.TryGetValue(port, out var receiver))
-            return receiver;
+        {
+            if (receiver.IsListening)
+                return receiver;
+
+            // Drop dead groups (failed bind / closed socket) so the next register can retry.
+            try { receiver.Stop(); } catch { /* ignore */ }
+            _groupsByPort.Remove(port);
+        }
 
         var newGroup = new PortGroup(port);
+        if (!newGroup.IsListening)
+            return null;
+
         _groupsByPort.Add(port, newGroup);
         return newGroup;
     }
@@ -79,10 +101,13 @@ public static class OscConnectionManager
 
     public static bool TryGetScannedAddressesForPort(int port, out Dictionary<string, string> addresses)
     {
-        if (_groupsByPort.TryGetValue(port, out var group))
+        lock (_groupsByPort)
         {
-            addresses = group.ScannedAddresses;
-            return true;
+            if (_groupsByPort.TryGetValue(port, out var group))
+            {
+                addresses = group.ScannedAddresses;
+                return true;
+            }
         }
 
         addresses = null;
@@ -99,10 +124,13 @@ public static class OscConnectionManager
         public readonly HashSet<IOscConsumer> Consumers = new();
         private readonly OscReceiver _receiver;
 
+        public bool IsListening => _receiver is { State: OscSocketState.Connected };
+
         public PortGroup(int listenPort)
         {
             Port = listenPort;
-            _receiver = new OscReceiver(listenPort);
+            // Bind explicitly to IPv4 Any so 127.0.0.1 senders always match (avoids IPv6-only binds).
+            _receiver = new OscReceiver(IPAddress.Any, listenPort);
             try
             {
                 _receiver.Connect();

@@ -86,7 +86,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     private volatile string _lastStatusMessage = "";
     private Mat _sharedMat;
     private int _storeDeviceIndex = -1;
-
+    private string _storeDeviceName = "";
+    private string _lastRequestedDeviceName = "";
     // Transformation cache
     private Mat _transformationMatrix;
     private int _width;
@@ -114,47 +115,65 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
         ScanWebCamDevices();
 
         var deviceName = InputDeviceName.GetValue(context);
-        
-        if (string.IsNullOrEmpty(deviceName) && _webcamWithIndices?.Count > 0)
+
+        // Do not auto-grab the first camera when no name is set. Two CameraInput
+        // instances would otherwise both open the same USB device → exclusive lock / AV.
+        if (string.IsNullOrWhiteSpace(deviceName))
         {
-            deviceName = _webcamWithIndices[0].Name;
+            if (IsCaptureThreadRunning())
+                StopCaptureThread();
+            SetStatus("Waiting for camera device name…");
+            Status.Value = _lastStatusMessage;
+            return;
         }
+
+        var deviceNameChanged = !string.Equals(deviceName, _lastRequestedDeviceName, StringComparison.Ordinal);
+        if (deviceNameChanged)
+            _lastRequestedDeviceName = deviceName;
 
         if (!TryGetIndexForDeviceName(deviceName, out var selectedDeviceIndex))
         {
-            SetStatus($"Error: Camera '{deviceName}' not found.");
-            StopCaptureThread();
+            // Device list can be stale (USB plugged after first scan).
+            ForceRescanWebCamDevices();
+            if (!TryGetIndexForDeviceName(deviceName, out selectedDeviceIndex))
+            {
+                SetStatus($"Error: Camera '{deviceName}' not found.");
+                StopCaptureThread();
+                Status.Value = _lastStatusMessage;
+                return;
+            }
+        }
+
+        var deviceIsActive = Active.GetValue(context);
+        var deactivateWhenNotShowing = DeactivateWhenNotShowing.GetValue(context);
+
+        bool shouldBeCapturing = deviceIsActive && (!deactivateWhenNotShowing || IsActiveInGraph());
+
+        bool reconnectTriggered = Reconnect.GetValue(context);
+        if (reconnectTriggered)
+        {
+            Reconnect.SetTypedInputValue(false);
+        }
+
+        if (shouldBeCapturing)
+        {
+            if (IsCaptureThreadRunning() &&
+                (selectedDeviceIndex != _storeDeviceIndex || reconnectTriggered || deviceNameChanged))
+            {
+                Log.Debug($"VideoDeviceInput: switching camera → '{deviceName}' (index {selectedDeviceIndex}, reconnect={reconnectTriggered}, nameChanged={deviceNameChanged})");
+                StopCaptureThread();
+            }
+
+            if (!IsCaptureThreadRunning())
+            {
+                _storeDeviceIndex = selectedDeviceIndex;
+                _storeDeviceName = deviceName;
+                StartCaptureThread(context);
+            }
         }
         else
         {
-            var deviceIsActive = Active.GetValue(context);
-            var deactivateWhenNotShowing = DeactivateWhenNotShowing.GetValue(context);
-
-            bool shouldBeCapturing = deviceIsActive && (!deactivateWhenNotShowing || IsActiveInGraph());
-
-            bool reconnectTriggered = Reconnect.GetValue(context);
-            if (reconnectTriggered)
-            {
-                Reconnect.SetTypedInputValue(false);
-            }
-
-            if (shouldBeCapturing)
-            {
-                if (IsCaptureThreadRunning() && (selectedDeviceIndex != _storeDeviceIndex || reconnectTriggered))
-                {
-                    StopCaptureThread();
-                }
-
-                if (!IsCaptureThreadRunning())
-                {
-                    _storeDeviceIndex = selectedDeviceIndex;
-                    StartCaptureThread(context);
-                }
-            }
-            else
-            {
-                StopCaptureThread();
-            }
+            StopCaptureThread();
         }
 
         if (OpenSettings.GetValue(context))
@@ -203,22 +222,72 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
 
     private void StopCaptureThread()
     {
-        if (!IsCaptureThreadRunning()) return;
+        if (!IsCaptureThreadRunning() && _capture == null)
+            return;
 
-        _cancellationTokenSource?.Cancel();
-
-        if (!_captureThread.Join(TimeSpan.FromSeconds(2)))
+        try
         {
-            Log.Debug("Video capture thread did not exit in time.");
+            _cancellationTokenSource?.Cancel();
+        }
+        catch
+        {
+            /* ignore */
+        }
+
+        var thread = _captureThread;
+        if (thread != null && thread.IsAlive)
+        {
+            // Wait for CaptureLoop.finally to Release/Dispose the device.
+            if (!thread.Join(TimeSpan.FromSeconds(4)))
+            {
+                Log.Warning("Video capture thread did not exit in time — camera may stay locked until process exit.");
+                // Do NOT Dispose _capture here while the thread may still use it (AV).
+                _captureThread = null;
+                return;
+            }
         }
 
         _captureThread = null;
-        _cancellationTokenSource?.Dispose();
-        _cancellationTokenSource = null;
 
+        try
+        {
+            _cancellationTokenSource?.Dispose();
+        }
+        catch
+        {
+            /* ignore */
+        }
+
+        _cancellationTokenSource = null;
+        SafeReleaseCapture();
+    }
+
+    private void SafeReleaseCapture()
+    {
         lock (_captureDeviceLock)
         {
-            _capture?.Dispose();
+            if (_capture == null)
+                return;
+
+            try
+            {
+                if (_capture.IsOpened())
+                    _capture.Release();
+            }
+            catch (Exception e)
+            {
+                Log.Debug($"VideoCapture.Release failed: {e.Message}");
+            }
+
+            try
+            {
+                _capture.Dispose();
+            }
+            catch (Exception e)
+            {
+                Log.Debug($"VideoCapture.Dispose failed: {e.Message}");
+            }
+
             _capture = null;
         }
     }
@@ -227,24 +296,37 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     {
         try
         {
+            // Resolve the selected camera by name at open time. Never fall back to index 0.
+            var deviceIndex = settings.DeviceIndex;
+            var deviceName = settings.DeviceName?.Trim() ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(deviceName) &&
+                TryGetIndexForDeviceName(deviceName, out var resolvedIndex))
+            {
+                deviceIndex = resolvedIndex;
+            }
+
+            if (deviceIndex < 0 && string.IsNullOrWhiteSpace(deviceName))
+            {
+                SetStatus("Error: No camera selected.");
+                return;
+            }
+
+            _storeDeviceIndex = deviceIndex;
+
             lock (_captureDeviceLock)
             {
                 if (token.IsCancellationRequested) return;
 
-                _capture = new VideoCapture();
-
-                if (settings.ResolutionFpsType == ResolutionFpsTypeEnum.Custom)
+                // Prefer opening by FriendlyName — DirectShowLib indices can diverge from
+                // OpenCV's DSHOW indices when NDI/OBS virtual cams are present.
+                // Never Set() resolution before Open: that makes DSHOW grab camera 0.
+                if (!TryOpenCapture(deviceName, deviceIndex, out _capture))
                 {
-                    _capture.Set(VideoCaptureProperties.FrameWidth, settings.CustomResolution.X);
-                    _capture.Set(VideoCaptureProperties.FrameHeight, settings.CustomResolution.Y);
-                    _capture.Set(VideoCaptureProperties.Fps, settings.CustomFps);
-                }
-
-                if (!_capture.Open(_storeDeviceIndex, VideoCaptureAPIs.DSHOW))
-                {
-                    SetStatus("Error: Failed to open video capture device.");
+                    SetStatus($"Error: Failed to open video capture device '{deviceName}' (index {deviceIndex}).");
                     return;
                 }
+
+                Log.Debug($"VideoDeviceInput: opened '{deviceName}' (index {deviceIndex})");
             }
 
             Thread.Sleep(100);
@@ -374,13 +456,15 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
         }
         finally
         {
-            lock (_captureDeviceLock)
+            SafeReleaseCapture();
+            try
             {
-                _capture?.Dispose();
-                _capture = null;
+                _transformationMatrix?.Dispose();
             }
-
-            _transformationMatrix?.Dispose();
+            catch
+            {
+                /* ignore */
+            }
         }
     }
 
@@ -468,6 +552,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     {
         public readonly int CustomFps;
         public readonly Int2 CustomResolution;
+        public readonly int DeviceIndex;
+        public readonly string DeviceName;
         public readonly bool FlipHorizontally;
         public readonly bool FlipVertically;
         public readonly Vector2 Reposition;
@@ -485,6 +571,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
             Rotation = owner.ApplyRotationData.GetValue(context);
             Reposition = owner.Reposition.GetValue(context);
             Scale = owner.Scale.GetValue(context);
+            DeviceName = owner._storeDeviceName ?? owner.InputDeviceName.GetValue(context) ?? string.Empty;
+            DeviceIndex = owner._storeDeviceIndex;
         }
 
         public bool HasTransformation()
@@ -620,6 +708,85 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     #endregion
 
     #region Scanning for webcams and capabilities
+    private static void ForceRescanWebCamDevices()
+    {
+        lock (_staticInitLock)
+        {
+            _devicesScanned = false;
+        }
+
+        ScanWebCamDevices();
+    }
+
+    private static bool TryOpenCapture(string deviceName, int deviceIndex, out VideoCapture capture)
+    {
+        capture = null;
+
+        // 1) By FriendlyName via DSHOW (most reliable when virtual cams shift indices)
+        if (!string.IsNullOrWhiteSpace(deviceName))
+        {
+            if (TryOpenCaptureOnce($"video={deviceName}", VideoCaptureAPIs.DSHOW, out capture))
+                return true;
+        }
+
+        // 2) By index via DSHOW (empty ctor + Open — no property Set before Open)
+        if (deviceIndex >= 0)
+        {
+            if (TryOpenCaptureByIndex(deviceIndex, VideoCaptureAPIs.DSHOW, out capture))
+                return true;
+
+            // 3) MSMF fallback by index
+            if (TryOpenCaptureByIndex(deviceIndex, VideoCaptureAPIs.MSMF, out capture))
+                return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryOpenCaptureOnce(string source, VideoCaptureAPIs api, out VideoCapture capture)
+    {
+        capture = null;
+        try
+        {
+            var candidate = new VideoCapture(source, api);
+            if (candidate.IsOpened())
+            {
+                capture = candidate;
+                return true;
+            }
+
+            candidate.Dispose();
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"VideoDeviceInput: open '{source}' via {api} failed: {e.Message}");
+        }
+
+        return false;
+    }
+
+    private static bool TryOpenCaptureByIndex(int index, VideoCaptureAPIs api, out VideoCapture capture)
+    {
+        capture = null;
+        try
+        {
+            var candidate = new VideoCapture();
+            if (candidate.Open(index, api) && candidate.IsOpened())
+            {
+                capture = candidate;
+                return true;
+            }
+
+            candidate.Dispose();
+        }
+        catch (Exception e)
+        {
+            Log.Debug($"VideoDeviceInput: open index {index} via {api} failed: {e.Message}");
+        }
+
+        return false;
+    }
+
     public static void ScanWebCamDevices()
     {
         lock (_staticInitLock)
@@ -635,87 +802,27 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
 
             try
             {
+                // Only enumerate FriendlyNames — do NOT BindToObject every device here.
+                // Binding all cams at scan time exclusive-locks USB cameras (e.g. HD USB Camera)
+                // and prevents a later Open() from applying the selected device.
                 var videoInputDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
                 for (var i = 0; i < videoInputDevices.Length; i++)
                 {
                     var device = videoInputDevices[i];
+                    // Kinect / Xbox NUI are not usable as CameraInput VideoCapture devices.
+                    if (IsExcludedCameraDevice(device.Name))
+                    {
+                        Log.Debug($"VideoDeviceInput: skipping camera #{i}: {device.Name}");
+                        continue;
+                    }
+
                     _webcamWithIndices.Add(new WebcamWithIndex(device.Name, i));
-
-                    var capabilities = new List<(int Width, int Height, double Fps)>();
-                    try
-                    {
-                        if (device.Mon is not IMoniker moniker)
-                        {
-                            Log.Debug($"Moniker is null for device {device.Name}");
-                            continue;
-                        }
-
-                        var filterGuid = typeof(IBaseFilter).GUID;
-                        moniker.BindToObject(null, null, ref filterGuid, out var filter);
-                        if (filter is not IBaseFilter captureFilter)
-                        {
-                            Log.Debug($"Failed to create capture filter for {device.Name}");
-                            continue;
-                        }
-
-                        captureFilter.EnumPins(out var enumPins);
-                        var pins = new IPin[1];
-                        while (enumPins.Next(1, pins, IntPtr.Zero) == 0)
-                        {
-                            pins[0].QueryPinInfo(out var pinInfo);
-                            if (pinInfo.dir == PinDirection.Output)
-                            {
-                                if (pins[0] is IAMStreamConfig streamConfig)
-                                {
-                                    streamConfig.GetNumberOfCapabilities(out int count, out int size);
-                                    if (size > 0)
-                                    {
-                                        var capsPtr = Marshal.AllocCoTaskMem(size);
-                                        try
-                                        {
-                                            for (int j = 0; j < count; j++)
-                                            {
-                                                streamConfig.GetStreamCaps(j, out var mediaType, capsPtr);
-                                                if (mediaType != null &&
-                                                    mediaType.formatType == FormatType.VideoInfo &&
-                                                    mediaType.formatPtr != IntPtr.Zero)
-                                                {
-                                                    var vih = Marshal.PtrToStructure<VideoInfoHeader>(mediaType.formatPtr);
-                                                    int w = vih.BmiHeader.Width;
-                                                    int h = vih.BmiHeader.Height;
-                                                    double fps = vih.AvgTimePerFrame > 0
-                                                                     ? 10_000_000.0 / vih.AvgTimePerFrame
-                                                                     : 30.0;
-                                                    capabilities.Add((w, h, fps));
-                                                }
-
-                                                if (mediaType != null)
-                                                    DsUtils.FreeAMMediaType(mediaType);
-                                            }
-                                        }
-                                        finally
-                                        {
-                                            Marshal.FreeCoTaskMem(capsPtr);
-                                        }
-                                    }
-                                }
-                            }
-
-                            Marshal.ReleaseComObject(pins[0]);
-                        }
-
-                        Marshal.ReleaseComObject(enumPins);
-                        Marshal.ReleaseComObject(captureFilter);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Debug($"Failed to get capabilities for {device.Name}: {e.Message}");
-                    }
-
                     lock (_capabilitiesLock)
                     {
-                        _webcamCapabilities.Add(device.Name, capabilities);
+                        _webcamCapabilities[device.Name] = new List<(int Width, int Height, double Fps)>();
                     }
+
+                    Log.Debug($"VideoDeviceInput: found camera #{i}: {device.Name}");
                 }
             }
             catch (Exception e)
@@ -727,15 +834,46 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
         }
     }
 
+    private static bool IsExcludedCameraDevice(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return true;
+
+        return name.Contains("NVIDIA Broadcast", StringComparison.OrdinalIgnoreCase)
+               || name.Contains("OBS Virtual Camera", StringComparison.OrdinalIgnoreCase)
+               || name.Contains("VCam", StringComparison.OrdinalIgnoreCase)
+               || name.Contains("Kinect", StringComparison.OrdinalIgnoreCase)
+               || name.Contains("Xbox NUI", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool TryGetIndexForDeviceName(string deviceName, out int index)
     {
         index = -1;
-        if (_webcamWithIndices == null) return false;
+        if (_webcamWithIndices == null || string.IsNullOrWhiteSpace(deviceName))
+            return false;
 
-        var device = _webcamWithIndices.FirstOrDefault(d => d.Name == deviceName);
+        if (IsExcludedCameraDevice(deviceName))
+            return false;
+
+        // Exact match first
+        var device = _webcamWithIndices.FirstOrDefault(d =>
+            string.Equals(d.Name, deviceName, StringComparison.OrdinalIgnoreCase));
         if (device != null)
         {
             index = device.Index;
+            return true;
+        }
+
+        // Tolerant match: Windows sometimes appends " #2" / trims differently across APIs
+        var trimmed = deviceName.Trim();
+        device = _webcamWithIndices.FirstOrDefault(d =>
+            d.Name.Trim().Equals(trimmed, StringComparison.OrdinalIgnoreCase) ||
+            d.Name.Contains(trimmed, StringComparison.OrdinalIgnoreCase) ||
+            trimmed.Contains(d.Name.Trim(), StringComparison.OrdinalIgnoreCase));
+        if (device != null)
+        {
+            index = device.Index;
+            Log.Debug($"VideoDeviceInput: fuzzy-matched '{deviceName}' → '{device.Name}' (index {index})");
             return true;
         }
 

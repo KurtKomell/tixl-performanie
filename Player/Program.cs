@@ -121,9 +121,22 @@ public partial class Program
         OscConnectionManager.IOscConsumer _ioscConsumer = null;
         // Registrieren des Handlers beim OscConnectionManager
         int oscPort = 8000; // Beispiel-Port
-        OscConnectionManager.RegisterConsumer(_oscHandler, oscPort);
+        // Retry: on some PCs port 8000 is briefly busy after a previous run.
+        for (var attempt = 1; attempt <= 8; attempt++)
+        {
+            OscConnectionManager.RegisterConsumer(_oscHandler, oscPort);
+            if (OscConnectionManager.IsPortListening(oscPort))
+            {
+                Console.WriteLine($"OSC-Handler auf Port {oscPort} registriert.");
+                break;
+            }
 
-        Console.WriteLine($"OSC-Handler auf Port {oscPort} registriert.");
+            Console.WriteLine($"OSC-Port {oscPort} noch nicht bereit (Versuch {attempt}/8)...");
+            Thread.Sleep(150 * attempt);
+        }
+
+        if (!OscConnectionManager.IsPortListening(oscPort))
+            Console.WriteLine($"FEHLER: OSC-Server auf Port {oscPort} konnte nicht gestartet werden.");
 
        
 
@@ -513,29 +526,47 @@ public partial class Program
             }
             else
             {
-                Log.Warning($"No playback settings defined");
+                Log.Warning("No playback settings defined — using external audio defaults");
+                playbackSettings = new PlaybackSettings
+                                       {
+                                           Enabled = true,
+                                           AudioSource = PlaybackSettings.AudioSources.ExternalDevice,
+                                       };
+            }
 
-            };
-            
+            // Performanie always drives live input via --audio / OSC; force external device mode.
+            playbackSettings.AudioSource = PlaybackSettings.AudioSources.ExternalDevice;
+            playbackSettings.Enabled = true;
 
             _playback = new Playback
                             {
                                 Settings = playbackSettings
-                                
             };
 
-            for (int i = 0; i < WasapiAudioInput._inputDevices.Count(); i++)
+            for (int i = 0; i < WasapiAudioInput.InputDevices.Count; i++)
             {
                 if (i == audioDeviceIndex)
                 {
-
-
-                    audioDevice = WasapiAudioInput._inputDevices[i].DeviceInfo.Name;
+                    audioDevice = WasapiAudioInput.InputDevices[i].DeviceInfo.Name;
                     break;
                 }
             }
-            
-            _playback.Settings.AudioInputDeviceName = audioDevice;
+
+            // Fall back to first device when index is missing/invalid
+            if (string.IsNullOrEmpty(audioDevice) || audioDevice == "Default")
+            {
+                if (WasapiAudioInput.InputDevices.Count > 0)
+                {
+                    var fallbackIndex = audioDeviceIndex >= 0 && audioDeviceIndex < WasapiAudioInput.InputDevices.Count
+                                            ? audioDeviceIndex
+                                            : 0;
+                    audioDevice = WasapiAudioInput.InputDevices[fallbackIndex].DeviceInfo.Name;
+                    audioDeviceIndex = fallbackIndex;
+                }
+            }
+
+            _playback.Settings.AudioInputDeviceName = audioDevice ?? string.Empty;
+            Log.Debug($"Audio input device: '{_playback.Settings.AudioInputDeviceName}' (index {audioDeviceIndex})");
 
             // Create instance of project op, all children are create automatically
 
@@ -1431,23 +1462,24 @@ public partial class Program
 
     private static void SwitchAudioInputDevice(int deviceIndex)
     {
-        if (_playback == null)
+        if (_playback?.Settings == null)
         {
             Log.Warning("Playback not initialized. Cannot switch audio device.");
             return;
         }
 
-        string newDeviceName = null;
-        if (deviceIndex >= 0 && deviceIndex < WasapiAudioInput._inputDevices.Count)
-        {
-            newDeviceName = WasapiAudioInput._inputDevices[deviceIndex].DeviceInfo.Name;
-            Log.Debug($"Attempting to switch audio input to index {deviceIndex}: '{newDeviceName}'");
-        }
-        else
+        var devices = WasapiAudioInput.InputDevices;
+        if (deviceIndex < 0 || deviceIndex >= devices.Count)
         {
             Log.Warning($"Invalid audio device index received: {deviceIndex}. Not switching.");
             return;
         }
+
+        var newDeviceName = devices[deviceIndex].DeviceInfo.Name;
+        Log.Debug($"Attempting to switch audio input to index {deviceIndex}: '{newDeviceName}'");
+
+        _playback.Settings.AudioSource = PlaybackSettings.AudioSources.ExternalDevice;
+        _playback.Settings.Enabled = true;
 
         if (_playback.Settings.AudioInputDeviceName == newDeviceName)
         {
@@ -1456,12 +1488,6 @@ public partial class Program
         }
 
         _playback.Settings.AudioInputDeviceName = newDeviceName;
-        //Bass.Free();
-        //Bass.Init();
-
-        
-
-        // We need to re-initialize the audio input to apply the change.
         AudioEngine.ReinitializeAudioInput();
     }
 

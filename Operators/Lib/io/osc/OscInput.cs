@@ -284,6 +284,13 @@ internal sealed class OscInput : Instance<OscInput>, OscConnectionManager.IOscCo
                     _lastMessageContent = logo;
                 }
                 break;
+
+            case "/string/camera" when _address == "/string/camera":
+                if (m.Count > 0 && m[0] != null)
+                {
+                    _lastMessageContent = m[0].ToString() ?? string.Empty;
+                }
+                break;
         }
 
         lock (_valuesByKeys)

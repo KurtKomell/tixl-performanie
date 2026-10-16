@@ -84,6 +84,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     private volatile string _lastStatusMessage = "";
     private Mat _sharedMat;
     private int _storeDeviceIndex = -1;
+    private string _storeDeviceName = "";
+    private string _lastRequestedDeviceName = "";
 
     // Transformation cache
     private Mat _transformationMatrix;
@@ -107,10 +109,20 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
         ScanWebCamDevices();
 
         var deviceName = InputDeviceName.GetValue(context);
-        if (string.IsNullOrEmpty(deviceName) && _webcamWithIndices?.Count > 0)
+
+        // Do not auto-grab the first camera when no name is set.
+        if (string.IsNullOrWhiteSpace(deviceName))
         {
-            deviceName = _webcamWithIndices[0].Name;
+            if (IsCaptureThreadRunning())
+                StopCaptureThread();
+            SetStatus("Waiting for camera device name…");
+            Status.Value = _lastStatusMessage;
+            return;
         }
+
+        var deviceNameChanged = !string.Equals(deviceName, _lastRequestedDeviceName, StringComparison.Ordinal);
+        if (deviceNameChanged)
+            _lastRequestedDeviceName = deviceName;
 
         if (!TryGetIndexForDeviceName(deviceName, out var selectedDeviceIndex))
         {
@@ -132,7 +144,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
 
             if (shouldBeCapturing)
             {
-                if (IsCaptureThreadRunning() && (selectedDeviceIndex != _storeDeviceIndex || reconnectTriggered))
+                if (IsCaptureThreadRunning() &&
+                    (selectedDeviceIndex != _storeDeviceIndex || reconnectTriggered || deviceNameChanged))
                 {
                     StopCaptureThread();
                 }
@@ -140,6 +153,7 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
                 if (!IsCaptureThreadRunning())
                 {
                     _storeDeviceIndex = selectedDeviceIndex;
+                    _storeDeviceName = deviceName;
                     StartCaptureThread(context);
                 }
             }
@@ -219,22 +233,32 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     {
         try
         {
+            var deviceIndex = settings.DeviceIndex;
+            if (!string.IsNullOrWhiteSpace(settings.DeviceName) &&
+                TryGetIndexForDeviceName(settings.DeviceName, out var resolvedIndex))
+            {
+                deviceIndex = resolvedIndex;
+            }
+
+            if (deviceIndex < 0)
+            {
+                SetStatus($"Error: No camera index for '{settings.DeviceName}'.");
+                return;
+            }
+
+            _storeDeviceIndex = deviceIndex;
+
             lock (_captureDeviceLock)
             {
                 if (token.IsCancellationRequested) return;
 
-                _capture = new VideoCapture();
-
-                if (settings.ResolutionFpsType == ResolutionFpsTypeEnum.Custom)
+                // Open selected device first — Set before Open makes DSHOW grab camera 0.
+                _capture = new VideoCapture(deviceIndex, VideoCaptureAPIs.DSHOW);
+                if (!_capture.IsOpened())
                 {
-                    _capture.Set(VideoCaptureProperties.FrameWidth, settings.CustomResolution.X);
-                    _capture.Set(VideoCaptureProperties.FrameHeight, settings.CustomResolution.Y);
-                    _capture.Set(VideoCaptureProperties.Fps, settings.CustomFps);
-                }
-
-                if (!_capture.Open(_storeDeviceIndex, VideoCaptureAPIs.DSHOW))
-                {
-                    SetStatus("Error: Failed to open video capture device.");
+                    _capture.Dispose();
+                    _capture = null;
+                    SetStatus($"Error: Failed to open video capture device '{settings.DeviceName}' (index {deviceIndex}).");
                     return;
                 }
             }
@@ -460,6 +484,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
     {
         public readonly int CustomFps;
         public readonly Int2 CustomResolution;
+        public readonly int DeviceIndex;
+        public readonly string DeviceName;
         public readonly bool FlipHorizontally;
         public readonly bool FlipVertically;
         public readonly Vector2 Reposition;
@@ -477,6 +503,8 @@ public class VideoDeviceInput : Instance<VideoDeviceInput>, ICustomDropdownHolde
             Rotation = owner.ApplyRotationData.GetValue(context);
             Reposition = owner.Reposition.GetValue(context);
             Scale = owner.Scale.GetValue(context);
+            DeviceName = owner._storeDeviceName ?? owner.InputDeviceName.GetValue(context) ?? string.Empty;
+            DeviceIndex = owner._storeDeviceIndex;
         }
 
         public bool HasTransformation()

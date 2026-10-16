@@ -83,14 +83,18 @@ internal sealed class OscInputString : Instance<OscInputString>, OscConnectionMa
     {
         lock (this)
         {
-            // Only process if the address matches
-            if (msg.Address != _address)
+            // Prefer live address; fall back to last known so early packets aren't dropped
+            // before the first Update() runs.
+            var address = !string.IsNullOrEmpty(_address) ? _address : Address.Value;
+            if (string.IsNullOrEmpty(address) ||
+                !string.Equals(msg.Address, address, StringComparison.Ordinal))
                 return;
 
             if (msg.Count > 0 && msg[0] != null)
             {
-                _lastMessageContent = msg[0].ToString();
+                _lastMessageContent = msg[0].ToString() ?? string.Empty;
                 Result.DirtyFlag.Invalidate();
+                WasTrigger.DirtyFlag.Invalidate();
                 _wasTrigger = true;
             }
         }

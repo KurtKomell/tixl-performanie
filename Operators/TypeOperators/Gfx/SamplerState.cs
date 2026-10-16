@@ -16,24 +16,64 @@ public sealed class SamplerState : Instance<SamplerState>
 
     private void Update(EvaluationContext context)
     {
+        // Unconnected InputSlots default to 0. D3D11 rejects 0 for AddressMode/Comparison
+        // (valid enums start at 1). Some GPUs/drivers are strict → E_INVALIDARG (0x80070057).
+        var filter = Filter.GetValue(context);
+        if (!Enum.IsDefined(typeof(Filter), filter))
+            filter = SharpDX.Direct3D11.Filter.MinMagMipLinear;
+
+        var addressU = SanitizeAddress(AddressU.GetValue(context));
+        var addressV = SanitizeAddress(AddressV.GetValue(context));
+        var addressW = SanitizeAddress(AddressW.GetValue(context));
+
+        var mipBias = MipLoadBias.GetValue(context);
+
+        var maxAnisotropy = MaximumAnisotropy.GetValue(context);
+        // D3D11 requires MaxAnisotropy in [1, 16]. Unconnected inputs default to 0.
+        if (maxAnisotropy < 1)
+            maxAnisotropy = 1;
+        else if (maxAnisotropy > 16)
+            maxAnisotropy = 16;
+
+        var comparison = ComparisonFunction.GetValue(context);
+        if (!Enum.IsDefined(typeof(Comparison), comparison) || (int)comparison == 0)
+            comparison = Comparison.Never;
+
+        var minLod = MinimumLod.GetValue(context);
+        var maxLod = MaximumLod.GetValue(context);
+        // Unconnected LOD slots default to 0/0 — invalid on some GPUs.
+        // Match ResourceManager.DefaultSamplerState.
+        if (minLod == 0 && maxLod == 0)
+        {
+            minLod = -float.MaxValue;
+            maxLod = float.MaxValue;
+        }
+        else if (maxLod < minLod)
+        {
+            maxLod = minLod;
+        }
+
         var samplerDesc = new SamplerStateDescription()
                               {
-                                  Filter = Filter.GetValue(context),
-                                  AddressU = AddressU.GetValue(context),
-                                  AddressV = AddressV.GetValue(context),
-                                  AddressW = AddressW.GetValue(context),
-                                  MipLodBias = MipLoadBias.GetValue(context),
-                                  MaximumAnisotropy = MaximumAnisotropy.GetValue(context),
-                                  ComparisonFunction = ComparisonFunction.GetValue(context),
-                                  // BorderColor = BorderColor.GetValue(context),
-                                  MinimumLod = MinimumLod.GetValue(context),
-                                  MaximumLod = MaximumLod.GetValue(context)
+                                  Filter = filter,
+                                  AddressU = addressU,
+                                  AddressV = addressV,
+                                  AddressW = addressW,
+                                  MipLodBias = mipBias,
+                                  MaximumAnisotropy = maxAnisotropy,
+                                  ComparisonFunction = comparison,
+                                  BorderColor = new SharpDX.Mathematics.Interop.RawColor4(1.0f, 1.0f, 1.0f, 1.0f),
+                                  MinimumLod = minLod,
+                                  MaximumLod = maxLod
                               };
 
         try
         {
-            var samplerState = new SharpDX.Direct3D11.SamplerState(ResourceManager.Device, samplerDesc); // todo: put into resource manager
-            Value.Value?.Dispose();
+            var samplerState = new SharpDX.Direct3D11.SamplerState(ResourceManager.Device, samplerDesc);
+
+            // Never Dispose the shared default — that blacks out the whole renderer.
+            if (Value.Value != null && !ReferenceEquals(Value.Value, ResourceManager.DefaultSamplerState))
+                Value.Value.Dispose();
             Value.Value = samplerState;
         }
         catch (SharpDXException e)
@@ -41,7 +81,6 @@ public sealed class SamplerState : Instance<SamplerState>
             Log.Error($"{Parent?.Symbol.Name}.SamplerStateOp: Invalid sampler state " + e.Message);
             if (Value.Value == null)
             {
-                // there was no previous valid sampler state, so set default sampler state
                 Value.Value = ResourceManager.DefaultSamplerState;
                 Log.Error("Using the default sampler state instead.", this);
             }
@@ -50,6 +89,14 @@ public sealed class SamplerState : Instance<SamplerState>
                 Log.Error("Using the last valid sampler state instead.", this);
             }
         }
+    }
+
+    private static TextureAddressMode SanitizeAddress(TextureAddressMode mode)
+    {
+        // TextureAddressMode: Wrap=1 … MirrorOnce=5. 0 is invalid.
+        if (!Enum.IsDefined(typeof(TextureAddressMode), mode) || (int)mode == 0)
+            return TextureAddressMode.Clamp;
+        return mode;
     }
 
     [Input(Guid = "{A870921F-A28C-4501-9F31-38A18B0ACDCC}")]
